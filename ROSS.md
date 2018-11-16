@@ -42,3 +42,19 @@ Traceback (most recent call last):
   File "/usr/lib/python3.4/tkinter/__init__.py", line 1854, in __init__
     self.tk = _tkinter.create(screenName, baseName, className, interactive, wantobjects, useTk, sync, use)
 _tkinter.TclError: no display name and no $DISPLAY environment variable
+
+
+With X enabled, it pops up a bunch of graphs and shows
+ross@ross-node1:~/Kornak/bifs$ python3 bifs/src/bifs_cl_1D.py
+Running BIFS_MAP() on image
+Prior mean:  397.6
+Prior scale:  0.1988
+K-space data value: 2.88936330499
+Likelihood scale: 0.14446816525
+Maximum of Rice Likelihood at:  2.89296825122
+Maximum of Gaussian Likelihood at:  2.88936328963
+Conjugate Gaussian value:  139.297476848
+Gaussian Likelihood MAP estimate: 2.61803396034 at k-space co-ordinates: (32,)
+Rician Likelihood MAP estimate: 2.61803396034 at k-space co-ordinates: (32,)
+
+i.e., it at least appears to work.

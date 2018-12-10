@@ -144,7 +144,7 @@ def kdist3D(N1,N2,N3):
     for i in range(N1):
         for j in range(N2):
             for k in range(N3):
-                kdmat[i,j,k] = np.sqrt(xvec[0,i]**2 + yvec[0,j]**2 + yvec[0,j]**2)
+                kdmat[i,j,k] = np.sqrt(xvec[0,i]**2 + yvec[0,j]**2 + zvec[0,k]**2)
     return kdmat
 
 # K-space functional forms for parameter function 

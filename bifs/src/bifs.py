@@ -50,7 +50,7 @@ class bifs:
 
     view3Dslice - for 3D data this is a 2D array [a,b] where:
                   a = axis perpindicular to slice
-                  b = percentage of maximum along that direction 
+                  b = fraction of maximum along that direction 
                       for slice location
     
     prior - string specifying prior distribution to use
@@ -323,6 +323,10 @@ class bifs:
                     else: # 3D
                         read_imfile = imageio.volread(self.initial_image_file_name)
                         read_image = np.asarray(read_imfile)
+                elif self.initial_image_file_name.endswith('.nii'):
+                    import nibabel
+                    read_imfile = nibabel.load(self.initial_image_file_name)
+                    read_image = read_imfile.get_fdata()
                 else: # non tif (or txt) so assume 2D
                     read_imfile = imageio.imread(self.initial_image_file_name)
                     read_image = np.asarray(read_imfile)

@@ -514,11 +514,14 @@ class Start3DSlice_Dialog(QtWidgets.QDialog, Slice3D_Dialog):
 
     def getSliceIndex(self):
         try:
-            return np.int(QtWidgets.QLineEdit.text(self.slice_index))
+            # currentIndex should yield same value as currentData, but the latter
+            # seems more future-proof.  RB
+            return np.int(self.slice_index.currentData())
         except:
             print("Couldn't get slice index")
             
     def getSlicePercent(self):
+        # the value is actually a fraction between 0 and 1
         try:
             return np.float(QtWidgets.QLineEdit.text(self.slice_percent))
         except:

@@ -3,6 +3,13 @@
 ###        This file contains the GUI interface    ###
 ###        for the BIFS package                    ###
 ###                                                ###
+import cProfile, pstats
+try:
+    # new in 3.7
+    from pstats import SortKey
+    newProfile = True
+except:
+    newProfile = False
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -61,6 +68,21 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update()
 
     def getImage(self):
+        #not sure if self will work in exec"
+        if newProfile:
+            #next if for Python 3.7+
+            prof = cProfile.run("self.getImage_real()", sort=SortKey.CUMULATIVE)
+            prof.strip_dirs().print_stats(15)
+        else:
+            # runs in Python 3.6
+            pr = cProfile.Profile()
+            pr.enable()
+            self.getImage_real()
+            pr.disable()
+            prof = pstats.Stats(pr)
+            prof.strip_dirs().sort_stats("cumulative").print_stats(15)
+        
+    def getImage_real(self):
         """
     
         function that calls the BIFS function load_image_file()

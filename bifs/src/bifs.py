@@ -340,9 +340,10 @@ class bifs:
     def load_image(self,init_image):
         """
 
-        the more general bifs file loader; uses load_image_file
-        then intializes the bifs object so as to be ready for
+        intializes the bifs object so as to be ready for
         analysis steps.
+
+        load_image_file calls this
 
         Inputs:
 

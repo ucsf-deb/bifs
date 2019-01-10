@@ -122,13 +122,14 @@ def kdist2D(N1,N2):
             kdmat[i,j] = np.sqrt(xvec[0,i]**2 + yvec[0,j]**2)
     return kdmat
     
-def kdist3D(N1,N2,N3):
+def kdist3D(*ns):
     """
     kdist3D() generates array with distance from
     center of Fourier space but shifted so origin is at index (0,0,0) 
 
-    Inpute:
-    
+    Input:
+
+    ns should be 3 arguments:
     N1 - Size of desired array in kx
     N2 - Size of desired array in ky
     N3 - Size of desired array in kz 
@@ -136,16 +137,16 @@ def kdist3D(N1,N2,N3):
     Outputs:
 
     shifted, size (N1,N2,N3) k-space distance array
+
+    Comment: This code could almost work for the 1 and 2D cases,
+    but doing so would require a way to generalize the
+    a+b+c expression. It is rougly 400x faster than a naive loop-based implmentation.
     """
-    xvec = kdist_calc(N1)
-    yvec = kdist_calc(N2)
-    zvec = kdist_calc(N3)
-    kdmat = np.zeros((N1,N2,N3))
-    for i in range(N1):
-        for j in range(N2):
-            for k in range(N3):
-                kdmat[i,j,k] = np.sqrt(xvec[0,i]**2 + yvec[0,j]**2 + zvec[0,k]**2)
+    dist = [kdist_calc(n)[0, ]**2 for n in ns]
+    a, b, c = np.ix_(*dist)
+    kdmat = np.sqrt(a+b+c)
     return kdmat
+
 
 # K-space functional forms for parameter function 
 

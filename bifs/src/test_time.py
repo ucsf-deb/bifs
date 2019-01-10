@@ -58,7 +58,11 @@ def alt1(*ns):
     
 
 ## end fourier.py excerpt
-import timeit
-print(timeit.timeit("x=alt1(100, 256, 256)", number=3, globals=globals()))
+#import timeit
+#print(timeit.timeit("x=alt1(100, 256, 256)", number=3, globals=globals()))
 #r=alt1(50, 25, 25)
 #print("Result shape = {}".format(r.shape))
+mold = kdist3D(7, 49, 13)
+mnew = alt1(7, 49, 13)
+assert mold.shape == mnew.shape
+print("largetst aboslute discrepancy", np.abs(mnew-mold).max())

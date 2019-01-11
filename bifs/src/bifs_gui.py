@@ -3,9 +3,16 @@
 ###        This file contains the GUI interface    ###
 ###        for the BIFS package                    ###
 ###                                                ###
+import cProfile, pstats
+try:
+    # new in 3.7
+    from pstats import SortKey
+    newProfile = True
+except:
+    newProfile = False
 
-from PyQt4 import QtGui, QtCore
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from PyQt5 import QtGui, QtWidgets, QtCore
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.colors import NoNorm 
 import matplotlib.pyplot as plt
@@ -19,7 +26,7 @@ from pset_dialogs import Param_Fourier_Space_Dialog,Prior_Dialog
 from pset_dialogs import Likelihood_Dialog,Slice3D_Dialog
 from pset_dialogs import AddBump_Dialog,DeleteBump_Dialog
 
-class MainWindow(QtGui.QMainWindow):
+class MainWindow(QtWidgets.QMainWindow):
     """
 
     Class that generates the main BIFS GUI window
@@ -29,7 +36,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def __init__(self):
         super(MainWindow, self).__init__()
-        self.main_widget = QtGui.QWidget(self)
+        self.main_widget = QtWidgets.QWidget(self)
         # Initialize BIFS object
         self.mybifs = bifs.bifs()
         self.filename = None
@@ -46,10 +53,10 @@ class MainWindow(QtGui.QMainWindow):
         self.axes=[self.ax1, self.ax2, self.ax3, self.ax4]
         self.canvas = FigureCanvas(self.fig)
 
-        self.canvas.setSizePolicy(QtGui.QSizePolicy.Expanding, 
-                                   QtGui.QSizePolicy.Expanding)
+        self.canvas.setSizePolicy(QtWidgets.QSizePolicy.Expanding, 
+                                   QtWidgets.QSizePolicy.Expanding)
         self.canvas.updateGeometry()
-        self.layout = QtGui.QGridLayout(self.main_widget)
+        self.layout = QtWidgets.QGridLayout(self.main_widget)
         self.layout.addWidget(self.canvas,0,0,5,5)
         self.createActions()
         self.createMenus()
@@ -61,6 +68,21 @@ class MainWindow(QtGui.QMainWindow):
         self.update()
 
     def getImage(self):
+        #not sure if self will work in exec"
+        if newProfile:
+            #next if for Python 3.7+
+            prof = cProfile.run("self.getImage_real()", sort=SortKey.CUMULATIVE)
+            prof.strip_dirs().print_stats(15)
+        else:
+            # runs in Python 3.6
+            pr = cProfile.Profile()
+            pr.enable()
+            self.getImage_real()
+            pr.disable()
+            prof = pstats.Stats(pr)
+            prof.strip_dirs().sort_stats("cumulative").print_stats(15)
+        
+    def getImage_real(self):
         """
     
         function that calls the BIFS function load_image_file()
@@ -68,8 +90,9 @@ class MainWindow(QtGui.QMainWindow):
 
         """
         # self.__init__()
-        self.fileName = QtGui.QFileDialog.getOpenFileName(self, "Open File",
-                                                     QtCore.QDir.currentPath())
+        self.fileName = QtWidgets.QFileDialog.getOpenFileName(self, "Open File",
+                                                     QtCore.QDir.currentPath())[0]
+        # Qt docs say return value is a string, but it is tuple whose first element we want
 
         try:
             self.mybifs.load_image_file(self.fileName)
@@ -77,7 +100,7 @@ class MainWindow(QtGui.QMainWindow):
             self.show_initial_image()
             return
         except:
-            QtGui.QMessageBox.information(self, "Image Viewer","Cannot load %s % self.fileName")
+            QtWidgets.QMessageBox.information(self, "Image Viewer","Cannot load %s % self.fileName")
             return
 
     def doMAP(self):
@@ -89,7 +112,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Do MAP estimation
         if np.isscalar(self.mybifs.init_image):
-            QtGui.QMessageBox.information(self,"MAP Estimator", "Can't perform MAP without an image - load image using Load Initial Image... option from BIFS menu")
+            QtWidgets.QMessageBox.information(self,"MAP Estimator", "Can't perform MAP without an image - load image using Load Initial Image... option from BIFS menu")
             return
         else:
             #try:
@@ -118,7 +141,7 @@ class MainWindow(QtGui.QMainWindow):
             self.didMAP = True
             self.show_post_proc_images()
             #except:
-            #    QtGui.QMessageBox.information(self,"MAP Estimator", "MAP estimate failed") 
+            #    QtWidgets.QMessageBox.information(self,"MAP Estimator", "MAP estimate failed") 
             return
             
     def show_initial_image(self):
@@ -151,7 +174,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.canvas.draw()
             return
         except:
-            QtGui.QMessageBox.information(self, "Image Viewer","No image loaded %s.")
+            QtWidgets.QMessageBox.information(self, "Image Viewer","No image loaded %s.")
             return
         
     def show_post_proc_images(self):
@@ -237,7 +260,7 @@ class MainWindow(QtGui.QMainWindow):
                     self.ax4.imshow(np.log(showim2k), cmap = cm.Greys_r)
                 self.canvas.draw()
         except:
-            QtGui.QMessageBox.information(self, "Image Viewer","No image loaded %s.")
+            QtWidgets.QMessageBox.information(self, "Image Viewer","No image loaded %s.")
             return
         return
     
@@ -249,7 +272,7 @@ class MainWindow(QtGui.QMainWindow):
 
         """
         if np.isscalar(self.mybifs.final_image):
-            QtGui.QMessageBox.information(self,"Save Current Results","No Results to Output Yet; Probably need to run - Get MAP Estimate Image - first")
+            QtWidgets.QMessageBox.information(self,"Save Current Results","No Results to Output Yet; Probably need to run - Get MAP Estimate Image - first")
         else:
             print("Saving Current Results")
             self.mybifs.save_results()
@@ -261,7 +284,7 @@ class MainWindow(QtGui.QMainWindow):
         saved via the BIFS function save_results().  
 
         """        
-        fileName = QtGui.QFileDialog.getOpenFileName(self, "Load Existing Paramter File",QtCore.QDir.currentPath())
+        fileName = QtWidgets.QFileDialog.getOpenFileName(self, "Load Existing Paramter File",QtCore.QDir.currentPath())[0]
         # Check if it's a bifs parameter file
         if fileName.split('.')[1] == 'bifspout':
             bifs_handle = open(fileName,"r")
@@ -273,7 +296,7 @@ class MainWindow(QtGui.QMainWindow):
             # Show initial and post BIFS k-spage images and final image
             self.show_post_proc_images()                    
         else:
-            QtGui.QMessageBox.information(self, "Parameter File Loader","Cannot load %s., doesn't look like a bifs parameter file" % fileName)
+            QtWidgets.QMessageBox.information(self, "Parameter File Loader","Cannot load %s., doesn't look like a bifs parameter file" % fileName)
             return
         return
     
@@ -300,49 +323,49 @@ class MainWindow(QtGui.QMainWindow):
 
     def createActions(self):
 
-        self.setParamFuncAct = QtGui.QAction("&Parameter Space Function", self, triggered=self.setParamFunc)
+        self.setParamFuncAct = QtWidgets.QAction("&Parameter Space Function", self, triggered=self.setParamFunc)
 
-        self.setPriorAct = QtGui.QAction("&Prior Distribution", self, triggered=self.setPrior)
+        self.setPriorAct = QtWidgets.QAction("&Prior Distribution", self, triggered=self.setPrior)
 
-        self.setLikelihoodAct = QtGui.QAction("&Likelihood Distribution", self, triggered=self.setLikelihood)
+        self.setLikelihoodAct = QtWidgets.QAction("&Likelihood Distribution", self, triggered=self.setLikelihood)
 
-        self.setAddBumpAct =  QtGui.QAction("&Add K-Space Bump", self, triggered=self.setAddBump)
+        self.setAddBumpAct =  QtWidgets.QAction("&Add K-Space Bump", self, triggered=self.setAddBump)
 
-        self.setDeleteBumpAct =  QtGui.QAction("&Delete K-Space Bump", self, triggered=self.setDeleteBump)
+        self.setDeleteBumpAct =  QtWidgets.QAction("&Delete K-Space Bump", self, triggered=self.setDeleteBump)
         
-        self.set3DSliceAct = QtGui.QAction("&3D Slice to View", self, triggered=self.set3DSlice)
+        self.set3DSliceAct = QtWidgets.QAction("&3D Slice to View", self, triggered=self.set3DSlice)
         
-        self.getImageAct = QtGui.QAction("&Load Initial Image...", self, triggered=self.getImage)
+        self.getImageAct = QtWidgets.QAction("&Load Initial Image...", self, triggered=self.getImage)
 
-        self.doMapAct = QtGui.QAction("&Get MAP Estimate Image...", self,triggered=self.doMAP)
+        self.doMapAct = QtWidgets.QAction("&Get MAP Estimate Image...", self,triggered=self.doMAP)
 
-        self.saveCurrentAct = QtGui.QAction("&Save Current Results...", self,triggered=self.saveCurrent)
+        self.saveCurrentAct = QtWidgets.QAction("&Save Current Results...", self,triggered=self.saveCurrent)
 
-        self.loadPreviousAct = QtGui.QAction("&Load Previous Results...", self,triggered=self.loadPrevious)
+        self.loadPreviousAct = QtWidgets.QAction("&Load Previous Results...", self,triggered=self.loadPrevious)
         
-        self.exitAct = QtGui.QAction("&Exit", self, shortcut="Ctrl+Q",
+        self.exitAct = QtWidgets.QAction("&Exit", self, shortcut="Ctrl+Q",
                 triggered=self.close)
 
-        self.zoomInAct = QtGui.QAction("Zoom &In (25%)", self,
+        self.zoomInAct = QtWidgets.QAction("Zoom &In (25%)", self,
                 shortcut="Ctrl++", enabled=False, triggered=self.zoomIn)
 
-        self.zoomOutAct = QtGui.QAction("Zoom &Out (25%)", self,
+        self.zoomOutAct = QtWidgets.QAction("Zoom &Out (25%)", self,
                 shortcut="Ctrl+-", enabled=False, triggered=self.zoomOut)
 
-        self.normalSizeAct = QtGui.QAction("&Normal Size", self,
+        self.normalSizeAct = QtWidgets.QAction("&Normal Size", self,
                 shortcut="Ctrl+S", enabled=False, triggered=self.normalSize)
 
-        self.fitToWindowAct = QtGui.QAction("&Fit to Window", self,
+        self.fitToWindowAct = QtWidgets.QAction("&Fit to Window", self,
                 enabled=False, checkable=True, shortcut="Ctrl+F",
                 triggered=self.fitToWindow)
 
-        # self.aboutAct = QtGui.QAction("&About", self, triggered=self.about)
+        # self.aboutAct = QtWidgets.QAction("&About", self, triggered=self.about)
 
-        # self.aboutQtAct = QtGui.QAction("&About Qt", self,
-        #        triggered=QtGui.qApp.aboutQt)
+        # self.aboutQtAct = QtWidgets.QAction("&About Qt", self,
+        #        triggered=QtWidgets.qApp.aboutQt)
 
     def createMenus(self):
-        self.bifsMenu = QtGui.QMenu("&BIFS Operations", self)
+        self.bifsMenu = QtWidgets.QMenu("&BIFS Operations", self)
         self.bifsMenu.addAction(self.getImageAct)
         self.bifsMenu.addAction(self.doMapAct)
         self.bifsMenu.addAction(self.saveCurrentAct)
@@ -350,7 +373,7 @@ class MainWindow(QtGui.QMainWindow):
         self.bifsMenu.addSeparator()
         self.bifsMenu.addAction(self.exitAct)
 
-        self.paramMenu = QtGui.QMenu("&Parameter Set", self)
+        self.paramMenu = QtWidgets.QMenu("&Parameter Set", self)
         self.paramMenu.addAction(self.setParamFuncAct)
         self.paramMenu.addAction(self.setPriorAct)
         self.paramMenu.addAction(self.setLikelihoodAct)
@@ -360,14 +383,14 @@ class MainWindow(QtGui.QMainWindow):
         self.paramMenu.addSeparator()
         self.paramMenu.addAction(self.exitAct)
         
-        self.viewMenu = QtGui.QMenu("&View", self)
+        self.viewMenu = QtWidgets.QMenu("&View", self)
         self.viewMenu.addAction(self.zoomInAct)
         self.viewMenu.addAction(self.zoomOutAct)
         self.viewMenu.addAction(self.normalSizeAct)
         self.viewMenu.addSeparator()
         self.viewMenu.addAction(self.fitToWindowAct)
 
-        # self.helpMenu = QtGui.QMenu("&Help", self)
+        # self.helpMenu = QtWidgets.QMenu("&Help", self)
         # self.helpMenu.addAction(self.aboutAct)
         # self.helpMenu.addAction(self.aboutQtAct)
         
@@ -408,7 +431,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def setAddBump(self):
         if np.isscalar(self.mybifs.init_image):
-            QtGui.QMessageBox.information(self,"Add Bump", "Can't add bump without k-space structure, need to first load image using Load Initial Image... option from BIFS menu")
+            QtWidgets.QMessageBox.information(self,"Add Bump", "Can't add bump without k-space structure, need to first load image using Load Initial Image... option from BIFS menu")
             return
         else:
             dialog = StartAddBump_Dialog(self)
@@ -420,7 +443,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.mybifs.add_bump(get_key,get_position,get_amplitude,get_width)
                 return
 
-#                QtGui.QMessageBox.information(self, "Add Bump","Failed")
+#                QtWidgets.QMessageBox.information(self, "Add Bump","Failed")
 #                return
     def setDeleteBump(self):
         if self.mybifs.bumps:
@@ -455,14 +478,14 @@ class MainWindow(QtGui.QMainWindow):
                 return
 
             
-class StartParam_Fourier_Space_Dialog(QtGui.QDialog, Param_Fourier_Space_Dialog):
+class StartParam_Fourier_Space_Dialog(QtWidgets.QDialog, Param_Fourier_Space_Dialog):
     def __init__(self,parent=MainWindow):
-        QtGui.QDialog.__init__(self,parent)
+        QtWidgets.QDialog.__init__(self,parent)
         self.setupUi(self)
 
     def getDecay(self):
         try:
-            return np.float(QtGui.QLineEdit.text(self.decay))
+            return np.float(QtWidgets.QLineEdit.text(self.decay))
         except:
             print("Couldn't get decay value")
             
@@ -472,14 +495,14 @@ class StartParam_Fourier_Space_Dialog(QtGui.QDialog, Param_Fourier_Space_Dialog)
         except:
             print("Couldn't get parameter function")
 
-class StartPrior_Dialog(QtGui.QDialog, Prior_Dialog):
+class StartPrior_Dialog(QtWidgets.QDialog, Prior_Dialog):
     def __init__(self,parent=MainWindow):
-        QtGui.QDialog.__init__(self,parent)
+        QtWidgets.QDialog.__init__(self,parent)
         self.setupUi(self)
 
     def getScale(self):
         try:
-            return np.float(QtGui.QLineEdit.text(self.scale))
+            return np.float(QtWidgets.QLineEdit.text(self.scale))
         except:
             print("Couldn't get scale value")
             
@@ -489,14 +512,14 @@ class StartPrior_Dialog(QtGui.QDialog, Prior_Dialog):
         except:
             print("Couldn't get prior distribution")
             
-class StartLikelihood_Dialog(QtGui.QDialog, Likelihood_Dialog):
+class StartLikelihood_Dialog(QtWidgets.QDialog, Likelihood_Dialog):
     def __init__(self,parent=MainWindow):
-        QtGui.QDialog.__init__(self,parent)
+        QtWidgets.QDialog.__init__(self,parent)
         self.setupUi(self)
 
     def getScale(self):
         try:
-            return np.float(QtGui.QLineEdit.text(self.scale))
+            return np.float(QtWidgets.QLineEdit.text(self.scale))
         except:
             print("Couldn't get scale value")
             
@@ -506,26 +529,29 @@ class StartLikelihood_Dialog(QtGui.QDialog, Likelihood_Dialog):
         except:
             print("Couldn't get likelihood distribution")
 
-class Start3DSlice_Dialog(QtGui.QDialog, Slice3D_Dialog):
+class Start3DSlice_Dialog(QtWidgets.QDialog, Slice3D_Dialog):
     def __init__(self,parent=MainWindow):
-        QtGui.QDialog.__init__(self,parent)
+        QtWidgets.QDialog.__init__(self,parent)
         self.setupUi(self)
 
     def getSliceIndex(self):
         try:
-            return np.int(QtGui.QLineEdit.text(self.slice_index))
+            # currentIndex should yield same value as currentData, but the latter
+            # seems more future-proof.  RB
+            return np.int(self.slice_index.currentData())
         except:
             print("Couldn't get slice index")
             
     def getSlicePercent(self):
+        # the value is actually a fraction between 0 and 1
         try:
-            return np.float(QtGui.QLineEdit.text(self.slice_percent))
+            return np.float(QtWidgets.QLineEdit.text(self.slice_percent))
         except:
             print("Couldn't get slice percent")
 
-class StartAddBump_Dialog(QtGui.QDialog, AddBump_Dialog):
+class StartAddBump_Dialog(QtWidgets.QDialog, AddBump_Dialog):
     def __init__(self,parent=MainWindow):
-        QtGui.QDialog.__init__(self,parent)
+        QtWidgets.QDialog.__init__(self,parent)
         self.setupUi(self)
 
     def getKey(self):
@@ -536,25 +562,25 @@ class StartAddBump_Dialog(QtGui.QDialog, AddBump_Dialog):
             
     def getPosition(self):
         try:
-            return np.float(QtGui.QLineEdit.text(self.Position))
+            return np.float(QtWidgets.QLineEdit.text(self.Position))
         except:
             print("Couldn't get bump position")
             
     def getAmplitude(self):
         try:
-            return np.float(QtGui.QLineEdit.text(self.Amplitude))
+            return np.float(QtWidgets.QLineEdit.text(self.Amplitude))
         except:
             print("Couldn't get bump position")
             
     def getWidth(self):
         try:
-            return np.float(QtGui.QLineEdit.text(self.Width))
+            return np.float(QtWidgets.QLineEdit.text(self.Width))
         except:
             print("Couldn't get bump width")
             
-class StartDeleteBump_Dialog(QtGui.QDialog, DeleteBump_Dialog):
+class StartDeleteBump_Dialog(QtWidgets.QDialog, DeleteBump_Dialog):
     def __init__(self,parent=MainWindow):
-        QtGui.QDialog.__init__(self,parent)
+        QtWidgets.QDialog.__init__(self,parent)
         self.setupUi(self)
 
     def getDeleteString(self):
@@ -564,6 +590,6 @@ class StartDeleteBump_Dialog(QtGui.QDialog, DeleteBump_Dialog):
             print("Couldn't get bump function information")
 
 if __name__ == '__main__':
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     win = MainWindow()
     sys.exit(app.exec_())

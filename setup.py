@@ -23,7 +23,7 @@ setup(
                       'matplotlib',
                       'nibabel',
                       'numpy',
-                      'PyQt',
+                      'PyQt5',
                       'scipy']
 )
 

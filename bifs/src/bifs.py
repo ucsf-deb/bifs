@@ -309,27 +309,28 @@ class bifs:
             # with numpy.savetxt with the conventions that
             # header comments start with # and there is no
             # sperator between lines
-            if self.initial_image_file_name.endswith('.txt'):
+            if self.initial_image_file_name.lower().endswith('.txt'):
                 # numpy.loadtext automatacilly reads to numpy array
                 read_image = np.loadtxt(self.initial_image_file_name)
             else:
-                # BAD - Need To Fix - for now assume that 3D volumes
-                # will be in tiff format - can add stuff like Dicom
-                # later
-                if self.initial_image_file_name.endswith('.tif') or self.initial_image_file_name.endswith('.tiff'):
-                    if len(imageio.volread(self.initial_image_file_name)) == 2:
-                        read_imfile = imageio.imread(self.initial_image_file_name)
-                        read_image = np.asarray(read_imfile)
-                    else: # 3D
-                        read_imfile = imageio.volread(self.initial_image_file_name)
-                        read_image = np.asarray(read_imfile)
-                elif self.initial_image_file_name.endswith('.nii'):
+                try:
                     import nibabel
+                    # if nibabel is not installed, move on
+                    # if nibabel can't read file, move on
+                    # nibabel.streamlines.is_supported(fname) would seem to be a good test, but files
+                    # that fail it can still be read, e.g., nii.gz files.
+                    # So we use the Python idiom "Better to ask forgiveness than permission"
                     read_imfile = nibabel.load(self.initial_image_file_name)
                     read_image = read_imfile.get_fdata()
-                else: # non tif (or txt) so assume 2D
-                    read_imfile = imageio.imread(self.initial_image_file_name)
-                    read_image = np.asarray(read_imfile)
+                except:
+                    try:
+                        read_imfile = imageio.volread(self.initial_image_file_name)
+                        assert len(read_imfile) > 2
+                        read_image = np.asarray(read_imfile)
+                    except:
+                        # we have a 2D, or maybe 1D, image
+                        read_imfile = imageio.imread(self.initial_image_file_name)
+                        read_image = np.asarray(read_imfile)
             self.image_file_loaded = True
             self.load_image(read_image)
         except:

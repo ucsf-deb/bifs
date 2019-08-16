@@ -89,8 +89,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
         """
         # self.__init__()
+
+        # for ease of development, pre-specify a file
+        # next 2 lines are the original code
+        #self.fileName = QtWidgets.QFileDialog.getOpenFileName(self, "Open File",
+        #                                             QtCore.QDir.currentPath())[0]
+        testFile = r"C:\Users\rdboylan\Documents\Kornak\ADNI\PET1\002_S_2010\Tx_Origin,_Spatially_Normalized" + \
+            r"\2010-07-14_08_30_16.0\I210121\ADNI_002_S_2010_MR_Tx_Origin,_Spatially_Normalized_Br_20110110222232802_S89021_I210121.nii"
         self.fileName = QtWidgets.QFileDialog.getOpenFileName(self, "Open File",
-                                                     QtCore.QDir.currentPath())[0]
+                                                     testFile)[0]
         # Qt docs say return value is a string, but it is tuple whose first element we want
 
         try:
@@ -117,25 +124,14 @@ class MainWindow(QtWidgets.QMainWindow):
             #try:
             print("Performing k-space MAP estimation")
             # Reinitialize bifs object but keep current parameter setttings
-            pft = self.mybifs.param_func_type
-            dec = self.mybifs.decay
-            pri = self.mybifs.prior
-            prs = self.mybifs.prior_scale
-            lik = self.mybifs.likelihood
-            lis = self.mybifs.likelihood_scale
-            bps = self.mybifs.bumps
-            v3d = self.mybifs.view3Dslice
-            self.mybifs = bifs.bifs()
+            # RB: I refactored the parameter copying to the bifs object itself.
+            # However, this means I set the parameters and then load the image file.
+            # The original code loaded the image file and then set the parameters.
+            # Since I don't understand why the reinitialization was necessary at all,
+            # it's possible this change in sequence will break something.
+            self.mybifs = self.mybifs.copy_params()
             self.mybifs.load_image_file(self.fileName)
             self.mybifs.image_file_loaded = True
-            self.mybifs.param_func_type = pft
-            self.mybifs.decay = dec
-            self.mybifs.prior = pri
-            self.mybifs.prior_scale = prs
-            self.mybifs.likelihood = lik
-            self.mybifs.likelihood_scale = lis
-            self.mybifs.bumps = bps
-            self.mybifs.view3Dslice = v3d
             self.mybifs.BIFS_MAP()
             self.didMAP = True
             self.show_post_proc_images()

@@ -287,6 +287,24 @@ class bifs:
             param_file.close()
             return
 
+    def copy_params(self):
+        """
+
+        Return a new bifs object that has all the basic parameter values found in self.
+
+        Does not copy the image or filename
+        """
+        newbifs = bifs()
+        newbifs.param_func_type = self.param_func_type
+        newbifs.decay = self.decay
+        newbifs.prior = self.prior
+        newbifs.prior_scale = self.prior_scale
+        newbifs.likelihood = self.likelihood
+        newbifs.likelihood_scale = self.likelihood_scale
+        newbifs.bumps = self.bumps
+        newbifs.view3Dslice = self.view3Dslice
+        return newbifs
+
 
     def load_image_file(self,fileName):
         """

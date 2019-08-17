@@ -12,6 +12,7 @@ except:
     newProfile = False
 
 from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5.QtWidgets import QMessageBox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.colors import NoNorm 
@@ -21,6 +22,7 @@ import numpy as np
 from scipy import misc
 import bifs
 import jsonpickle
+import os
 
 from pset_dialogs import Param_Fourier_Space_Dialog,Prior_Dialog
 from pset_dialogs import Likelihood_Dialog,Slice3D_Dialog
@@ -80,7 +82,113 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             # runs in Python 3.6
             prof.strip_dirs().sort_stats("cumulative").print_stats(15)
-        
+
+    def getEmpiricalPrior(self):
+        """
+
+        Prompt for root directory of images.
+        Scan each, FFT, and get mean and sd of values in k-space
+        """
+        docDir = QtCore.QStandardPaths.standardLocations(QtCore.QStandardPaths.DocumentsLocation)[0]
+        topDirDlg = QtWidgets.QFileDialog(self, caption="Top Directory for Images",
+                                         directory = docDir)
+        topDirDlg.setFileMode(QtWidgets.QFileDialog.Directory)
+        if topDirDlg.exec_():
+            topDir = topDirDlg.selectedFiles()[0]
+            print("You pick top dir {}\nInitial directory was {}.".format(topDir, docDir))
+        else:
+            return
+        if self._scanImages(topDir):
+            self._statsImages()
+        else:
+            # something funky in images
+            return
+
+    def _scanImages(self, rootDir):
+        """
+        Read in all the images under rootDir
+        Fourier transform them
+
+        self._mbifs  is a collection of the resulting bifs objects
+
+        If headers of images are inconsistent, report error and return False.
+        Otherwise return True.
+
+        May operate in parallel.
+        """
+
+        self._mbifs = []
+        benchmarkHdr = None
+        mismatch = set()  # holds keys that had a mismatch
+
+        for root, dirs, files in os.walk(rootDir):
+            if files:
+                for f in files:
+                    if not f.endswith(".nii"):
+                        continue
+                    b = self.mybifs.copy_params()
+                    b.load_image_file(os.path.join(root, f))
+                    self._mbifs.append(b)
+                    hdr = b.read_imfile.header
+                    if not benchmarkHdr:
+                        # first header encountered
+                        benchmarkHdr = hdr
+                        # could not delete the following key
+                        # it actually doesn't appear in the objects attributes
+                        #del benchmarkHdr.__dict__['db_name']  # differences expected and no concern
+                    else:
+                        for key in benchmarkHdr:
+                            if key == 'db_name':
+                                continue
+
+                            if key.startswith("scl_"):
+                                # values were array(nan, dtype=float32) and I had no luck testing for them
+                                # in various ways
+                                continue
+                            v1 = benchmarkHdr[key]
+                            v2 = hdr[key]
+                            if (v1 != v2).any():
+                                mismatch.add(key)
+        if mismatch:
+            msgb = QMessageBox()
+            msgb.setText("Warning: The following keys were not uniform in the files scanned: {}.".format(mismatch))
+            msgb.setInformativeText("Do you want to proceed anyway?")
+            msgb.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            msgb.setIcon(QMessageBox.Warning)
+            msgb.setDefaultButton(QMessageBox.No)
+            return msgb.exec() == QMessageBox.Yes
+        return True
+
+
+    def _statsImages(self):
+        """
+        Collect statistics on images previously scanned.
+        For now we want mean and sd by voxel.
+
+        Results returned as arrays self.mns and self.sds
+
+        Note the assumption that all images have the same dimensions.
+        Also, images should be aligned with each other for this to be meaningful
+
+        This implementation is very crude
+        """
+        n = len(self._mbifs)
+        aSample = self._mbifs[0].mod_image
+        aSize = aSample.shape
+        mns = np.empty_like(aSample)
+        sds = np.empty_like(aSample)
+        vs = np.empty(n, dtype=aSample.dtype)
+        for i in np.ndindex(*aSize):
+            j = 0
+            for b in self._mbifs:
+                vs[j] = b.mod_image[i]
+                j += 1
+            mns[i] = np.mean(vs)
+            sds[i] = np.std(vs, ddof=1)
+        self.mns = mns
+        self.sds = sds
+
+    
     def getImage_real(self):
         """
     
@@ -332,6 +440,8 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.getImageAct = QtWidgets.QAction("&Load Initial Image...", self, triggered=self.getImage)
 
+        self.getEmpiricalPriorAct = QtWidgets.QAction("&Empirical Prior...", self, triggered=self.getEmpiricalPrior)
+
         self.doMapAct = QtWidgets.QAction("&Get MAP Estimate Image...", self,triggered=self.doMAP)
 
         self.saveCurrentAct = QtWidgets.QAction("&Save Current Results...", self,triggered=self.saveCurrent)
@@ -362,6 +472,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def createMenus(self):
         self.bifsMenu = QtWidgets.QMenu("&BIFS Operations", self)
         self.bifsMenu.addAction(self.getImageAct)
+        self.bifsMenu.addAction(self.getEmpiricalPriorAct)
         self.bifsMenu.addAction(self.doMapAct)
         self.bifsMenu.addAction(self.saveCurrentAct)
         self.bifsMenu.addAction(self.loadPreviousAct)

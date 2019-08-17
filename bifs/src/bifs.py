@@ -318,6 +318,8 @@ class bifs:
         Outputs:
           loads file into bifs object
 
+        RB makes read_imfile persistent in some cases so bulk scans can get the headers.
+
         """
         self.initial_image_file_name = fileName
         try:
@@ -338,17 +340,17 @@ class bifs:
                     # nibabel.streamlines.is_supported(fname) would seem to be a good test, but files
                     # that fail it can still be read, e.g., nii.gz files.
                     # So we use the Python idiom "Better to ask forgiveness than permission"
-                    read_imfile = nibabel.load(self.initial_image_file_name)
-                    read_image = read_imfile.get_fdata()
+                    self.read_imfile = nibabel.load(self.initial_image_file_name)
+                    read_image = self.read_imfile.get_fdata()
                 except:
                     try:
-                        read_imfile = imageio.volread(self.initial_image_file_name)
-                        assert len(read_imfile) > 2
-                        read_image = np.asarray(read_imfile)
+                        self.read_imfile = imageio.volread(self.initial_image_file_name)
+                        assert len(self.read_imfile) > 2
+                        read_image = np.asarray(self.read_imfile)
                     except:
                         # we have a 2D, or maybe 1D, image
-                        read_imfile = imageio.imread(self.initial_image_file_name)
-                        read_image = np.asarray(read_imfile)
+                        self.read_imfile = imageio.imread(self.initial_image_file_name)
+                        read_image = np.asarray(self.read_imfile)
             self.image_file_loaded = True
             self.load_image(read_image)
         except:

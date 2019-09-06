@@ -95,7 +95,6 @@ class MainWindow(QtWidgets.QMainWindow):
         topDirDlg.setFileMode(QtWidgets.QFileDialog.Directory)
         if topDirDlg.exec_():
             topDir = topDirDlg.selectedFiles()[0]
-            print("You pick top dir {}\nInitial directory was {}.".format(topDir, docDir))
         else:
             return
         if self._scanImages(topDir):
@@ -187,6 +186,8 @@ class MainWindow(QtWidgets.QMainWindow):
             sds[i] = np.std(vs, ddof=1)
         self.mns = mns
         self.sds = sds
+        np.savez("ep1.npz", mean=mns, sd=sds)
+        np.savez_compressed("ep1_compressed.npz", mean=mns, sd=sds)
 
     
     def getImage_real(self):

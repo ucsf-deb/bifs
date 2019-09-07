@@ -307,8 +307,9 @@ class bifs:
         newbifs.likelihood_scale = self.likelihood_scale
         newbifs.bumps = self.bumps
         newbifs.view3Dslice = self.view3Dslice
-        newbifs.prior_mean = self.prior_mean
-        newbifs.prior_std = self.prior_std
+        if hasattr(self, "prior_mean"):
+            newbifs.prior_mean = self.prior_mean
+            newbifs.prior_std = self.prior_std
         return newbifs
 
 

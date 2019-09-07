@@ -29,6 +29,12 @@ from pset_dialogs import Param_Fourier_Space_Dialog,Prior_Dialog
 from pset_dialogs import Likelihood_Dialog,Slice3D_Dialog
 from pset_dialogs import AddBump_Dialog,DeleteBump_Dialog
 
+# gastly hack
+# but currently if this is run in debug mode it has a different working directory than
+# if run from command line.  To avoid problems, hard code whole path.
+# Empirical Prior file
+EPFILE = r"C:\Users\rdboylan\Documents\Kornak\bifs\bifs\src\ep2.npz"
+
 class MainWindow(QtWidgets.QMainWindow):
     """
 
@@ -105,7 +111,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         ## actual computation
         if self._scanImages(topDir):
-            self._statsImages()
+            self._statsPost()
         else:
             # something funky in images
             pass
@@ -133,8 +139,7 @@ class MainWindow(QtWidgets.QMainWindow):
         May operate in parallel.
         """
 
-        self._mbifs = []
-        nImages = 0
+        self.nImages = 0
         benchmarkHdr = None
         mismatch = set()  # holds keys that had a mismatch
 
@@ -154,10 +159,10 @@ class MainWindow(QtWidgets.QMainWindow):
                     #if not f.endswith(".nii"):
                     if not f == "suvr_pons.nii":
                         continue
-                    nImages += 1
+                    self.nImages += 1
                     b = self.mybifs.copy_params()
                     b.load_image_file(os.path.join(root, f))
-                    self._mbifs.append(b.mod_image)
+                    self._statsAccumulate(b.mod_image)
                     hdr = b.read_imfile.header
                     del b
                     if not benchmarkHdr:
@@ -189,36 +194,43 @@ class MainWindow(QtWidgets.QMainWindow):
             return msgb.exec() == QMessageBox.Yes
         return True
 
-
-    def _statsImages(self):
+    def _statsAccumulate(self, m):
         """
-        Collect statistics on images previously scanned.
-        For now we want mean and sd by voxel.
+        Accumulate running statistics on the values of m in different images
+        self.nImages gives the current image number; it starts at 1.
+        m is ordinarily the modulus, and must conform to numpy array protocols
 
-        Results returned as arrays self.mns and self.sds
+        Updates self._mns and self._ss currently.
+        """
+        if self.nImages == 1:
+            self._mns = m
+            # ss will turn into a matrix later
+            self._ss = 0.0
+        else:
+            lastdelta = m-self._mns
+            self._mns += (lastdelta)/self.nImages
+            # element by element multiplication in next line
+            self._ss += lastdelta*(m-self._mns)
+
+    def _statsPost(self):
+        """
+        Finalize computation of voxel by voxel statistics for all images.
+        Call after all images have been seen.
+
+        Results returned as arrays self.mns and self.sds.
+        Also writes these results to disk.
 
         Note the assumption that all images have the same dimensions.
         Also, images should be aligned with each other for this to be meaningful
 
         """
-        nSeen = 0
-        for m in self._mbifs:
-            nSeen += 1
-            if nSeen == 1:
-                mns = m
-                # ss will turn into a matrix later
-                ss = 0.0
-            else:
-                lastdelta = m-mns
-                mns += (lastdelta)/nSeen
-                # element by element multiplication in next line
-                ss += lastdelta*(m-mns)
-
-        self.mns = mns
+        self.mns = self._mns
         # element by element square root
-        self.sds = np.sqrt(ss/(nSeen-1))
-        np.savez("ep1.npz", mean=self.mns, sd=self.sds)
-        print("ep1.npz has means and sds for modulus of {} PET scans".format(nSeen))
+        self.sds = np.sqrt(self._ss/(self.nImages-1))
+        del self._mns
+        del self._ss
+        np.savez(EPFILE, mean=self.mns, sd=self.sds)
+        print("{} has means and sds for modulus of {} PET scans".format(EPFILE, self.nImages))
         #np.savez_compressed("ep1_compressed.npz", mean=mns, sd=sds)
 
     def loadEmpiricalPrior(self):
@@ -232,7 +244,7 @@ class MainWindow(QtWidgets.QMainWindow):
         mybifs to use those, rather than functional shortcuts, for the prior in reconstructing
         a particular image.
         """
-        self.mybifs.load_empirical(r"C:\Users\rdboylan\Documents\Kornak\bifs\bifs\src\ep1.npz")
+        self.mybifs.load_empirical(EPFILE)
 
     def getImage_real(self):
         """

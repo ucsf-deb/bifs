@@ -155,13 +155,11 @@ class MainWindow(QtWidgets.QMainWindow):
                     if not f == "suvr_pons.nii":
                         continue
                     nImages += 1
-                    # for debug
-                    if nImages>10:
-                        return True
                     b = self.mybifs.copy_params()
                     b.load_image_file(os.path.join(root, f))
-                    self._mbifs.append(b)
+                    self._mbifs.append(b.mod_image)
                     hdr = b.read_imfile.header
+                    del b
                     if not benchmarkHdr:
                         # first header encountered
                         benchmarkHdr = hdr
@@ -202,24 +200,25 @@ class MainWindow(QtWidgets.QMainWindow):
         Note the assumption that all images have the same dimensions.
         Also, images should be aligned with each other for this to be meaningful
 
-        This implementation is very crude
         """
-        n = len(self._mbifs)
-        aSample = self._mbifs[0].mod_image
-        aSize = aSample.shape
-        mns = np.empty_like(aSample)
-        sds = np.empty_like(aSample)
-        vs = np.empty(n, dtype=aSample.dtype)
-        for i in np.ndindex(*aSize):
-            j = 0
-            for b in self._mbifs:
-                vs[j] = b.mod_image[i]
-                j += 1
-            mns[i] = np.mean(vs)
-            sds[i] = np.std(vs, ddof=1)
+        nSeen = 0
+        for m in self._mbifs:
+            nSeen += 1
+            if nSeen == 1:
+                mns = m
+                # ss will turn into a matrix later
+                ss = 0.0
+            else:
+                lastdelta = m-mns
+                mns += (lastdelta)/nSeen
+                # element by element multiplication in next line
+                ss += lastdelta*(m-mns)
+
         self.mns = mns
-        self.sds = sds
-        np.savez("ep1.npz", mean=mns, sd=sds)
+        # element by element square root
+        self.sds = np.sqrt(ss/(nSeen-1))
+        np.savez("ep1.npz", mean=self.mns, sd=self.sds)
+        print("ep1.npz has means and sds for modulus of {} PET scans".format(nSeen))
         #np.savez_compressed("ep1_compressed.npz", mean=mns, sd=sds)
 
     

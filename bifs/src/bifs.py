@@ -307,6 +307,8 @@ class bifs:
         newbifs.likelihood_scale = self.likelihood_scale
         newbifs.bumps = self.bumps
         newbifs.view3Dslice = self.view3Dslice
+        newbifs.prior_mean = self.prior_mean
+        newbifs.prior_std = self.prior_std
         return newbifs
 
 
@@ -509,6 +511,12 @@ class bifs:
                     self.prior_mean = self.bas.linsc(self.bvec,self.kdist)
                     self.prior_std = self.prior_scale*self.prior_mean # default for now
                                                         # i.e. strong prior
+                elif pft == "Empirical":
+                    # should already have loaded prior_mean and prior_std
+                    self.prior_std *= self.prior_scale
+                    # ugly: this is done elsewhere for all other types
+                    # which is weird since we reset the sd for some of the other types just above
+                    self.prior_std2 = self.prior_std*self.prior_std
                 else:
                     print("Please specify recognized transform space parameter function, one of:")
                     for pf in self.param_func_choices:
@@ -538,6 +546,17 @@ class bifs:
             else:
                 pass
         return
+
+    def load_empirical(self, fname):
+        """Load empirical prior from named file and set mode to Empirical
+        Also sets prior scale to 1, since the default value is very small.
+        You can and probably should make it larger via the Gaussian gui specification.
+        """
+        x = np.load(fname)
+        self.prior_mean = x["mean"]
+        self.prior_std = x["sd"]
+        self.param_func_type = "Empirical"
+        self.prior_scale = 1.0
      
     def bifs_map_gauss_gauss(self,pm,ps2,mf,ds2):
         """
@@ -644,9 +663,10 @@ class bifs:
             return
         else:
             # In case prior scale was reset:
-            self.prior_std[np.where(self.prior_mean != 0.0)] = self.prior_scale*self.prior_mean[np.where(self.prior_mean != 0.0)]
-            self.prior_std[np.where(self.prior_mean == 0.0)] = self.prior_scale*self.prior_mean_init
-            self.prior_std2 = self.prior_std*self.prior_std
+            if self.param_func_type != "Empirical":
+                self.prior_std[np.where(self.prior_mean != 0.0)] = self.prior_scale*self.prior_mean[np.where(self.prior_mean != 0.0)]
+                self.prior_std[np.where(self.prior_mean == 0.0)] = self.prior_scale*self.prior_mean_init
+                self.prior_std2 = self.prior_std*self.prior_std
 
             # In case parameter function or decay value were reset:
             self.set_prior_from_param_func(self.param_func_type)

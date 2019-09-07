@@ -221,7 +221,19 @@ class MainWindow(QtWidgets.QMainWindow):
         print("ep1.npz has means and sds for modulus of {} PET scans".format(nSeen))
         #np.savez_compressed("ep1_compressed.npz", mean=mns, sd=sds)
 
-    
+    def loadEmpiricalPrior(self):
+        """
+        Load a previously computed empirical prior and use it as the prior for image reconstruction.
+
+        getEmpiricalPrior scans through directories of images to build up the prior.
+        Ultimately it saves the mean and sd of the modulus, as seen in the code immediately above.
+
+        In contrast, this function reads those values that were written out and instructs
+        mybifs to use those, rather than functional shortcuts, for the prior in reconstructing
+        a particular image.
+        """
+        self.mybifs.load_empirical(r"C:\Users\rdboylan\Documents\Kornak\bifs\bifs\src\ep1.npz")
+
     def getImage_real(self):
         """
     
@@ -235,8 +247,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # next 2 lines are the original code
         #self.fileName = QtWidgets.QFileDialog.getOpenFileName(self, "Open File",
         #                                             QtCore.QDir.currentPath())[0]
-        testFile = r"C:\Users\rdboylan\Documents\Kornak\ADNI\PET1\002_S_2010\Tx_Origin,_Spatially_Normalized" + \
-            r"\2010-07-14_08_30_16.0\I210121\ADNI_002_S_2010_MR_Tx_Origin,_Spatially_Normalized_Br_20110110222232802_S89021_I210121.nii"
+        #testFile = r"C:\Users\rdboylan\Documents\Kornak\ADNI\PET1\002_S_2010\Tx_Origin,_Spatially_Normalized" + \
+        #    r"\2010-07-14_08_30_16.0\I210121\ADNI_002_S_2010_MR_Tx_Origin,_Spatially_Normalized_Br_20110110222232802_S89021_I210121.nii"
+        testFile = r"C:\Users\rdboylan\Documents\Kornak\ExternalData\ycobigo\ASL\ana_res-2019-02-21_SPM\CBF\CBF_T1_10933_2012-09-21.nii.gz"
         self.fileName = QtWidgets.QFileDialog.getOpenFileName(self, "Open File",
                                                      testFile)[0]
         # Qt docs say return value is a string, but it is tuple whose first element we want
@@ -475,6 +488,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.getEmpiricalPriorAct = QtWidgets.QAction("&Empirical Prior...", self, triggered=self.getEmpiricalPrior)
 
+        self.loadEmpiricalPriorAct = QtWidgets.QAction("&Load Empirical Prior", self, triggered=self.loadEmpiricalPrior)
+
         self.doMapAct = QtWidgets.QAction("&Get MAP Estimate Image...", self,triggered=self.doMAP)
 
         self.saveCurrentAct = QtWidgets.QAction("&Save Current Results...", self,triggered=self.saveCurrent)
@@ -513,6 +528,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.bifsMenu.addAction(self.exitAct)
 
         self.paramMenu = QtWidgets.QMenu("&Parameter Set", self)
+        self.paramMenu.addAction(self.loadEmpiricalPriorAct)
         self.paramMenu.addAction(self.setParamFuncAct)
         self.paramMenu.addAction(self.setPriorAct)
         self.paramMenu.addAction(self.setLikelihoodAct)

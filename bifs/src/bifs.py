@@ -4,6 +4,10 @@
 ###         Class for performing Bayesian Image         ###
 ###         Restoration in Fourier Space (BIFS)         ###
 
+# for debugging
+import traceback
+
+
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
@@ -379,6 +383,7 @@ class bifs:
 
         """
         self.init_image = init_image
+        self.init_image[np.isnan(init_image)] = 0.0
         self.final_image = 0
         self.bifsk_image = 0
         self.imdim = len(init_image.shape)

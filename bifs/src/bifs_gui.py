@@ -23,6 +23,7 @@ from scipy import misc
 import bifs
 import jsonpickle
 import os
+import itertools
 
 from pset_dialogs import Param_Fourier_Space_Dialog,Prior_Dialog
 from pset_dialogs import Likelihood_Dialog,Slice3D_Dialog
@@ -97,11 +98,27 @@ class MainWindow(QtWidgets.QMainWindow):
             topDir = topDirDlg.selectedFiles()[0]
         else:
             return
+
+        ## profiling
+        pr = cProfile.Profile()
+        pr.enable()
+
+        ## actual computation
         if self._scanImages(topDir):
             self._statsImages()
         else:
             # something funky in images
-            return
+            pass
+
+        ## end profiling
+        pr.disable()
+        prof = pstats.Stats(pr)
+        if newProfile:
+            #next if for Python 3.7+
+            prof.strip_dirs().sort_stats(SortKey.CUMULATIVE).print_stats(15)
+        else:
+            # runs in Python 3.6
+            prof.strip_dirs().sort_stats("cumulative").print_stats(15)
 
     def _scanImages(self, rootDir):
         """
@@ -117,14 +134,30 @@ class MainWindow(QtWidgets.QMainWindow):
         """
 
         self._mbifs = []
+        nImages = 0
         benchmarkHdr = None
         mismatch = set()  # holds keys that had a mismatch
 
         for root, dirs, files in os.walk(rootDir):
+            # avoid our target case for whom we are trying to predict
+            iKill = [ i for i, d in zip(itertools.count(), dirs) if d.find("10933")>=0]
+            if iKill:
+                nKill = 0
+                for i in iKill:
+                    i -= nKill
+                    print("Skipping {}".format(dirs[i]))
+                    del dirs[i-nKill]
+                    nKill += 1
+            # look for files to import
             if files:
                 for f in files:
-                    if not f.endswith(".nii"):
+                    #if not f.endswith(".nii"):
+                    if not f == "suvr_pons.nii":
                         continue
+                    nImages += 1
+                    # for debug
+                    if nImages>10:
+                        return True
                     b = self.mybifs.copy_params()
                     b.load_image_file(os.path.join(root, f))
                     self._mbifs.append(b)
@@ -187,7 +220,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.mns = mns
         self.sds = sds
         np.savez("ep1.npz", mean=mns, sd=sds)
-        np.savez_compressed("ep1_compressed.npz", mean=mns, sd=sds)
+        #np.savez_compressed("ep1_compressed.npz", mean=mns, sd=sds)
 
     
     def getImage_real(self):

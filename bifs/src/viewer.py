@@ -13,8 +13,9 @@ iMin = np.min(m.shape)
 # we know it will be the x axis
 iMin = m.shape[0]
 m0 = m
-m = np.zeros_like(m0)
-m[m0>100] = 1.0
+#m = np.zeros_like(m0)
+#m[m0>100] = 1.0
+m = np.log(m0)
 mlab.pipeline.volume(mlab.pipeline.scalar_field(m))
 mlab.show_pipeline()
 #mlab.show()

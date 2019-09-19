@@ -10,6 +10,11 @@ sd = x["sd"]
 x.close()
 aSlice = mlab.volume_slice(m)
 iMin = np.min(m.shape)
+# we know it will be the x axis
+iMin = m.shape[0]
+m0 = m
+m = np.zeros_like(m0)
+m[m0>100] = 1.0
 mlab.pipeline.volume(mlab.pipeline.scalar_field(m))
 mlab.show_pipeline()
 #mlab.show()

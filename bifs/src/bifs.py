@@ -67,7 +67,7 @@ class bifs:
     prior_scale_orig - prior scale at the origin - generally set huge
                            to allow data to determine overall scale
 
-    likelihood - string specifying prior distribution to use
+    likelihood - string specifying likelihood distribution to use
                  current choices:
                  'Gaussian'
                  'Rician'

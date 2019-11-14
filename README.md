@@ -1,11 +1,4 @@
 # BIFS
 **Bayesian Image Analysis in Fourier Space**
 
-Bifs is a framework - along with the computational tools - for imaging practitioners to easily implement their own Bayesian Image analysis in Fourier Space class of models. The BIFS approach will efficiently enable enhanced feature contrast and reduced image noise in a wide range of medical imaging problems, including clinical imaging studies, screening, diagnosis, and treatment evaluation.
-
-The goal is to develop, implement, and disseminate a new approach to medical image processing that,
-* leads to enhanced images beyond conventional standards
-* allows straightforward specification and implementation across a wide range of medical imaging research and clinical practice problems 
-* is amenable to fast and high-throughput processing
-
-In addition, we hope this framework and these methods will find application in many other image processing applications.
+BIFS is a framework and set of computational tools for implementation of Bayesian Image analysis in Fourier Space. The BIFS approach enables enhanced feature contrast and noise reduction, analagous to, but much more efficiently than Bayesian methods applied directly in image space, such as Markov Chain Monte Carlo methods. This efficiency is provided by the fact that for a large class of images the Fourier modes can reasonably be approximated as being independent, thus reducing the optimization probelm from one involving a large number of couple variables to one involving a product of independent one dimensional optimizations. BIFS is useful for a large class of images and in particular for medical imaging problems, including clinical imaging studies, screening, diagnosis, and treatment evaluation.

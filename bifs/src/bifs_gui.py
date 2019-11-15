@@ -33,7 +33,7 @@ from pset_dialogs import AddBump_Dialog,DeleteBump_Dialog
 # but currently if this is run in debug mode it has a different working directory than
 # if run from command line.  To avoid problems, hard code whole path.
 # Empirical Prior file
-EPFILE = r"C:\Users\rdboylan\Documents\Kornak\bifs\bifs\src\ep2.npz"
+EPFILE = r"ep1.npz"
 
 class MainWindow(QtWidgets.QMainWindow):
     """
@@ -255,15 +255,8 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         # self.__init__()
 
-        # for ease of development, pre-specify a file
-        # next 2 lines are the original code
-        #self.fileName = QtWidgets.QFileDialog.getOpenFileName(self, "Open File",
-        #                                             QtCore.QDir.currentPath())[0]
-        #testFile = r"C:\Users\rdboylan\Documents\Kornak\ADNI\PET1\002_S_2010\Tx_Origin,_Spatially_Normalized" + \
-        #    r"\2010-07-14_08_30_16.0\I210121\ADNI_002_S_2010_MR_Tx_Origin,_Spatially_Normalized_Br_20110110222232802_S89021_I210121.nii"
-        testFile = r"C:\Users\rdboylan\Documents\Kornak\ExternalData\ycobigo\ASL\ana_res-2019-02-21_SPM\CBF\CBF_T1_10933_2012-09-21.nii.gz"
         self.fileName = QtWidgets.QFileDialog.getOpenFileName(self, "Open File",
-                                                     testFile)[0]
+                                                     QtCore.QDir.currentPath())[0]
         # Qt docs say return value is a string, but it is tuple whose first element we want
 
         try:

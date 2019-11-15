@@ -27,8 +27,30 @@ step can be performed independently on the modes, greatly increasing
 effiency.
 
 Using the Package
+-----------------
+
+Empirical Priors
+~~~~~~~~~~~~~~~~
+
+One can scan a set of images and use them to form a prior in Fourier space for
+later analysis.  To do so, select "BIFS Operations" and then "Empirical Prior". 
+Then select the top directory that holds all your images.  The code scans all subdirectories
+and reads all files named suvr_pons.nii.  It complains if they don't all have the same
+dimensions.
+
+You will probably want to do something different; you can edit the code in bifs_gui.py for
+_scanImages.
+
+The results are stored in a file ep1.npz in your current working directory.  This is defined
+in EPFILE near the top of bifs_gui.py.  Saving the results means the scanning process
+need only be done once; it it time and resource intensive.
+
+To use the empirical prior select "Parameter Set" and then "Load Empirical Prior".  This reads
+the file just mentioned and then uses it to form a prior.
+
 
 Installation
+------------
 
 We are currently working on making the package fully PyPi compatible
 so it will be easy to install, including installing all dependencies
@@ -65,6 +87,7 @@ commands in one of the scripts (e.g. bifs_cl_2D.py) described below
 to suit one's particular project.
 
 Package Structure
+-----------------
 
 The package is seperated into a class representing the calculation
 engine and a main GUI class. The files containted in the package
@@ -99,6 +122,7 @@ bases/fourier.py  - in principle a BIFS style analysis could be
 		    specific functions.
 		   
 Package Details
+---------------
 
 Much of the following information can be obtained at the Python
 command line by importing the bifs package and typing help(bifs),
@@ -179,6 +203,7 @@ Class variables available to constructor:
                       "Inverse Power Decay"
                       "Banded Inverse Power Decay"
                       "Linear Decay"
+                      "Empirical"
 		      
     param_func_choices - list of current choices (see above)
     decay - float decay exponent for the inverse power paramter function

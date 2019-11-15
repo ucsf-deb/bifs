@@ -5,7 +5,7 @@ from math import isnan
 import sys
 
 
-IMAGETOP = r"C:\Users\rdboylan\Documents\Kornak\ExternalData\ycobigo\ASL"
+IMAGETOP = r"C:\Users\rdboylan\Documents\Kornak\ExternalData\ycobigo\registered"
 #IMAGETOP = r"C:\Users\rdboylan\Documents\Kornak\ADNI\PET1"
 
 def do_scan(theDir):

@@ -26,8 +26,54 @@ that reults in independence of the modes, so that the optimization
 step can be performed independently on the modes, greatly increasing
 effiency.
 
+
+Installation
+------------
+
+We are currently working on making the package fully PyPi compatible
+so it will be easy to install, including installing all dependencies
+In the meantime one can just get the package from GitHub (e.g. via
+clone) and manually install the depencies, e.g. via the pip command
+(a good way to automatically install a number of the depencies is to
+start with an environment designed for scientific processing in
+Python, e.g. Entought's Canopy environment).
+
+The currently required packages are (BIFS is known to work with
+the following versions but will typically work with many earlier
+versions as well):
+Python 3
+numpy 1.15.4-2
+scipy 1.2.1-1
+matplotlib 2.2.4-2
+imageio 2.4.1
+jsonpickle 1.2
+pyqt5 5.7.1-1 (note: some version of PyQT 5 is required, i.e.
+              (the package will not work with PyQT 4)
+
+
 Using the Package
 -----------------
+
+Once the dependencies are installed and the BIFS package has
+been obtained from GitHub one can go to the directory containing
+the class definition file, bifs.py, and the BIFS GUI, bifs_gui.py
+(on typical install that will be ../bifs/src:) and run the GUI
+via the command:
+
+python bifs_gui.py
+
+on MS-Windows, try
+py bifs_gui.py
+or
+py -3 bifs_gui.py
+
+This provides the easiest access to the BIFS package but provides
+limited access to BIFS class variables.
+
+To gain full access to the capabilities of BIFS one can: 1) run python,
+2) load the BIFS class (import bifs), and 3) e.g. modify the
+commands in one of the scripts (e.g. bifs_cl_2D.py) described below
+to suit one's particular project.
 
 Empirical Priors
 ~~~~~~~~~~~~~~~~
@@ -48,43 +94,6 @@ need only be done once; it it time and resource intensive.
 To use the empirical prior select "Parameter Set" and then "Load Empirical Prior".  This reads
 the file just mentioned and then uses it to form a prior.
 
-
-Installation
-------------
-
-We are currently working on making the package fully PyPi compatible
-so it will be easy to install, including installing all dependencies
-In the meantime one can just get the package from GitHub (e.g. via
-clone) and manually install the depencies, e.g. via the pip command
-(a good way to automatically install a number of the depencies is to
-start with an environment designed for scientific processing in
-Python, e.g. Entought's Canopy environment).
-
-The currently required packages are (BIFS is known to work with
-the following versions but will typically work with many earlier
-versions as well):
-numpy 1.15.4-2
-scipy 1.2.1-1
-matplotlib 2.2.4-2
-imageio 2.4.1
-jsonpickle 1.2
-pyqt5 5.7.1-1 (note: some version of PyQT 5 is required, i.e.
-              (the package will not work with PyQT 4)
-
-Once these dependencies are installed and the BIFS package has
-been obtained from GitHub one can go to the directory containing
-the class definition file, bifs.py, and the BIFS GUI, bifs_gui.py
-(on typical install that will be ../bifs/src:) and run the GUI
-via the command:
-
-python bifs_gui.py
-
-This provides the easiest access to the BIFS package but provides
-limited access to BIFS class variables.
-To gain full access to the capabilities of BIFS one can: 1) run python,
-2) load the BIFS class (import bifs), and 3) e.g. modify the
-commands in one of the scripts (e.g. bifs_cl_2D.py) described below
-to suit one's particular project.
 
 Package Structure
 -----------------

@@ -8,7 +8,7 @@ J. Kornak, K. Young, N. Schuff, A. Du, A. A. Maudsley, M. W. Weiner.
    K-Bayes Reconstruction for Perfusion MRI I: Concepts and Application. Journal of Digital Imaging. (2009) Feb 10
 J. Kornak, K. Young.
    K-Bayes Reconstruction for Perfusion MRI II: Modeling Motivation
-   and Technical Development. Journal of Digitital Imaging. (2009) Mar 10
+   and Technical Development. Journal of Digital Imaging. (2009) Mar 10
 J. Kornak , K. Young, B.J. Soher, A.A. Maudsley.
    Bayesian k -space-time reconstruction of MR spectroscopic imaging for enhanced resolution. IEEE Trans Med Imaging. 2010 Jul;29(7):1333-50.
 
@@ -18,13 +18,13 @@ like Markov Chain Monte Carlo, but to try to do so in a more
 efficient way by transforming to a space in which the degrees of
 freedom can, at least approximately, be treated independently.
 For a large class of images, transforming to a Fourier space
-representation apears to accomplish this quite well.
+representation appears to accomplish this quite well.
 And to emphasize a point that sometimes arises as a point of
 confusion regarding this method, the goal is NOT to find a transform
-that results in a parsimonious representation of the image but one
-that reults in independence of the modes, so that the optimization
+that results in a parsimonious representation of the image, but one
+that results in independence of the modes, so that the optimization
 step can be performed independently on the modes, greatly increasing
-effiency.
+efficacy.
 
 
 Installation
@@ -33,10 +33,10 @@ Installation
 We are currently working on making the package fully PyPi compatible
 so it will be easy to install, including installing all dependencies
 In the meantime one can just get the package from GitHub (e.g. via
-clone) and manually install the depencies, e.g. via the pip command
-(a good way to automatically install a number of the depencies is to
+clone) and manually install the dependencies, e.g. via the pip command
+(a good way to automatically install a number of the dependencies is to
 start with an environment designed for scientific processing in
-Python, e.g. Entought's Canopy environment).
+Python, e.g. Enthought's Canopy environment).
 
 The currently required packages are (BIFS is known to work with
 the following versions but will typically work with many earlier
@@ -98,8 +98,8 @@ the file just mentioned and then uses it to form a prior.
 Package Structure
 -----------------
 
-The package is seperated into a class representing the calculation
-engine and a main GUI class. The files containted in the package
+The package is separated into a class representing the calculation
+engine and a main GUI class. The files contained in the package
 are:
 
 bifs.py           - the main class containing the BIFS functions
@@ -111,9 +111,9 @@ bifs_cl_1D.py     - an example script showing how to perform
 		    python or ipython shell (can also just be
 		    run as a script)
 
-bifs_cl_2D.py     - simlar to bifs_cl_1D.py but for a 2D image
+bifs_cl_2D.py     - similar to bifs_cl_1D.py but for a 2D image
 
-bifs_cl_3D.py     - simlar to bifs_cl_1D.py but for a 3D data set
+bifs_cl_3D.py     - similar to bifs_cl_1D.py but for a 3D data set
 
 pset_dialogs.py   - set up functions for the BIFS Gui dialog boxes
 
@@ -142,7 +142,7 @@ i.e. by issuing the following commands at the Python command line:
 
 A number of class variables are available in the biffs class; many are
 set to defaults by the class constructor and many are calculated and
-set automatically when an inital image is loaded. To see how to set various
+set automatically when an initial image is loaded. To see how to set various
 variables and perform an analysis using them, view the example scripts
 provided with the package (and mentioned above).
 
@@ -157,7 +157,7 @@ Class variables available to constructor:
 
     NOTE: All these images are currently stored in the BIFS object
     re. testing and experimentation - in future more
-    parsimonious optiions may be provided re. production runs.
+    parsimonious options may be provided re. production runs.
 
     image_file_loaded - whether an image is loaded (True,False)
     initial_image_file_name - file name of initial image
@@ -165,10 +165,10 @@ Class variables available to constructor:
     imdim1 - int specifying size of 1st dimension of image
     imdim2 - int specifying size of 2nd dimension of image
     imdim3 - int specifying size of possible 3rd dimension of "image"
-    kdist = distance funcion on the shifted k-space lattice
+    kdist = distance function on the shifted k-space lattice
 
     view3Dslice - for 3D data this is a 2D array [a,b] where:
-                  a = axis perpindicular to slice
+                  a = axis perpendicular to slice
                   b = fraction of maximum along that direction 
                       for slice location
     
@@ -178,7 +178,7 @@ Class variables available to constructor:
 
     prior_choices - list of current prior distribution
                     function choices (see above)
-    prior_mean_init - prior mean before paramter space function
+    prior_mean_init - prior mean before parameter space function
                       is set up (used for tests)
     prior_mean - the prior mean defined at each k-space point 
                  by the k-space parameter function
@@ -195,18 +195,18 @@ Class variables available to constructor:
     likelihood_choices - list of current choices (see above)
     likelihood_scale - the assumed (const) noise level in k-space
 
-    bessel_approx_lims - limits for bessel approximtion for rice
+    bessel_approx_lims - limits for bessel approximation for rice
                          distribution - see paper referenced in code
 
-    bessel_approx_array - array for bessel approximtion for rice
+    bessel_approx_array - array for bessel approximation for rice
                          distribution - see paper referenced in code
     
-    rice_denom_cutoff - cutoff for the demoninator of the closed form 
+    rice_denom_cutoff - cutoff for the denominator of the closed form
                         of the posterior with a Gaussian prior and
                         Rician likelihood derived from bessel approximation
                         see paper referenced in code
 
-    param_func_type - string specifying the k-space BIFS paramter
+    param_func_type - string specifying the k-space BIFS parameter
                       function to use
                       current choices are:
                       "Inverse Power Decay"
@@ -215,12 +215,12 @@ Class variables available to constructor:
                       "Empirical"
 		      
     param_func_choices - list of current choices (see above)
-    decay - float decay exponent for the inverse power paramter function
+    decay - float decay exponent for the inverse power parameter function
     bvec - 2D float array specifying intercept and amplitude for parameter
            space functions 
-    banded_cutoff - cutoff for banded, inverse power k-space paramter function  
+    banded_cutoff - cutoff for banded, inverse power k-space parameter function
 
-    basis - string specifying the basis to use - currently ony choice
+    basis - string specifying the basis to use - currently only choice
             is "Fourier"
 	    
     basis_choices - list of current choices (see above)
@@ -235,15 +235,15 @@ Class variables available to constructor:
 	    wavelengths corresponding to that size could enhance the
 	    sensitivity of the analysis. The scipy.signal package
 	    provides a number of filters meant to applied in
-	    the time (image) domain to charactrize properties in the
-	    Fourier domain. Providing these shapes for aplication in
+	    the time (image) domain to characterize properties in the
+	    Fourier domain. Providing these shapes for application in
 	    the Fourier domain for BIFS was straightforward and might
 	    be interesting to experiment with re. effective image
 	    feature enhancement.
 	    
 	    
     bump_types - set of choices for "bump" filter types to add to k-space
-                 paramter function; uses scipy.signal window types 
+                 parameter function; uses scipy.signal window types
                  so consult that documentation for available types - 
                  currently only types that only require window type name
                  and size are used - current choices are: 

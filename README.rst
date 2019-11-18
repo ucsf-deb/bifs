@@ -24,7 +24,7 @@ confusion regarding this method, the goal is NOT to find a transform
 that results in a parsimonious representation of the image, but one
 that results in independence of the modes, so that the optimization
 step can be performed independently on the modes, greatly increasing
-efficacy.
+efficiency.
 
 
 Installation

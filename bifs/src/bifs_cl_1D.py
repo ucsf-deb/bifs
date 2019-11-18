@@ -25,10 +25,12 @@ mybifs = bifs.bifs()
 
 # Set a few things:
 # Prior
-mybifs.prior = "Gaussian" # Choices are currently: "Gaussian","Uniform"
-# "Gaussian" is actually the default but for illustration...
+mybifs.prior = "Gaussian" # Only choice currently
+# A uniform prior is equivalent of maximum likelihood, which simply
+# gives the current data value.  But it does it very slowly.  So don't do that.
 
-# Lilelihood
+
+# Likelihood
 mybifs.likelihood = "Gaussian" # Choices are currently: "Gaussian","Rician" 
 # "Gaussian" is actually the default but again for illustration...
 

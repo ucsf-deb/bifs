@@ -77,18 +77,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update()
 
     def getImage(self):
-        #reference to self in cProfile.run fails
-        pr = cProfile.Profile()
-        pr.enable()
         self.getImage_real()
-        pr.disable()
-        prof = pstats.Stats(pr)
-        if newProfile:
-            #next if for Python 3.7+
-            prof.strip_dirs().sort_stats(SortKey.CUMULATIVE).print_stats(15)
-        else:
-            # runs in Python 3.6
-            prof.strip_dirs().sort_stats("cumulative").print_stats(15)
+
 
     def getEmpiricalPrior(self):
         """
@@ -105,26 +95,12 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             return
 
-        ## profiling
-        pr = cProfile.Profile()
-        pr.enable()
-
         ## actual computation
         if self._scanImages(topDir):
             self._statsPost()
         else:
             # something funky in images
             pass
-
-        ## end profiling
-        pr.disable()
-        prof = pstats.Stats(pr)
-        if newProfile:
-            #next if for Python 3.7+
-            prof.strip_dirs().sort_stats(SortKey.CUMULATIVE).print_stats(15)
-        else:
-            # runs in Python 3.6
-            prof.strip_dirs().sort_stats("cumulative").print_stats(15)
 
     def _scanImages(self, rootDir):
         """

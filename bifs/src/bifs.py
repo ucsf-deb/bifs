@@ -182,7 +182,7 @@ class bifs:
         # For now set default parameters here; make them editable via
         # pop widget
         if self.basis == "Fourier":
-            import bases.fourier as fb
+            from .bases import fourier as fb
             self.bas = fb
             self.decay = 0.5
             self.param_func_type = self.bas.param_func_type

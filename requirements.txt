@@ -1,0 +1,7 @@
+imageio
+jsonpickle
+matplotlib
+numpy
+PyQt5
+scipy
+nibabel

@@ -7,9 +7,16 @@ import sys
 import numpy as np
 from pathlib import Path
 
-from PyQt5 import Qt, QtCore, QtGui, QtWidgets
-from PyQt5.QtPrintSupport import QPrinter
+import matplotlib
+from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib.figure import Figure
+from matplotlib.colors import NoNorm
+from matplotlib import cm
+import matplotlib.pyplot as plt
 
+pp = PdfPages('example01.pdf')
+
+# hack the path to load bifs
 sys.path.insert(0, Path.cwd() / "bifs")
 import bifs
 
@@ -25,22 +32,6 @@ PET = []
 #local MRI images
 MRI = []
 
-app = QtWidgets.QApplication(sys.argv)
-printer = QPrinter(QPrinter.HighResolution)
-printer.setOutputFormat(QPrinter.PdfFormat)
-# 1200 DPI resolution!
-# setPaperSize always uses portrait orientation
-printer.setPaperSize(QPrinter.Letter)
-printer.setOrientation(QPrinter.Landscape)
-printer.setOutputFileName("presentation01.pdf")
-painter = QtGui.QPainter(printer)
-
-# painter.scale() affects fonts and coordinates equally
-# I want coordinates only.  So leave it alon.I hope this means I specify coordinates in inches
-painter.setFont(QtGui.QFont("Times", pointSize = 20))
-painter.drawText(1200, 1200, "Hi!")
-painter.end()
-sys.exit(0)
 
 for d in Path(DATATOP).iterdir():
     if d.is_dir() and not d.name.startswith("."):
@@ -52,25 +43,43 @@ for d in Path(DATATOP).iterdir():
             elif f.name.startswith("mniwrsuvr_pons"):
                 PET.append(f)
 
-print("ADNI: {}".format(ADNI))
-print("PET: {}".format(PET))
-print("MRI: {}".format(MRI))
+#print("ADNI: {}".format(ADNI))
+#print("PET: {}".format(PET))
+#print("MRI: {}".format(MRI))
 
 ALL6 = ADNI+PET+MRI
-for f in MRI:
+SUPER6 = [] # holds pairs of f and bifs image
+for f in ALL6:
     b = bifs.bifs()
     b.load_image_file(str(f))
     b.image_file_loaded = True
     assert b.imdim == 3
-    # borrowed from bifs_gui.py show_initial_image
-    slice_index = np.int(np.round(b.view3Dslice[1]*b.init_image.shape[b.view3Dslice[0]]))
+    SUPER6.append((f, b))
 
-    if b.view3Dslice[0] == 0:
-        init_im_slice = b.init_image[slice_index,:,:]
-    elif b.view3Dslice[0] == 1:
-        init_im_slice = b.init_image[:,slice_index,:]
-    elif b.view3Dslice[0] == 2:
-        init_im_slice = b.init_image[:,:,slice_index]
-    else:
-        print("Sorry slice index needs to be one of 0,1,2")
-    #self.ax1.imshow(init_im_slice, cmap = cm.Greys_r)
+for ix in range(3):
+    for frac in [0.3, 0.5, 0.7]:
+        # borrowed from bifs_gui.py show_initial_image
+        for f, b in SUPER6:
+            slice_index = np.int(np.round(frac*b.init_image.shape[ix]))
+            if ix == 0:
+                init_im_slice = b.init_image[slice_index,:,:]
+            elif ix == 1:
+                init_im_slice = b.init_image[:,slice_index,:]
+            elif ix == 2:
+                init_im_slice = b.init_image[:,:,slice_index]
+            else:
+                print("Sorry slice index needs to be one of 0,1,2")
+            fig = Figure()
+            plt.rcParams["axes.grid"] = False # turn off grid lines for images
+            plt.rcParams["xtick.color"] = (1,1,1,0)
+            plt.rcParams["ytick.color"] = (1,1,1,0)
+            plt.imshow(init_im_slice, cmap = cm.Greys_r)
+            myTitle = f.name
+            if len(myTitle)>30:
+                myTitle = myTitle[:30]+"...."
+            plt.title(myTitle)
+            plt.text(0, init_im_slice.shape[0]+10, "Slice {}% along axis {}".format(frac*100, ix))
+            pp.savefig()
+            # the text just before savefig persisted across figures without the next line
+            plt.clf()
+pp.close()

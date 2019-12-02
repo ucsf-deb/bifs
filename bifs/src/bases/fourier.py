@@ -35,7 +35,7 @@ from scipy.fftpack import fft,ifft,fft2,ifft2,fftn,ifftn
 from scipy import signal
 
 # Choices for K-space parameter function
-param_func_choices = ["Inverse Power Decay","Banded Inverse Power Decay","Linear Decay"]
+param_func_choices = ["Inverse Power Decay","Banded Inverse Power Decay","Linear Decay", "Empirical"]
 
 # Default K-space parameter function choice
 param_func_type = "Inverse Power Decay"

@@ -93,7 +93,8 @@ class bifs:
                       current choices:
                       "Inverse Power Decay"
                       "Banded Inverse Power Decay"
-                      "Linear Decay"    
+                      "Linear Decay"
+                      "Empirical"
     param_func_choices - list of current choices (see above)
     decay - float decay exponent for the inverse power paramter function
     bvec - 2D float array specifying intercept and amplitude for parameter

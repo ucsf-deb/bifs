@@ -47,9 +47,7 @@ class bifs:
     image_file_loaded - whether an image is loaded (True,False)
     initial_image_file_name - file name of initial image
     imdim - int image dimension (1,2 or 3)
-    imdim1 - int specifying size of 1st dimension of image
-    imdim2 - int specifying size of 2nd dimension of image
-    imdim3 - int specifying size of possible 3rd dimension of "image"
+
     kdist = distance funcion on the shifted k-space lattice
 
     view3Dslice - for 3D data this is a 2D array [a,b] where:
@@ -391,23 +389,15 @@ class bifs:
         self.bifsk_image = 0
         self.imdim = len(init_image.shape)
         
+        myShape = init_image.shape
         if self.imdim == 1:
-            self.imdim1 = init_image.shape[0]
-            self.imdim2 = np.nan
-            self.imdim3 = np.nan
-            self.kdist = self.bas.kdist1D(self.imdim1)
+            self.kdist = self.bas.kdist1D(*myShape)
             self.k_image = self.bas.tx1(self.init_image) # Get k-space image
         elif self.imdim == 2:
-            self.imdim1 = init_image.shape[0]
-            self.imdim2 = init_image.shape[1]
-            self.imdim3 = np.nan
-            self.kdist = self.bas.kdist2D(self.imdim1,self.imdim2)
+            self.kdist = self.bas.kdist2D(*myShape)
             self.k_image = self.bas.tx2(self.init_image) # Get k-space image
         elif self.imdim == 3:
-            self.imdim1 = init_image.shape[0]
-            self.imdim2 = init_image.shape[1]
-            self.imdim3 = init_image.shape[2]
-            self.kdist = self.bas.kdist3D(self.imdim1,self.imdim2,self.imdim3)
+            self.kdist = self.bas.kdist3D(*myShape)
             self.k_image = self.bas.txn(self.init_image) # Get k-space image
 
         if self.basis == "Fourier": # Add other basis functions as else...

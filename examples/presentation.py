@@ -90,5 +90,12 @@ def example01():
                 plt.clf()
     pp.close()
 
+def example02():
+    """ graph various bifs transforms of the original images
+    """
+    f, b = SUPER6[0]
+    b.BIFS_MAP()
+
 if __name__ == "__main__":
-    example01()
+
+    example02()

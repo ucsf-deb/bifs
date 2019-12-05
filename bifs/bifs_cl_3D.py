@@ -2,11 +2,10 @@
 
 import numpy as np
 import imageio
-import random
-from pylab import *
+from pylab import cm
 import matplotlib.pyplot as plt
-import bifs
-import bifs_util.util as bu
+from bifs.bifs import Bifs
+import bifs.bifs_util.util as bu
 
 # 3D image
 # Load image - sphere in 64x64x64 array
@@ -27,7 +26,7 @@ my_slice = [0,0.5]
 noisy_im = imageio.imread('../../images/test3Dnoisy_sphere.tiff')
 
 # Create mybifs BIFS object:
-mybifs = bifs.bifs()
+mybifs = Bifs()
 
 # Can take a look at what functions and variables are available with, e.g.:
 # dir(mybifs)

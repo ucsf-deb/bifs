@@ -2,11 +2,10 @@
 
 import numpy as np
 import imageio
-import random
-from pylab import *
+from pylab import cm
 import matplotlib.pyplot as plt
-import bifs
-import bifs_util.util as bu
+from bifs.bifs import Bifs
+import bifs.bifs_util.util as bu
 
 # 2D image
 # Load image - standard Lena for now
@@ -20,7 +19,7 @@ noise = noise_level*(np.max(im) - np.min(im))*np.random.rand(im.shape[0],im.shap
 noisy_im = im + noise
 
 # Create mybifs BIFS object:
-mybifs = bifs.bifs()
+mybifs = Bifs()
 
 # Can take a look at what functions and variables are available with, e.g.:
 # dir(mybifs)

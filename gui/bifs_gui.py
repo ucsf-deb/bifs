@@ -11,23 +11,22 @@ try:
 except:
     newProfile = False
 
-from PyQt5 import QtGui, QtWidgets, QtCore
-from PyQt5.QtWidgets import QMessageBox
+import sys
+from PyQt5 import QtWidgets, QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.colors import NoNorm 
 import matplotlib.pyplot as plt
-from pylab import *
+from pylab import cm
 import numpy as np
-from scipy import misc
-import bifs
+from bifs.bifs import Bifs
 import jsonpickle
 import os
 import itertools
 
-from pset_dialogs import Param_Fourier_Space_Dialog,Prior_Dialog
-from pset_dialogs import Likelihood_Dialog,Slice3D_Dialog
-from pset_dialogs import AddBump_Dialog,DeleteBump_Dialog
+from bifs.pset_dialogs import DeleteBump_Dialog, Prior_Dialog
+from bifs.pset_dialogs import Likelihood_Dialog, Slice3D_Dialog
+from bifs.pset_dialogs import AddBump_Dialog, Param_Fourier_Space_Dialog
 
 # gastly hack
 # but currently if this is run in debug mode it has a different working directory than
@@ -47,7 +46,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__()
         self.main_widget = QtWidgets.QWidget(self)
         # Initialize BIFS object
-        self.mybifs = bifs.bifs()
+        self.mybifs = Bifs()
         self.filename = None
         self.didMAP = False
         self.setWindowTitle("Bayesian Imaging in Fourier Space")
@@ -87,8 +86,9 @@ class MainWindow(QtWidgets.QMainWindow):
         Scan each, FFT, and get mean and sd of values in k-space
         """
         docDir = QtCore.QStandardPaths.standardLocations(QtCore.QStandardPaths.DocumentsLocation)[0]
-        topDirDlg = QtWidgets.QFileDialog(self, caption="Top Directory for Images",
-                                         directory = docDir)
+        topDirDlg = QtWidgets.QFileDialog(self,
+                                          caption="Top Directory for Images",
+                                          directory = docDir)
         topDirDlg.setFileMode(QtWidgets.QFileDialog.Directory)
         if topDirDlg.exec_():
             topDir = topDirDlg.selectedFiles()[0]
@@ -161,13 +161,14 @@ class MainWindow(QtWidgets.QMainWindow):
                             if (v1 != v2).any():
                                 mismatch.add(key)
         if mismatch:
-            msgb = QMessageBox()
+            msgb = QtWidgets.QMessageBox()
             msgb.setText("Warning: The following keys were not uniform in the files scanned: {}.".format(mismatch))
             msgb.setInformativeText("Do you want to proceed anyway?")
-            msgb.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-            msgb.setIcon(QMessageBox.Warning)
-            msgb.setDefaultButton(QMessageBox.No)
-            return msgb.exec() == QMessageBox.Yes
+            msgb.setStandardButtons(QtWidgets.QMessageBox.Yes |
+                                    QtWidgets.QMessageBox.No)
+            msgb.setIcon(QtWidgets.QMessageBox.Warning)
+            msgb.setDefaultButton(QtWidgets.QMessageBox.No)
+            return msgb.exec() == QtWidgets.QMessageBox.Yes
         return True
 
     def _statsAccumulate(self, m):
@@ -291,6 +292,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.ax1.imshow(self.mybifs.init_image,cmap = cm.Greys_r,norm=NoNorm())
                 else: # assume for now that the only other possibility is 3D
                       # can change later
+                    init_im_slice = None
                     slice_index = np.int(np.round(self.mybifs.view3Dslice[1]*self.mybifs.init_image.shape[self.mybifs.view3Dslice[0]]))
                     if self.mybifs.view3Dslice[0] == 0:
                         init_im_slice = self.mybifs.init_image[slice_index,:,:]
@@ -300,7 +302,8 @@ class MainWindow(QtWidgets.QMainWindow):
                         init_im_slice = self.mybifs.init_image[:,:,slice_index]
                     else:
                         print("Sorry slice index needs to be one of 0,1,2")
-                    self.ax1.imshow(init_im_slice, cmap = cm.Greys_r)
+                    if init_im_slice:
+                        self.ax1.imshow(init_im_slice, cmap = cm.Greys_r)
                 self.canvas.draw()
             return
         except:
@@ -328,6 +331,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.ax2.imshow(self.mybifs.final_image,cmap = cm.Greys_r)
                 else: # assume for now that the only other possibility is 3D
                       # can change later
+                    final_im_slice = None
                     slice_index = np.int(np.round(self.mybifs.view3Dslice[1]*self.mybifs.final_image.shape[self.mybifs.view3Dslice[0]]))
                     if self.mybifs.view3Dslice[0] == 0:
                         final_im_slice = self.mybifs.final_image[slice_index,:,:]
@@ -337,7 +341,8 @@ class MainWindow(QtWidgets.QMainWindow):
                         final_im_slice = self.mybifs.final_image[:,:,slice_index]
                     else:
                         print("Sorry slice index needs to be one of 0,1,2")
-                    self.ax2.imshow(final_im_slice, cmap = cm.Greys_r)
+                    if final_im_slice:
+                        self.ax2.imshow(final_im_slice, cmap = cm.Greys_r)
                 self.canvas.draw()
                 
                 self.ax3.clear()
@@ -351,6 +356,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.ax3.imshow(np.log(showim1k),cmap = cm.Greys_r)
                 else: # assume for now that the only other possibility is 3D
                       # can change later
+                    init_mod_im_slice = None
                     slice_index = np.int(np.round(self.mybifs.view3Dslice[1]*self.mybifs.mod_image.shape[self.mybifs.view3Dslice[0]]))
                     if self.mybifs.view3Dslice[0] == 0:
                         init_mod_im_slice = self.mybifs.mod_image[slice_index,:,:]
@@ -360,9 +366,9 @@ class MainWindow(QtWidgets.QMainWindow):
                         init_mod_im_slice = self.mybifs.mod_image[:,:,slice_index]
                     else:
                         print("Sorry slice index needs to be one of 0,1,2")
-
-                    showim1k = np.roll(np.roll(init_mod_im_slice,init_mod_im_slice.shape[0]//2,0),init_mod_im_slice.shape[1]//2,1)
-                    self.ax3.imshow(np.log(showim1k), cmap = cm.Greys_r)
+                    if init_mod_im_slice:
+                        showim1k = np.roll(np.roll(init_mod_im_slice,init_mod_im_slice.shape[0]//2,0),init_mod_im_slice.shape[1]//2,1)
+                        self.ax3.imshow(np.log(showim1k), cmap=cm.Greys_r)
                 self.canvas.draw()
 
                 self.ax4.clear()
@@ -421,9 +427,9 @@ class MainWindow(QtWidgets.QMainWindow):
             bifsj = bifs_handle.read()
             bifs_handle.close()
             self.mybifs = jsonpickle.decode(bifsj)
-            # Show intial image
+            # Show initial image
             self.show_initial_image()
-            # Show initial and post BIFS k-spage images and final image
+            # Show initial and post BIFS k-space images and final image
             self.show_post_proc_images()                    
         else:
             QtWidgets.QMessageBox.information(self, "Parameter File Loader","Cannot load %s., doesn't look like a bifs parameter file" % fileName)
@@ -631,6 +637,7 @@ class StartParam_Fourier_Space_Dialog(QtWidgets.QDialog, Param_Fourier_Space_Dia
         except:
             print("Couldn't get parameter function")
 
+
 class StartPrior_Dialog(QtWidgets.QDialog, Prior_Dialog):
     def __init__(self,parent=MainWindow):
         QtWidgets.QDialog.__init__(self,parent)
@@ -647,7 +654,8 @@ class StartPrior_Dialog(QtWidgets.QDialog, Prior_Dialog):
             return str(self.priorBox.currentText())
         except:
             print("Couldn't get prior distribution")
-            
+
+
 class StartLikelihood_Dialog(QtWidgets.QDialog, Likelihood_Dialog):
     def __init__(self,parent=MainWindow):
         QtWidgets.QDialog.__init__(self,parent)
@@ -664,6 +672,7 @@ class StartLikelihood_Dialog(QtWidgets.QDialog, Likelihood_Dialog):
             return str(self.likelihoodBox.currentText())
         except:
             print("Couldn't get likelihood distribution")
+
 
 class Start3DSlice_Dialog(QtWidgets.QDialog, Slice3D_Dialog):
     def __init__(self,parent=MainWindow):
@@ -684,6 +693,7 @@ class Start3DSlice_Dialog(QtWidgets.QDialog, Slice3D_Dialog):
             return np.float(QtWidgets.QLineEdit.text(self.slice_percent))
         except:
             print("Couldn't get slice percent")
+
 
 class StartAddBump_Dialog(QtWidgets.QDialog, AddBump_Dialog):
     def __init__(self,parent=MainWindow):
@@ -713,7 +723,8 @@ class StartAddBump_Dialog(QtWidgets.QDialog, AddBump_Dialog):
             return np.float(QtWidgets.QLineEdit.text(self.Width))
         except:
             print("Couldn't get bump width")
-            
+
+
 class StartDeleteBump_Dialog(QtWidgets.QDialog, DeleteBump_Dialog):
     def __init__(self,parent=MainWindow):
         QtWidgets.QDialog.__init__(self,parent)
@@ -724,6 +735,7 @@ class StartDeleteBump_Dialog(QtWidgets.QDialog, DeleteBump_Dialog):
             return str(self.deleteBumpKeyBox.currentText())
         except:
             print("Couldn't get bump function information")
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)

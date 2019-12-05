@@ -8,7 +8,6 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import scipy.stats as stats
 from scipy.optimize import minimize_scalar as ms

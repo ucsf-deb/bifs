@@ -1,15 +1,15 @@
 BIFS Module Repository
-========================
+======================
 
 This project is an implementation of Bayesian imaging in Fourier Space
 (BIFS). For details on the method see, e.g.:
 
-J. Kornak, K. Young, N. Schuff, A. Du, A. A. Maudsley, M. W. Weiner.
+ - J. Kornak, K. Young, N. Schuff, A. Du, A. A. Maudsley, M. W. Weiner.
    K-Bayes Reconstruction for Perfusion MRI I: Concepts and Application. Journal of Digital Imaging. (2009) Feb 10
-J. Kornak, K. Young.
+ - J. Kornak, K. Young.
    K-Bayes Reconstruction for Perfusion MRI II: Modeling Motivation
    and Technical Development. Journal of Digital Imaging. (2009) Mar 10
-J. Kornak , K. Young, B.J. Soher, A.A. Maudsley.
+ - J. Kornak , K. Young, B.J. Soher, A.A. Maudsley.
    Bayesian k -space-time reconstruction of MR spectroscopic imaging for enhanced resolution. IEEE Trans Med Imaging. 2010 Jul;29(7):1333-50.
 
 The basic idea is to perform something like a Bayesian image
@@ -19,6 +19,7 @@ efficient way by transforming to a space in which the degrees of
 freedom can, at least approximately, be treated independently.
 For a large class of images, transforming to a Fourier space
 representation appears to accomplish this quite well.
+
 And to emphasize a point that sometimes arises as a point of
 confusion regarding this method, the goal is NOT to find a transform
 that results in a parsimonious representation of the image, but one
@@ -41,14 +42,18 @@ Python, e.g. Enthought's Canopy environment).
 The currently required packages are (BIFS is known to work with
 the following versions but will typically work with many earlier
 versions as well):
-Python 3
-numpy 1.15.4-2
-scipy 1.2.1-1
-matplotlib 2.2.4-2
-imageio 2.4.1
-jsonpickle 1.2
-pyqt5 5.7.1-1 (note: some version of PyQT 5 is required, i.e.
-              (the package will not work with PyQT 4)
+
+::
+
+ Python 3
+ numpy 1.15.4-2
+ scipy 1.2.1-1
+ matplotlib 2.2.4-2
+ imageio 2.4.1
+ jsonpickle 1.2
+ pyqt5 5.7.1-1
+ (note: some version of PyQT 5 is required, i.e.
+  the package will not work with PyQT 4)
 
 
 Using the Package
@@ -70,10 +75,10 @@ py -3 bifs_gui.py
 This provides the easiest access to the BIFS package but provides
 limited access to BIFS class variables.
 
-To gain full access to the capabilities of BIFS one can: 1) run python,
-2) load the BIFS class (import bifs), and 3) e.g. modify the
-commands in one of the scripts (e.g. bifs_cl_2D.py) described below
-to suit one's particular project.
+To gain full access to the capabilities of BIFS one can:
+ 1) run python
+ 2) load the BIFS class (import bifs)
+ 3) e.g. modify the commands in one of the scripts (e.g. bifs_cl_2D.py) described below to suit one's particular project.
 
 Empirical Priors
 ~~~~~~~~~~~~~~~~
@@ -148,6 +153,8 @@ provided with the package (and mentioned above).
 
 Class variables available to constructor:
 
+::
+
     init_image - initial loaded image
     k_image - initial k-space image
     mod_image - initial modulus image in k-space
@@ -161,27 +168,30 @@ Class variables available to constructor:
 
     image_file_loaded - whether an image is loaded (True,False)
     initial_image_file_name - file name of initial image
+
     imdim - int image dimension (1,2 or 3)
     imdim1 - int specifying size of 1st dimension of image
     imdim2 - int specifying size of 2nd dimension of image
     imdim3 - int specifying size of possible 3rd dimension of "image"
+
     kdist = distance function on the shifted k-space lattice
 
-    view3Dslice - for 3D data this is a 2D array [a,b] where:
-                  a = axis perpendicular to slice
-                  b = fraction of maximum along that direction 
-                      for slice location
+    view3Dslice - for 3D data this is a 2D array [a,b] where::
+                   a = axis perpendicular to slice
+                   b = fraction of maximum along that direction
+                   for slice location
     
     prior - string specifying the prior distribution function to use
             current choices are:
-            'Gaussian'
+              'Gaussian'
 
     prior_choices - list of current prior distribution
                     function choices (see above)
     prior_mean_init - prior mean before parameter space function
                       is set up (used for tests)
-    prior_mean - the prior mean defined at each k-space point 
+    prior_mean - the prior mean defined at each k-space point
                  by the k-space parameter function
+
     prior_std - the prior std defined at each k-space point
     prior_scale - the overall scale of the prior variance
     prior_scale_orig - prior scale at the origin - generally set huge
@@ -197,15 +207,13 @@ Class variables available to constructor:
 
     bessel_approx_lims - limits for bessel approximation for rice
                          distribution - see paper referenced in code
-
     bessel_approx_array - array for bessel approximation for rice
                          distribution - see paper referenced in code
-    
+
     rice_denom_cutoff - cutoff for the denominator of the closed form
                         of the posterior with a Gaussian prior and
                         Rician likelihood derived from bessel approximation
                         see paper referenced in code
-
     param_func_type - string specifying the k-space BIFS parameter
                       function to use
                       current choices are:
@@ -218,30 +226,28 @@ Class variables available to constructor:
     decay - float decay exponent for the inverse power parameter function
     bvec - 2D float array specifying intercept and amplitude for parameter
            space functions 
-    banded_cutoff - cutoff for banded, inverse power k-space parameter function
 
+    banded_cutoff - cutoff for banded, inverse power k-space parameter function
     basis - string specifying the basis to use - currently only choice
             is "Fourier"
-	    
     basis_choices - list of current choices (see above)
 
     bumps - dictionary containing set of "bump filters" to implement
             note: these "bump filters" are elements that are added
-	    to the parameter function to increase (or decrease if the
-	    amplitude is specified as negative) the sensitivity of the
-	    analysis to frequency ranges known in advance to be important
-	    (or missing) in the analyzed images. E.g. if there is a
-	    predominance of features of a give size, adding filters at
-	    wavelengths corresponding to that size could enhance the
-	    sensitivity of the analysis. The scipy.signal package
-	    provides a number of filters meant to applied in
-	    the time (image) domain to characterize properties in the
-	    Fourier domain. Providing these shapes for application in
-	    the Fourier domain for BIFS was straightforward and might
-	    be interesting to experiment with re. effective image
-	    feature enhancement.
-	    
-	    
+            to the parameter function to increase (or decrease if the
+            amplitude is specified as negative) the sensitivity of the
+            analysis to frequency ranges known in advance to be important
+            (or missing) in the analyzed images. E.g. if there is a
+            predominance of features of a give size, adding filters at
+            wavelengths corresponding to that size could enhance the
+            sensitivity of the analysis. The scipy.signal package
+            provides a number of filters meant to applied in
+            the time (image) domain to characterize properties in the
+            Fourier domain. Providing these shapes for application in
+            the Fourier domain for BIFS was straightforward and might
+            be interesting to experiment with re. effective image
+            feature enhancement.
+
     bump_types - set of choices for "bump" filter types to add to k-space
                  parameter function; uses scipy.signal window types
                  so consult that documentation for available types - 
@@ -257,6 +263,7 @@ Class variables available to constructor:
                  "blackmanharris"
                  "nuttall"
                  "barthann"
+
     bump_default_type - the default window type used (currently "blackman")
 
     

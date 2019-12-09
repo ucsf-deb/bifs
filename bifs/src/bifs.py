@@ -389,8 +389,17 @@ class bifs:
         self.final_image = 0
         self.bifsk_image = 0
         self.imdim = len(init_image.shape)
+        return
+
+    def _final_setup(self):
+        """Setup after image loaded and all other parameters are set.
+        This used to be part of load_image, but was vulnerable to
+        making calculations based on parameters that would later change.
+
+        This should mostly be delegated to a suitable basis object.
+        """
         
-        myShape = init_image.shape
+        myShape = self.init_image.shape
         if self.imdim == 1:
             self.kdist = self.bas.kdist1D(*myShape)
             self.k_image = self.bas.tx1(self.init_image) # Get k-space image
@@ -414,7 +423,7 @@ class bifs:
 
         #### - The following doesn't seem to work, i.e. de-emphasizes -  ####
         #### - prior to too large an extent - need to investigate this - ####
-        # Do normilization
+        # Do normalization
         # # Since modulus and parameter functions are positive definite
         # don't need to square them (i.e. k-space integral) to get power
         # self.norm = (np.sum(self.mod_image))/(np.sum(self.prior_mean))
@@ -560,7 +569,7 @@ class bifs:
         Inputs:
            pm - prior mean
            ps2 - square of prior std
-           mf - k-space moduls (from data)
+           mf - k-space modulus (from data)
            ds2 - square of likelihood std
 
         Outputs:
@@ -587,7 +596,7 @@ class bifs:
         Inputs:
            pm - prior mean
            ps - prior std
-           mf - k-space moduls (from data)
+           mf - k-space modulus (from data)
            ds - data std
         Outputs:
            MAP estimate
@@ -653,39 +662,40 @@ class bifs:
         if np.isscalar(self.init_image):
             print ("Error: Need to load an image before running MAP")
             return
+        self._final_setup()
+        # In case prior scale was reset:
+        if self.param_func_type != "Empirical":
+            self.prior_std[np.where(self.prior_mean != 0.0)] = self.prior_scale*self.prior_mean[np.where(self.prior_mean != 0.0)]
+            self.prior_std[np.where(self.prior_mean == 0.0)] = self.prior_scale*self.prior_mean_init
+            self.prior_std2 = self.prior_std*self.prior_std
+
+        # In case parameter function or decay value were reset:
+        # note final_setup calls this function too
+        self.set_prior_from_param_func(self.param_func_type)
+
+        # Square of likelihood
+        self.ksd2 = self.likelihood_scale**2
+        # self.data_std2 = self.data_std**2
+        # Rician parameter
+        # self.rice_arg = self.mod_image/self.likelihood_scale
+        if self.prior == "Gaussian" and self.likelihood == "Gaussian":
+            self.bifsk_image = self.bifs_map_gauss_gauss(self.prior_mean,self.prior_std2,self.mod_image,self.ksd2)
+        elif self.prior == "Gaussian" and self.likelihood == "Rician":
+            conj = self.bifs_map_gauss_gauss(self.prior_mean,self.prior_std2,self.mod_image,self.ksd2)
+            besind = np.zeros(self.init_image.shape,dtype=int)
+            besind[np.where(conj > self.bessel_approx_lims[1])] = 1
+            besind[np.where(conj > self.bessel_approx_lims[2])] = 2
+            besind[np.where(conj > self.bessel_approx_lims[3])] = 3
+            self.bsa = self.bessel_approx_array[besind,:]
+            self.bifsk_image = self.bifs_map_gauss_rice(self.prior_mean,self.prior_std,self.mod_image,self.likelihood_scale)
         else:
-            # In case prior scale was reset:
-            if self.param_func_type != "Empirical":
-                self.prior_std[np.where(self.prior_mean != 0.0)] = self.prior_scale*self.prior_mean[np.where(self.prior_mean != 0.0)]
-                self.prior_std[np.where(self.prior_mean == 0.0)] = self.prior_scale*self.prior_mean_init
-                self.prior_std2 = self.prior_std*self.prior_std
-
-            # In case parameter function or decay value were reset:
-            self.set_prior_from_param_func(self.param_func_type)
-
-            # Square of likelihood
-            self.ksd2 = self.likelihood_scale**2
-            # self.data_std2 = self.data_std**2
-            # Rician parameter
-            # self.rice_arg = self.mod_image/self.likelihood_scale
-            if self.prior == "Gaussian" and self.likelihood == "Gaussian":
-                self.bifsk_image = self.bifs_map_gauss_gauss(self.prior_mean,self.prior_std2,self.mod_image,self.ksd2)
-            elif self.prior == "Gaussian" and self.likelihood == "Rician":
-                conj = self.bifs_map_gauss_gauss(self.prior_mean,self.prior_std2,self.mod_image,self.ksd2)
-                besind = np.zeros(self.init_image.shape,dtype=int)
-                besind[np.where(conj > self.bessel_approx_lims[1])] = 1
-                besind[np.where(conj > self.bessel_approx_lims[2])] = 2
-                besind[np.where(conj > self.bessel_approx_lims[3])] = 3
-                self.bsa = self.bessel_approx_array[besind,:]
-                self.bifsk_image = self.bifs_map_gauss_rice(self.prior_mean,self.prior_std,self.mod_image,self.likelihood_scale)
-            else:
-                pass
-            # Send back to image space
-            if self.basis == "Fourier": # usual add else for other tx 
-                if self.imdim == 1:
-                    self.final_image = np.real(self.bas.itx1(self.bifsk_image*np.exp(1j*self.phase_image)))
-                elif self.imdim == 2:
-                    self.final_image = np.real(self.bas.itx2(self.bifsk_image*np.exp(1j*self.phase_image)))
-                elif self.imdim == 3:
-                    self.final_image = np.real(self.bas.itxn(self.bifsk_image*np.exp(1j*self.phase_image)))
-            return
+            pass
+        # Send back to image space
+        if self.basis == "Fourier": # usual add else for other tx 
+            if self.imdim == 1:
+                self.final_image = np.real(self.bas.itx1(self.bifsk_image*np.exp(1j*self.phase_image)))
+            elif self.imdim == 2:
+                self.final_image = np.real(self.bas.itx2(self.bifsk_image*np.exp(1j*self.phase_image)))
+            elif self.imdim == 3:
+                self.final_image = np.real(self.bas.itxn(self.bifsk_image*np.exp(1j*self.phase_image)))
+        return

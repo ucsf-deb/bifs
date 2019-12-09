@@ -43,3 +43,10 @@ def test_reset2():
 	assert (b.prior_mean != b2.prior_mean).any()
 	assert (b.bvec != b2.bvec).any()
 	assert b.param_func_type != b2.param_func_type
+
+def test_inverse():
+	b = bifs.bifs()
+	b.param_func_type = "Banded Inverse Power Decay"
+	b.load_image_file("tests/images/lena512.bmp")
+	b.BIFS_MAP()
+

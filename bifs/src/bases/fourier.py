@@ -245,7 +245,7 @@ def add_bumps_to_pf(bvec,x,bumps,kmax):
     add_bumps_to_pf() adds filter "bumps" to the k-space paramter
     function to enhance or supress certain frequency ranges in 
     generating the prior mean. Since the k-space paramter functions 
-    currently used are rotationally symmetri,c this adds a ring or 
+    currently used are rotationally symmetric this adds a ring or 
     spherical shell in 2D or 3D. This function uses the window shapes 
     from scipy.singal to generate the "bumps" so all filter shapes that 
     only require the filter type and size are available. The documentation

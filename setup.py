@@ -12,7 +12,7 @@ packages_ = find_packages()
 
 setup(
     name='bifs',
-    version='0.1.0a1',
+    version='0.1.0a3',
     description='Implementation of Bayesian Imaging in Fourier Space (BIFS)',
     long_description=readme,
     author='John Kornak, Karl Young, Ross Boylan',
@@ -25,6 +25,10 @@ setup(
     package_data={'bifs': ['images/*']},
     include_package_data=True,
     scripts=['bifs/gui/bifs_gui.py'],
+    entry_points = {
+        'console_scripts': ['bifs_gui=bifs.gui.bifs_gui:main'],
+    },
+
     # package_dir = {['../Framework', 'package2': '../Framework', 'main_package': 'bifs']},
 
     install_requires=['imageio',

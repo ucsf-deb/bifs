@@ -3,8 +3,8 @@
 import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
-from bifs.bifs import Bifs
-import bifs.bifs_util.util as bu
+from bifs.bifs_core import Bifs
+from bifs.bifs_util import util as bu
 
 # Make 1D "image"
 # Noise standard deviation in image space

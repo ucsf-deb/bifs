@@ -1,10 +1,14 @@
 # A command line type example for using BIFS example
 
+import os
+import pkg_resources
+
 import numpy as np
 import imageio
 from pylab import cm
 import matplotlib.pyplot as plt
-from bifs.bifs import Bifs
+
+from bifs.bifs_core import Bifs
 import bifs.bifs_util.util as bu
 
 # 3D image
@@ -23,7 +27,11 @@ my_slice = [0,0.5]
 # Add noise:
 # noisy_im = im + noise
 
-noisy_im = imageio.imread('../../images/test3Dnoisy_sphere.tiff')
+# load image
+path_ = 'images/test3Dnoisy_sphere.tiff'
+test_sphere_p2f = pkg_resources.resource_filename(__name__, path_)
+
+noisy_im = imageio.imread(test_sphere_p2f)
 
 # Create mybifs BIFS object:
 mybifs = Bifs()
@@ -123,4 +131,5 @@ else:
   plt.title("Reconstructed Image")
   plt.imshow(fin_im_slice, cmap = cm.Greys_r)
 
+  plt.plot()
   plt.show()

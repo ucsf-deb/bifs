@@ -11,19 +11,21 @@ try:
 except:
     newProfile = False
 
+import pkg_resources
 import sys
-from PyQt5 import QtWidgets, QtCore
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-from matplotlib.colors import NoNorm 
-import matplotlib.pyplot as plt
-from pylab import cm
-import numpy as np
-from bifs.bifs import Bifs
 import jsonpickle
 import os
 import itertools
 
+from PyQt5 import QtWidgets, QtCore
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from matplotlib.colors import NoNorm
+import matplotlib.pyplot as plt
+from pylab import cm
+import numpy as np
+
+from bifs.bifs_core import Bifs
 from bifs.pset_dialogs import DeleteBump_Dialog, Prior_Dialog
 from bifs.pset_dialogs import Likelihood_Dialog, Slice3D_Dialog
 from bifs.pset_dialogs import AddBump_Dialog, Param_Fourier_Space_Dialog
@@ -75,9 +77,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show()
         self.update()
 
+
     def getImage(self):
         self.getImage_real()
-
 
     def getEmpiricalPrior(self):
         """
@@ -230,10 +232,11 @@ class MainWindow(QtWidgets.QMainWindow):
         to load an image file.  
 
         """
-        # self.__init__()
+        path_ = '../images/'
+        image_path = pkg_resources.resource_filename(__name__, path_)
 
         self.fileName = QtWidgets.QFileDialog.getOpenFileName(self, "Open File",
-                                                     QtCore.QDir.currentPath())[0]
+                                                     image_path)[0]
         # Qt docs say return value is a string, but it is tuple whose first element we want
 
         try:
@@ -737,7 +740,11 @@ class StartDeleteBump_Dialog(QtWidgets.QDialog, DeleteBump_Dialog):
             print("Couldn't get bump function information")
 
 
-if __name__ == '__main__':
+def main():
     app = QtWidgets.QApplication(sys.argv)
     win = MainWindow()
     sys.exit(app.exec_())
+
+
+if __name__ == '__main__':
+    main()

@@ -17,7 +17,7 @@ import jsonpickle
 import os
 import itertools
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui #pyqt stuff
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.colors import NoNorm
@@ -29,6 +29,7 @@ from bifs.bifs_core import Bifs
 from bifs.pset_dialogs import DeleteBump_Dialog, Prior_Dialog
 from bifs.pset_dialogs import Likelihood_Dialog, Slice3D_Dialog
 from bifs.pset_dialogs import AddBump_Dialog, Param_Fourier_Space_Dialog
+
 
 # gastly hack
 # but currently if this is run in debug mode it has a different working directory than

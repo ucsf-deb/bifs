@@ -93,8 +93,40 @@ def example01():
 def example02():
     """ graph various bifs transforms of the original images
     """
-    f, b = SUPER6[0]
-    b.BIFS_MAP()
+    pp = PdfPages('example02.pdf')
+    f, b = SUPER6[-1]
+    for pft in b.param_func_choices:
+        b.set_prior_func_type(pft)
+        aprior = b.prior_object()
+        scale = b.prior_object()._scale
+        for sc in [scale/10, scale, scale*10]:
+            aprior.setScale(sc)
+            b.BIFS_MAP()
+            ix = 0
+            frac = 0.5
+            slice_index = np.int(np.round(frac*b.final_image.shape[ix]))
+            if ix == 0:
+                im_slice = b.final_image[slice_index,:,:]
+            elif ix == 1:
+                im_slice = b.final_image[:,slice_index,:]
+            elif ix == 2:
+                im_slice = b.final_image[:,:,slice_index]
+            else:
+                print("Sorry slice index needs to be one of 0,1,2")
+            fig = Figure()
+            plt.rcParams["axes.grid"] = False # turn off grid lines for images
+            plt.rcParams["xtick.color"] = (1,1,1,0)
+            plt.rcParams["ytick.color"] = (1,1,1,0)
+            plt.imshow(im_slice, cmap = cm.Greys_r)
+            myTitle = f.name
+            if len(myTitle)>40:
+                myTitle = myTitle[:40]+"...."
+            plt.title(myTitle)
+            plt.text(0, im_slice.shape[0]+10, "{} (scale {}). Slice {}% along axis {}".format(pft, sc, frac*100, ix))
+            pp.savefig()
+            # the text just before savefig persisted across figures without the next line
+            plt.clf()
+    pp.close()
 
 if __name__ == "__main__":
 

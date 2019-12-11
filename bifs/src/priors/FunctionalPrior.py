@@ -1,6 +1,9 @@
 # Use some functional form to simplify the prior
 from .AbstractPrior import *
 
+def param_func_choices():
+    return ["Inverse Power Decay", "Banded Inverse Power Decay", "Linear Decay"]
+
 class FunctionalPrior(AdjustmentPrior):
     """ Abstract class with common logic for all functional priors
     kdist is an array with distance from center of Fourier space but shifted so origin is at [0], [0,0] or [0,0,0]

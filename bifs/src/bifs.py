@@ -35,7 +35,7 @@ class bifs:
     Class variables available to constructor:
 
     init_image - initial loaded image
-    k_image - initial k-space image
+    k_image() - initial k-space image
     mod_image - initial modulus image in k-space
     phase_image - initial phase image in k-space
     bifsk_image - final BIFS modulus image in k-space
@@ -50,7 +50,7 @@ class bifs:
     initial_image_file_name - file name of initial image
     imdim - int image dimension (1,2 or 3)
 
-    kdist = distance funcion on the shifted k-space lattice
+    _kdist = distance on the shifted k-space lattice
 
     view3Dslice - for 3D data this is a 2D array [a,b] where:
                   a = axis perpindicular to slice
@@ -152,11 +152,16 @@ class bifs:
         self.imdim = None
         self.view3Dslice = [0,0.5]
 
+        # transformed image in basis space
+        self._kdist = None
+        self._k_image = None
+
         self.prior = prior
         self.prior_choices = ["Gaussian"]
         self.prior_scale = prior_scale
         self.prior_scale_orig = 10.**7
         self._prior = None
+        self.param_func_choices = FP.param_func_choices()
 
         self.likelihood = likelihood
         self.likelihood_choices = ["Gaussian","Rician"]
@@ -346,7 +351,30 @@ class bifs:
         self.final_image = 0
         self.bifsk_image = 0
         self.imdim = len(init_image.shape)
+        self._kdist = None
+        self._k_image = None
         return
+
+    def kdist(self):
+        if self._kdist is None:
+            myShape = self.init_image.shape
+            if self.imdim == 1:
+                self._kdist = self.bas.kdist1D(*myShape)
+            elif self.imdim == 2:
+                self._kdist = self.bas.kdist2D(*myShape)
+            elif self.imdim == 3:
+                self._kdist = self.bas.kdist3D(*myShape)
+        return self._kdist
+
+    def k_image(self):
+        if self._k_image is None:
+            if self.imdim == 1:
+                self._k_image = self.bas.tx1(self.init_image) # Get k-space image
+            elif self.imdim == 2:
+                self._k_image = self.bas.tx2(self.init_image) # Get k-space image
+            elif self.imdim == 3:
+                self._k_image = self.bas.txn(self.init_image) # Get k-space image
+        return self._k_image
 
     def _final_setup(self):
         """Setup after image loaded and all other parameters are set.
@@ -356,20 +384,9 @@ class bifs:
         This should mostly be delegated to a suitable basis object.
         """
         
-        myShape = self.init_image.shape
-        if self.imdim == 1:
-            self.kdist = self.bas.kdist1D(*myShape)
-            self.k_image = self.bas.tx1(self.init_image) # Get k-space image
-        elif self.imdim == 2:
-            self.kdist = self.bas.kdist2D(*myShape)
-            self.k_image = self.bas.tx2(self.init_image) # Get k-space image
-        elif self.imdim == 3:
-            self.kdist = self.bas.kdist3D(*myShape)
-            self.k_image = self.bas.txn(self.init_image) # Get k-space image
-
         if self.basis == "Fourier": # Add other basis functions as else...
-            self.mod_image = abs(self.k_image) # Get modulus image in k-space
-            self.phase_image = sp.angle(self.k_image) # Get phase image in k-space
+            self.mod_image = abs(self.k_image()) # Get modulus image in k-space
+            self.phase_image = sp.angle(self.k_image()) # Get phase image in k-space
             # self.data_std =  self.likelihood_scale*self.mod_image
             self.image_exists = True
 
@@ -444,11 +461,11 @@ class bifs:
             # else:
             #    pass
             if pft == "Inverse Power Decay":
-                self._prior = FP.InversePowerDecayPrior(self.bas, self.kdist, scale = self.prior_scale, scale_origin = self.prior_scale_orig)
+                self._prior = FP.InversePowerDecayPrior(self.bas, self.kdist(), scale = self.prior_scale, scale_origin = self.prior_scale_orig)
             elif pft == "Banded Inverse Power Decay":
-                self._prior = FP.BandedInversePowerDecayPrior(self.bas, self.kdist, scale = self.prior_scale, scale_origin = self.prior_scale_orig)
+                self._prior = FP.BandedInversePowerDecayPrior(self.bas, self.kdist(), scale = self.prior_scale, scale_origin = self.prior_scale_orig)
             elif pft == "Linear Decay":
-                self._prior = FP.LinearDecayPrior(self.bas, self.kdist, scale = self.prior_scale, scale_origin = self.prior_scale_orig)
+                self._prior = FP.LinearDecayPrior(self.bas, self.kdist(), scale = self.prior_scale, scale_origin = self.prior_scale_orig)
             elif pft == "Empirical":
                 raise RuntimeError("Empirical Prior to be implemented")
                 # should already have loaded prior_mean and prior_std
@@ -515,15 +532,15 @@ class bifs:
             #    pass
                 
             if pft == "Inverse Power Decay":
-                self.prior_mean = self.bas.ixsc(self.bvec,self.kdist,self.decay)
+                self.prior_mean = self.bas.ixsc(self.bvec,self.kdist(),self.decay)
                 self.prior_std = self.prior_scale*self.prior_mean # default for now
                                                     # i.e. strong prior
             elif pft == "Banded Inverse Power Decay":
-                self.prior_mean = self.bas.ixscbanded(self.bvec,self.kdist,self.decay,self.banded_cutoff)
+                self.prior_mean = self.bas.ixscbanded(self.bvec,self.kdist(),self.decay,self.banded_cutoff)
                 self.prior_std = self.prior_scale*self.prior_mean # default for now
                                                     # i.e. strong prior
             elif pft == "Linear Decay":
-                self.prior_mean = self.bas.linsc(self.bvec,self.kdist)
+                self.prior_mean = self.bas.linsc(self.bvec,self.kdist())
                 self.prior_std = self.prior_scale*self.prior_mean # default for now
                                                     # i.e. strong prior
             elif pft == "Empirical":
@@ -540,7 +557,7 @@ class bifs:
         # Add bumps if there are any
         if self.bumps:
             # print("Adding some bumps ",self.bumps)
-            self.prior_mean += self.bas.add_bumps_to_pf(self.bvec,self.kdist,self.bumps,np.int(np.max(self.kdist)))
+            self.prior_mean += self.bas.add_bumps_to_pf(self.bvec,self.kdist(),self.bumps,np.int(np.max(self.kdist())))
         # "Zero" center of transform space prior and
         # set large std at origin
         if self.imdim == 1:

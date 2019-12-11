@@ -19,6 +19,8 @@ from scipy.optimize import minimize_scalar as ms
 from multiprocessing import Pool, TimeoutError
 from datetime import datetime
 import jsonpickle as jsp
+from .priors import FunctionalPrior as FP
+import copy
 
 class bifs:
     """
@@ -60,14 +62,27 @@ class bifs:
             'Gaussian'
 
     prior_choices - list of current prior choices (see above)
-    prior_mean_init - prior mean before paramter space function
-                      is set up (used for tests)
-    prior_mean - the prior mean defined at each k-space point 
-                 by the k-space parameter function
-    prior_std - the prior std defined at each k-space point
     prior_scale - the overall scale of the prior variance
     prior_scale_orig - prior scale at the origin - generally set huge
                            to allow data to determine overall scale
+
+    All of the above prior* variables are obsolescent.  Prefer the new
+    _prior  - <AbstractPrior>
+
+    The next 2 items might be obsolescent.  However, their presence permits us to
+    set the parameter type before the image is loaded; _prior needs image info,
+    specifically dimensions, for construction.
+    param_func_type is replaced by _prior, specifically _prior.name(), 
+    and param_func_choices should come from import priors
+    param_func_type - string specifying the k-space BIFS paramter
+                      function to use
+                      current choices:
+                      "Inverse Power Decay"
+                      "Banded Inverse Power Decay"
+                      "Linear Decay"
+                      "Empirical"
+    param_func_choices - list of current choices (see above)
+
 
     likelihood - string specifying likelihood distribution to use
                  current choices:
@@ -87,19 +102,6 @@ class bifs:
                         of the posterior with a Gaussian prior and
                         Rician likelihood derived from bessel approximation
                         see paper referenced in code
-
-    param_func_type - string specifying the k-space BIFS paramter
-                      function to use
-                      current choices:
-                      "Inverse Power Decay"
-                      "Banded Inverse Power Decay"
-                      "Linear Decay"
-                      "Empirical"
-    param_func_choices - list of current choices (see above)
-    decay - float decay exponent for the inverse power paramter function
-    bvec - 2D float array specifying intercept and amplitude for parameter
-           space functions 
-    banded_cutoff - cutoff for banded inverse power k-space paramter function  
 
     basis - string specifying the basis to use - currently ony choice
             is "Fourier"
@@ -149,11 +151,13 @@ class bifs:
         self.initial_image_file_name = ''
         self.imdim = None
         self.view3Dslice = [0,0.5]
+
         self.prior = prior
         self.prior_choices = ["Gaussian"]
         self.prior_scale = prior_scale
         self.prior_scale_orig = 10.**7
-        self.prior_mean_init = 0.0
+        self._prior = None
+
         self.likelihood = likelihood
         self.likelihood_choices = ["Gaussian","Rician"]
         self.likelihood_scale = likelihood_scale
@@ -183,52 +187,8 @@ class bifs:
         if self.basis == "Fourier":
             from .bases import fourier as fb
             self.bas = fb
-            self.decay = 0.5
-            self.param_func_type = self.bas.param_func_type
-            self.param_func_choices = self.bas.param_func_choices
-            if self.param_func_type == "Inverse Power Decay":
-                self.bvec = self.bas.bvec_ixsc
-            elif self.param_func_type == "Banded Inverse Power Decay":
-                self.bvec = self.bas.bvec_ixscbanded
-            elif self.param_func_type == "Linear Decay":
-                self.bvec = self.bas.bvec_linsc
-            else:
-                pass
-            self.bvec[1] = 500.
-            # self.bvec[1] = 546.
-            self.banded_cutoff = 50.
-            # Create an empty bump dictionary
-            # keys are text strings for scipy.signal.window
-            # available bump types from scipy.signal.window are 
-            # (others like gaussian require more paramters):
-            #
-            # Due to our use in k-space picking the preferred versions
-            # of these, which are the versions that end at 0
-            # boxcar - kspace ring filter 
-            # triang - pretty self explanatory - XXX - use bartlett instead 
-            # blackman - nice decaying tails <- use as default
-            # hamming - nice decaying tails - XXX
-            # hann - nice decaying tails <- use this instead of hamming
-            # bartlett - same as triang but ending at 0
-            # flattop - fast decaying to below 0 and back <- should be 2nd def.
-            # parzen - nice decaying tails
-            # bohman - nice decaying tails
-            # blackmanharris - good narrow, decaying tails 
-            # nuttall - good narrow, decaying tail
-            # barthann - kind of fat tails with pointy top
-            #
-            # Read about the properties of these at:
-            # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.windows.get_window.html#scipy.signal.windows.get_window
-            # functions and values are 3 element arrays containing:
-            # 1) the position of the k-space filter in terms
-            #    of the fraction of Kx max
-            # 2) the amplitude of the k-space filter in terms
-            #    of the fraction of parameter function max - bvec[1]
-            # 3) the width of the filter to send to the window function
-            #    specified in terms of a fraction of Kx max
-            self.bumps = {}
-            self.bump_types = ["boxcar","blackman","hann","bartlett","flattop","parzen","bohman","blackmanharris","nuttall","barthann"]
-            self.bump_default_type = "blackman"
+
+        self.param_func_type = self.bas.param_func_type
         ##### Test 1 ##############
         ##### - These are the 'ideal' settings for a Rician
         ##### likelihood analysis
@@ -299,16 +259,13 @@ class bifs:
         """
         newbifs = bifs()
         newbifs.param_func_type = self.param_func_type
-        newbifs.decay = self.decay
         newbifs.prior = self.prior
         newbifs.prior_scale = self.prior_scale
+        newbifs._prior = copy.deepcopy(self._prior)
         newbifs.likelihood = self.likelihood
         newbifs.likelihood_scale = self.likelihood_scale
         newbifs.bumps = self.bumps
         newbifs.view3Dslice = self.view3Dslice
-        if hasattr(self, "prior_mean"):
-            newbifs.prior_mean = self.prior_mean
-            newbifs.prior_std = self.prior_std
         return newbifs
 
 
@@ -417,7 +374,7 @@ class bifs:
             self.image_exists = True
 
         # Set prior via orthogonal-space parameter function
-        self.set_prior_from_param_func(self.param_func_type)
+        self.set_prior_func_type(self.param_func_type)
         # Set Rice parameter in case you use it
         # self.rice_arg = self.mod_image/self.likelihood_scale
 
@@ -449,22 +406,79 @@ class bifs:
            width -     fraction of kmax for width of bump filter        
 
         Outputs:
-          adds bump filter to self.bumps dictionary
+          adds bump filter to prior
 
         """
-        key_orig = my_key.split(".")[0] 
-        if my_key in self.bumps:
-            for i in range(10): # No more than ten bump filters of any kind !!!!
-                new_key = key_orig+"."+str(i)
-                if new_key not in self.bumps:
-                    break
-        else:
-            new_key = my_key
-        self.bumps[new_key] = np.array([np.float(position),np.float(amplitude),np.float(width)])
-        return
-    
-    def set_prior_from_param_func(self,pft):
+        return self.prior_object().add_bump(my_key, position, amplitude, width)
+
+
+    def set_prior_func_type(self, pft : str):
+        """ Set up prior object
+        pft is the name of a type of prior function
         """
+        if np.isscalar(self.init_image):
+            self.param_func_type = pft
+            self._prior = None
+            # Nothing more can be done until image is loaded
+            return
+        if self._prior is not None and pft == self._prior.name():
+            return
+        # test ##########
+        # The following doesn't work and I don't know why
+        # It seems that the prior function (in particulr the decay
+        # function) should be normalized by the zero k-space value
+        # of the image (i.e. the total "power") rather than an arbitrary
+        # value like 500
+        # self.bvec[1] = self.mod_image[0,0]
+        # print("Zero k-space value:",self.mod_image[0,0])
+        # self.bvec[1] = 50.0
+        # test ##########
+        if self.basis == "Fourier": # the usual re. elses for other tx spaces
+            # Try setting bvec[1] = self.mod_image[0]
+            # if self.imdim == 1:
+            #    self.bvec[1] = self.mod_image[0]
+            # elif self.imdim == 2:
+            #    self.bvec[1] = self.mod_image[0,0]
+            # elif self.imdim == 3:
+            #    self.bvec[1] = self.mod_image[0,0,0]
+            # else:
+            #    pass
+            if pft == "Inverse Power Decay":
+                self._prior = FP.InversePowerDecayPrior(self.bas, self.kdist, scale = self.prior_scale, scale_origin = self.prior_scale_orig)
+            elif pft == "Banded Inverse Power Decay":
+                self._prior = FP.BandedInversePowerDecayPrior(self.bas, self.kdist, scale = self.prior_scale, scale_origin = self.prior_scale_orig)
+            elif pft == "Linear Decay":
+                self._prior = FP.LinearDecayPrior(self.bas, self.kdist, scale = self.prior_scale, scale_origin = self.prior_scale_orig)
+            elif pft == "Empirical":
+                raise RuntimeError("Empirical Prior to be implemented")
+                # should already have loaded prior_mean and prior_std
+                self.prior_std *= self.prior_scale
+                # ugly: this is done elsewhere for all other types
+                # which is weird since we reset the sd for some of the other types just above
+                self.prior_std2 = self.prior_std*self.prior_std
+            else:
+                raise RuntimeError("Please specify recognized transform space parameter function, one of:"+
+                                   ", ".join(self.param_func_choices))
+            self.param_func_type = pft
+
+    def prior_object(self):
+        """ Return object representing the prior for possible editing.
+        Edits may change the type-specific parameters of the object,
+        but not the type (functional form) of the object.
+
+        The ugly name is a result of prior already being used as a string.
+        It should be the case that self.prior == self.prior_object().distribution().
+
+        Also, the whole interface is ugly.
+        """
+        if self._prior is None:
+            self.set_prior_func_type(self.param_func_type)
+        return self._prior
+
+
+    def set_prior_from_param_func(self,pft):
+        """ THIS METHOD IS OBSOLETE.  See the _prior and AbstractPrior classes.
+        Keeping it partly for references when implementing EmpiricalPrior.
 
         sets up k-space parameter function based on default or 
         specified paramters
@@ -478,74 +492,74 @@ class bifs:
         """
         if np.isscalar(self.init_image):
             print("Error: The Transform Space parameter function can only be set after loading an initial image")
-        else:
-            # test ##########
-            # The following doesn't work and I don't know why
-            # It seems that the prior function (in particulr the decay
-            # function) should be normalized by the zero k-space value
-            # of the image (i.e. the total "power") rather than an arbitrary
-            # value like 500
-            # self.bvec[1] = self.mod_image[0,0]
-            # print("Zero k-space value:",self.mod_image[0,0])
-            # self.bvec[1] = 50.0
-            # test ##########
-            if self.basis == "Fourier": # the usual re. elses for other tx spaces
-                # Try setting bvec[1] = self.mod_image[0]
-                # if self.imdim == 1:
-                #    self.bvec[1] = self.mod_image[0]
-                # elif self.imdim == 2:
-                #    self.bvec[1] = self.mod_image[0,0]
-                # elif self.imdim == 3:
-                #    self.bvec[1] = self.mod_image[0,0,0]
-                # else:
-                #    pass
+            return
+        # test ##########
+        # The following doesn't work and I don't know why
+        # It seems that the prior function (in particulr the decay
+        # function) should be normalized by the zero k-space value
+        # of the image (i.e. the total "power") rather than an arbitrary
+        # value like 500
+        # self.bvec[1] = self.mod_image[0,0]
+        # print("Zero k-space value:",self.mod_image[0,0])
+        # self.bvec[1] = 50.0
+        # test ##########
+        if self.basis == "Fourier": # the usual re. elses for other tx spaces
+            # Try setting bvec[1] = self.mod_image[0]
+            # if self.imdim == 1:
+            #    self.bvec[1] = self.mod_image[0]
+            # elif self.imdim == 2:
+            #    self.bvec[1] = self.mod_image[0,0]
+            # elif self.imdim == 3:
+            #    self.bvec[1] = self.mod_image[0,0,0]
+            # else:
+            #    pass
                 
-                if pft == "Inverse Power Decay":
-                    self.prior_mean = self.bas.ixsc(self.bvec,self.kdist,self.decay)
-                    self.prior_std = self.prior_scale*self.prior_mean # default for now
-                                                        # i.e. strong prior
-                elif pft == "Banded Inverse Power Decay":
-                    self.prior_mean = self.bas.ixscbanded(self.bvec,self.kdist,self.decay,self.banded_cutoff,self.bumps)
-                    self.prior_std = self.prior_scale*self.prior_mean # default for now
-                                                        # i.e. strong prior
-                elif pft == "Linear Decay":
-                    self.prior_mean = self.bas.linsc(self.bvec,self.kdist)
-                    self.prior_std = self.prior_scale*self.prior_mean # default for now
-                                                        # i.e. strong prior
-                elif pft == "Empirical":
-                    # should already have loaded prior_mean and prior_std
-                    self.prior_std *= self.prior_scale
-                    # ugly: this is done elsewhere for all other types
-                    # which is weird since we reset the sd for some of the other types just above
-                    self.prior_std2 = self.prior_std*self.prior_std
-                else:
-                    print("Please specify recognized transform space parameter function, one of:")
-                    for pf in self.param_func_choices:
-                        print(pf)
-                    return
-            # Add bumps if there are any
-            if self.bumps:
-                # print("Adding some bumps ",self.bumps)
-                self.prior_mean += self.bas.add_bumps_to_pf(self.bvec,self.kdist,self.bumps,np.int(np.max(self.kdist)))
-            # "Zero" center of transform space prior and
-            # set large std at origin
-            if self.imdim == 1:
-                self.prior_mean_init = self.prior_mean[0]
-                self.prior_mean[0] = 0.
-                # self.prior_mean[0] = 1.
-                self.prior_std[0] = self.prior_scale_orig
-            elif self.imdim == 2:
-                self.prior_mean_init = self.prior_mean[0,0]
-                self.prior_mean[0,0] = 0.
-                # self.prior_mean[0,0] = 1.
-                self.prior_std[0,0] = self.prior_scale_orig
-            elif self.imdim == 3:
-                self.prior_mean_init = self.prior_mean[0,0,0]
-                self.prior_mean[0,0,0] = 0.
-                # self.prior_mean[0,0,0] = 1.
-                self.prior_std[0,0,0] = self.prior_scale_orig
+            if pft == "Inverse Power Decay":
+                self.prior_mean = self.bas.ixsc(self.bvec,self.kdist,self.decay)
+                self.prior_std = self.prior_scale*self.prior_mean # default for now
+                                                    # i.e. strong prior
+            elif pft == "Banded Inverse Power Decay":
+                self.prior_mean = self.bas.ixscbanded(self.bvec,self.kdist,self.decay,self.banded_cutoff)
+                self.prior_std = self.prior_scale*self.prior_mean # default for now
+                                                    # i.e. strong prior
+            elif pft == "Linear Decay":
+                self.prior_mean = self.bas.linsc(self.bvec,self.kdist)
+                self.prior_std = self.prior_scale*self.prior_mean # default for now
+                                                    # i.e. strong prior
+            elif pft == "Empirical":
+                # should already have loaded prior_mean and prior_std
+                self.prior_std *= self.prior_scale
+                # ugly: this is done elsewhere for all other types
+                # which is weird since we reset the sd for some of the other types just above
+                self.prior_std2 = self.prior_std*self.prior_std
             else:
-                pass
+                print("Please specify recognized transform space parameter function, one of:")
+                for pf in self.param_func_choices:
+                    print(pf)
+                return
+        # Add bumps if there are any
+        if self.bumps:
+            # print("Adding some bumps ",self.bumps)
+            self.prior_mean += self.bas.add_bumps_to_pf(self.bvec,self.kdist,self.bumps,np.int(np.max(self.kdist)))
+        # "Zero" center of transform space prior and
+        # set large std at origin
+        if self.imdim == 1:
+            self.prior_mean_init = self.prior_mean[0]
+            self.prior_mean[0] = 0.
+            # self.prior_mean[0] = 1.
+            self.prior_std[0] = self.prior_scale_orig
+        elif self.imdim == 2:
+            self.prior_mean_init = self.prior_mean[0,0]
+            self.prior_mean[0,0] = 0.
+            # self.prior_mean[0,0] = 1.
+            self.prior_std[0,0] = self.prior_scale_orig
+        elif self.imdim == 3:
+            self.prior_mean_init = self.prior_mean[0,0,0]
+            self.prior_mean[0,0,0] = 0.
+            # self.prior_mean[0,0,0] = 1.
+            self.prior_std[0,0,0] = self.prior_scale_orig
+        else:
+            pass
         return
 
     def load_empirical(self, fname):
@@ -559,7 +573,7 @@ class bifs:
         self.param_func_type = "Empirical"
         self.prior_scale = 1.0
      
-    def bifs_map_gauss_gauss(self,pm,ps2,mf,ds2):
+    def bifs_map_gauss_gauss(self, prior, mf, ds2):
         """
 
         returns MAP estimate for posterior function using 
@@ -567,8 +581,7 @@ class bifs:
         conjugate function
 
         Inputs:
-           pm - prior mean
-           ps2 - square of prior std
+           prior - <AbstractPrior>
            mf - k-space modulus (from data)
            ds2 - square of likelihood std
 
@@ -578,7 +591,7 @@ class bifs:
         """
         # return((pm/ps2 + mf/ms2) / (1./ps2 + 1./ms2))
         # more efficient:
-        return((pm*ds2 + mf*ps2) / (ps2 + ds2))
+        return((prior.mean()*ds2 + mf*prior.var()) / (prior.var() + ds2))
 
     # Don't think the arguments to the prior and likelihood are
     # right yet, e.g. maybe need self.prior_mean_orig as argument
@@ -586,7 +599,7 @@ class bifs:
     # the scale factor for the Rician from the signal to noise
     # in the image... KY
     
-    def bifs_map_gauss_rice(self,pm,ps,mf,ds):
+    def bifs_map_gauss_rice(self, prior, mf, ds):
         """
         returns MAP estimate for posterior function using 
         gaussian prior and rician likelihood and uses uses analytic
@@ -594,8 +607,7 @@ class bifs:
         function approximation from the paper cited above
         
         Inputs:
-           pm - prior mean
-           ps - prior std
+           prior - <AbstractPrior>
            mf - k-space modulus (from data)
            ds - data std
         Outputs:
@@ -606,8 +618,8 @@ class bifs:
         # ergo estimate which of the exponential coefficient values to use
         # for the modified Bessel function approximation
         #
-        conj = self.bifs_map_gauss_gauss(self.prior_mean,self.prior_std2,self.mod_image,self.ksd2)
-        d = (2*ds**2 - 2*ps**2)
+        conj = self.bifs_map_gauss_gauss(prior, self.mod_image, self.ksd2)
+        d = (2*ds**2 - 2*prior.var())
         dabs = np.abs(d)
         # Estimate which Bessel approximation coefficients
         # to use based on the Gaussian conjugate MAP value
@@ -626,7 +638,9 @@ class bifs:
                 ba = self.bsa[:,:,:,i]
             else:
                 pass
-            num = (-(b*ba*ds*ps**2 - mf*ds**2 + 2*mf*ps**2 - ds**2*pm + ds*np.sqrt(b**2*ba**2*ps**4 + 2*b*ba*mf*ds*ps**2 - 2*b*ba*ds*pm*ps**2 + mf**2*ds**2 - 2*mf*ds**2*pm + ds**2*pm**2 - 4*ds**2*ps**2 + 4*ps**4)))
+            num = (-(b*ba*ds*prior.var() - mf*ds**2 + 2*mf*prior.var() - ds**2*prior.mean() + 
+                     ds*np.sqrt(b**2*ba**2*prior.var()**2 + 2*b*ba*mf*ds*prior.var() - 2*b*ba*ds*prior.mean()*prior.var() +
+                               mf**2*ds**2 - 2*mf*ds**2*prior.mean() + ds**2*prior.mean()**2 - 4*ds**2*prior.var() + 4*prior.var()**2)))
             ### Note - the closer the scales get to each other
             # (ergo the pathalogical blow up), the MAP estimate
             # should actually get closer to the average of the
@@ -663,15 +677,6 @@ class bifs:
             print ("Error: Need to load an image before running MAP")
             return
         self._final_setup()
-        # In case prior scale was reset:
-        if self.param_func_type != "Empirical":
-            self.prior_std[np.where(self.prior_mean != 0.0)] = self.prior_scale*self.prior_mean[np.where(self.prior_mean != 0.0)]
-            self.prior_std[np.where(self.prior_mean == 0.0)] = self.prior_scale*self.prior_mean_init
-            self.prior_std2 = self.prior_std*self.prior_std
-
-        # In case parameter function or decay value were reset:
-        # note final_setup calls this function too
-        self.set_prior_from_param_func(self.param_func_type)
 
         # Square of likelihood
         self.ksd2 = self.likelihood_scale**2
@@ -679,15 +684,15 @@ class bifs:
         # Rician parameter
         # self.rice_arg = self.mod_image/self.likelihood_scale
         if self.prior == "Gaussian" and self.likelihood == "Gaussian":
-            self.bifsk_image = self.bifs_map_gauss_gauss(self.prior_mean,self.prior_std2,self.mod_image,self.ksd2)
+            self.bifsk_image = self.bifs_map_gauss_gauss(self._prior, self.mod_image, self.ksd2)
         elif self.prior == "Gaussian" and self.likelihood == "Rician":
-            conj = self.bifs_map_gauss_gauss(self.prior_mean,self.prior_std2,self.mod_image,self.ksd2)
+            conj = self.bifs_map_gauss_gauss(self._prior, self.mod_image, self.ksd2)
             besind = np.zeros(self.init_image.shape,dtype=int)
             besind[np.where(conj > self.bessel_approx_lims[1])] = 1
             besind[np.where(conj > self.bessel_approx_lims[2])] = 2
             besind[np.where(conj > self.bessel_approx_lims[3])] = 3
             self.bsa = self.bessel_approx_array[besind,:]
-            self.bifsk_image = self.bifs_map_gauss_rice(self.prior_mean,self.prior_std,self.mod_image,self.likelihood_scale)
+            self.bifsk_image = self.bifs_map_gauss_rice(self._prior, self.mod_image, self.likelihood_scale)
         else:
             pass
         # Send back to image space

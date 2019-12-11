@@ -24,6 +24,21 @@ var/
 .installed.cfg
 *.egg
 
+# pytest cache
+.pytest_cache
+
+# package and build testing
+build
+dist
+*.egg-info
+
+
+## development tools
+# pycharm
+.idea
+# visual studio code
+.vscode
+
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.

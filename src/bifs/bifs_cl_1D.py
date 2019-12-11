@@ -1,13 +1,10 @@
 # A command line type example for using BIFS example
 
 import numpy as np
-import scipy as sp
-from scipy import misc,stats
-import random
-from pylab import *
+from scipy import stats
 import matplotlib.pyplot as plt
-import bifs
-import bifs_util.util as bu
+from bifs.bifs_core import Bifs
+from bifs.bifs_util import util as bu
 
 # Make 1D "image"
 # Noise standard deviation in image space
@@ -18,7 +15,7 @@ z = np.concatenate((np.zeros(14),np.arange(19)+1,np.zeros(7)+10,10-np.arange(10)
 y = z + stats.norm.rvs(size=len(z),loc=0.0,scale=noiseSD)
 
 # Create mybifs BIFS object:
-mybifs = bifs.bifs()
+mybifs = Bifs()
 
 # Can take a look at what functions and variables are available with, e.g.:
 # dir(mybifs)

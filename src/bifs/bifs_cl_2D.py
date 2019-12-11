@@ -1,16 +1,22 @@
 # A command line type example for using BIFS example
 
+import os
+import pkg_resources
+
 import numpy as np
 import imageio
-import random
-from pylab import *
+from pylab import cm
 import matplotlib.pyplot as plt
-import bifs
-import bifs_util.util as bu
+
+from bifs.bifs_core import Bifs
+import bifs.bifs_util.util as bu
 
 # 2D image
 # Load image - standard Lena for now
-im = imageio.imread('../../images/lena512.bmp')
+path_ = 'images/lena512.bmp'  # always use slash
+test_2d_p2f = pkg_resources.resource_filename(__name__, path_)
+
+im = imageio.imread(test_2d_p2f)
 im = np.asarray(im)
 # 2D imag
 noise_level = 1.5
@@ -20,7 +26,7 @@ noise = noise_level*(np.max(im) - np.min(im))*np.random.rand(im.shape[0],im.shap
 noisy_im = im + noise
 
 # Create mybifs BIFS object:
-mybifs = bifs.bifs()
+mybifs = Bifs()
 
 # Can take a look at what functions and variables are available with, e.g.:
 # dir(mybifs)
@@ -105,4 +111,5 @@ else:
   plt.title("Reconstructed Image")
   plt.imshow(mybifs.final_image,cmap = cm.Greys_r)
 
+  plt.plot()
   plt.show()

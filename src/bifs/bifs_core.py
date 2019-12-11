@@ -11,16 +11,13 @@ import traceback
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
-from pylab import *
-import multiprocessing as mp
-from scipy import stats
+from pylab import where, cm
 import imageio
-from scipy.optimize import minimize_scalar as ms
-from multiprocessing import Pool, TimeoutError
 from datetime import datetime
 import jsonpickle as jsp
 
-class bifs:
+
+class Bifs:
     """
     Class bifs for performing Bayesian image restoration
     in k-space
@@ -62,7 +59,7 @@ class bifs:
             'Gaussian'
 
     prior_choices - list of current prior choices (see above)
-    prior_mean_init - prior mean before paramter space function
+    prior_mean_init - prior mean before parameter space function
                       is set up (used for tests)
     prior_mean - the prior mean defined at each k-space point 
                  by the k-space parameter function
@@ -79,28 +76,28 @@ class bifs:
     likelihood_choices - list of current choices (see above)
     likelihood_scale - the assumed (const) noise level in k-space
 
-    bessel_approx_lims - limits for bessel approximtion for rice
+    bessel_approx_lims - limits for bessel approximation for rice
                          distribution - see paper referenced in code
 
-    bessel_approx_array - array for bessel approximtion for rice
+    bessel_approx_array - array for bessel approximation for rice
                          distribution - see paper referenced in code
     
-    rice_denom_cutoff - cutoff for the demoninator of the closed form 
+    rice_denom_cutoff - cutoff for the denominator of the closed form
                         of the posterior with a Gaussian prior and
                         Rician likelihood derived from bessel approximation
                         see paper referenced in code
 
-    param_func_type - string specifying the k-space BIFS paramter
+    param_func_type - string specifying the k-space BIFS parameter
                       function to use
                       current choices:
                       "Inverse Power Decay"
                       "Banded Inverse Power Decay"
                       "Linear Decay"    
     param_func_choices - list of current choices (see above)
-    decay - float decay exponent for the inverse power paramter function
+    decay - float decay exponent for the inverse power parameter function
     bvec - 2D float array specifying intercept and amplitude for parameter
            space functions 
-    banded_cutoff - cutoff for banded inverse power k-space paramter function  
+    banded_cutoff - cutoff for banded inverse power k-space parameter function
 
     basis - string specifying the basis to use - currently ony choice
             is "Fourier"
@@ -108,7 +105,7 @@ class bifs:
 
     bumps - dictionary containing set of "bump" filters to implement
     bump_types - set of choices for "bump" filter types to add to k-space
-                 paramter function; uses scipy.signal window types 
+                 parameter function; uses scipy.signal window types
                  so consult that documentation for available types - 
                  currently only types that only require window type name
                  and size are used - current choices are: 
@@ -126,7 +123,8 @@ class bifs:
 
     """
     
-    def __init__(self,prior = "Gaussian",likelihood = "Gaussian",likelihood_scale = 0.05,prior_scale=0.0005,basis="Fourier"):
+    def __init__(self, prior = "Gaussian", likelihood = "Gaussian",
+                 likelihood_scale = 0.05, prior_scale=0.0005, basis="Fourier"):
         """ 
        
         initializes class
@@ -182,7 +180,7 @@ class bifs:
         # For now set default parameters here; make them editable via
         # pop widget
         if self.basis == "Fourier":
-            import bases.fourier as fb
+            from bifs.bases import fourier as fb
             self.bas = fb
             self.decay = 0.5
             self.param_func_type = self.bas.param_func_type
@@ -201,7 +199,7 @@ class bifs:
             # Create an empty bump dictionary
             # keys are text strings for scipy.signal.window
             # available bump types from scipy.signal.window are 
-            # (others like gaussian require more paramters):
+            # (others like gaussian require more parameters):
             #
             # Due to our use in k-space picking the preferred versions
             # of these, which are the versions that end at 0
@@ -285,7 +283,7 @@ class bifs:
             # Output images
             plt.imsave(out_im,self.final_image,cmap = cm.Greys_r)
             plt.imsave(out_k,np.log(out_k_im),cmap = cm.Greys_r)
-            # Output paramter file
+            # Output parameter file
             param_file = open(out_p, "w")
             param_file.write(jsp.encode(self))
             param_file.close()
@@ -298,7 +296,7 @@ class bifs:
 
         Does not copy the image or filename
         """
-        newbifs = bifs()
+        newbifs = Bifs()
         newbifs.param_func_type = self.param_func_type
         newbifs.decay = self.decay
         newbifs.prior = self.prior
@@ -368,7 +366,7 @@ class bifs:
     def load_image(self,init_image):
         """
 
-        intializes the bifs object so as to be ready for
+        initializes the bifs object so as to be ready for
         analysis steps.
 
         load_image_file calls this
@@ -379,9 +377,9 @@ class bifs:
                        load_image_file()
 
         Outputs:
-           sets up transformed (e.g. k-spce) data and paramter
+           sets up transformed (e.g. k-space) data and parameter
            function based on dimension and size of init_image
-           and default or specified paramters 
+           and default or specified parameters
 
 
         """
@@ -467,10 +465,10 @@ class bifs:
         """
 
         sets up k-space parameter function based on default or 
-        specified paramters
+        specified parameters
 
         Inputs:
-           pft = paramter space function type
+           pft = parameter space function type
 
         Outputs:
            sets up k-space parameter function

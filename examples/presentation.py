@@ -143,7 +143,7 @@ def plot_post(pp):
 def example02():
     """ graph various bifs transforms of the original images
     """
-    pp = PdfPages('example02b.pdf')
+    pp = PdfPages('example02c.pdf')
 
     #info on slice to display
     ix = 0
@@ -157,17 +157,17 @@ def example02():
 
     init_image = slice(aMRI.bifs.init_image, ix = ix, frac = frac)
     plot_prep(init_image)
-    plt.title("Initial MRI image")
+    #plt.title("Initial MRI image")
     plot_post(pp)
 
     init_image = slice(aPET.bifs.init_image, ix = ix, frac = frac)
     plot_prep(init_image)
-    plt.title("Initial PET image")
+    #plt.title("Initial PET image")
     plot_post(pp)
 
     im_slice = slice(MNI.bifs.init_image, ix=ix, frac=frac)
     plot_prep(im_slice)
-    plt.title("MNI Reference Image")
+    #plt.title("MNI Reference Image")
     plot_post(pp)
 
     b = aMRI.bifs
@@ -183,8 +183,8 @@ def example02():
             myTitle = aMRI.filename()
             if len(myTitle)>40:
                 myTitle = myTitle[:40]+"...."
-            plt.title(myTitle)
-            plt.text(0, im_slice.shape[0]+10, "{} (scale {}). Slice {}% along axis {}".format(pft, sc, frac*100, ix))
+            #plt.title(myTitle)
+            #plt.text(0, im_slice.shape[0]+10, "{} (scale {}). Slice {}% along axis {}".format(pft, sc, frac*100, ix))
             plot_post(pp)
 
     pp.close()

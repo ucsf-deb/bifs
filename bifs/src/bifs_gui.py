@@ -24,10 +24,11 @@ import bifs
 import jsonpickle
 import os
 import itertools
+import re
 
-from pset_dialogs import Param_Fourier_Space_Dialog,Prior_Dialog
-from pset_dialogs import Likelihood_Dialog,Slice3D_Dialog
-from pset_dialogs import AddBump_Dialog,DeleteBump_Dialog
+from bifs.pset_dialogs import Param_Fourier_Space_Dialog,Prior_Dialog
+from bifs.pset_dialogs import Likelihood_Dialog,Slice3D_Dialog
+from bifs.pset_dialogs import AddBump_Dialog,DeleteBump_Dialog
 
 # gastly hack
 # but currently if this is run in debug mode it has a different working directory than
@@ -118,6 +119,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.nImages = 0
         benchmarkHdr = None
         mismatch = set()  # holds keys that had a mismatch
+        reFile = re.compile(r"^mniwSUVR_.*\.nii(\.gz)$", re.I)
 
         for root, dirs, files in os.walk(rootDir):
             # avoid our target case for whom we are trying to predict
@@ -133,7 +135,11 @@ class MainWindow(QtWidgets.QMainWindow):
             if files:
                 for f in files:
                     #if not f.endswith(".nii"):
-                    if not f == "suvr_pons.nii":
+                    if reFile.match(f):
+                        continue
+                    if f.find("10933")>=0:
+                        print("Skipping {}".format(f))
+                        nKill += 1
                         continue
                     self.nImages += 1
                     b = self.mybifs.copy_params()

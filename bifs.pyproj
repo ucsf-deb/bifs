@@ -4,7 +4,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>b580896b-29ca-4a24-82be-0c6bf6ae80a8</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>bifs\src\bifs_gui.py</StartupFile>
+    <StartupFile>
+    </StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -24,14 +25,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="bifs\" />
-    <Folder Include="bifs\src\" />
-    <Folder Include="bifs\src\bases\" />
-    <Folder Include="bifs\src\bases\__pycache__\" />
-    <Folder Include="bifs\src\bifs_util\" />
-    <Folder Include="bifs\src\priors\" />
-    <Folder Include="bifs\src\priors\__pycache__\" />
-    <Folder Include="bifs\src\__pycache__\" />
-    <Folder Include="bifs\__pycache__\" />
+    <Folder Include="BIFS\bases\" />
+    <Folder Include="BIFS\bases\__pycache__\" />
+    <Folder Include="BIFS\bifs_util\" />
+    <Folder Include="BIFS\priors\" />
     <Folder Include="examples\" />
     <Folder Include="tests\" />
     <Folder Include="tests\images\" />
@@ -39,17 +36,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="bifs\.DS_Store" />
+    <Content Include="BIFS\bases\__pycache__\fourier.cpython-37.pyc" />
     <Content Include="bifs\bifs.pyproj" />
-    <Content Include="bifs\src\bases\__pycache__\fourier.cpython-37.pyc" />
-    <Content Include="bifs\src\ep1.npz" />
-    <Content Include="bifs\src\ep2.npz" />
-    <Content Include="bifs\src\PET2_nifti.out" />
-    <Content Include="bifs\src\priors\__pycache__\AbstractPrior.cpython-37.pyc" />
-    <Content Include="bifs\src\priors\__pycache__\FunctionalPrior.cpython-37.pyc" />
-    <Content Include="bifs\src\__pycache__\bifs.cpython-37.pyc" />
-    <Content Include="bifs\src\__pycache__\pset_dialogs.cpython-37.pyc" />
-    <Content Include="bifs\src\__pycache__\__init__.cpython-37.pyc" />
-    <Content Include="bifs\__pycache__\__init__.cpython-37.pyc" />
+    <Content Include="BIFS\ep1.npz" />
+    <Content Include="BIFS\ep2.npz" />
+    <Content Include="BIFS\PET2_nifti.out" />
     <Content Include="tests\images\kinda_noisy_lena512.bmp" />
     <Content Include="tests\images\lena512.bmp" />
     <Content Include="tests\images\my1dfunc.txt" />
@@ -57,16 +48,13 @@
     <Content Include="tests\__pycache__\test_reset.cpython-37-pytest-5.0.1.pyc" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BIFS\bases\fourier.py" />
     <Compile Include="bifs\bifs.py" />
-    <Compile Include="bifs\src\bases\fourier.py" />
-    <Compile Include="bifs\src\bifs.py" />
-    <Compile Include="bifs\src\bifs_gui.py" />
-    <Compile Include="bifs\src\bifs_util\util.py" />
-    <Compile Include="bifs\src\priors\AbstractPrior.py" />
-    <Compile Include="bifs\src\priors\FunctionalPrior.py" />
-    <Compile Include="bifs\src\priors\silly.py" />
-    <Compile Include="bifs\src\pset_dialogs.py" />
-    <Compile Include="bifs\src\__init__.py" />
+    <Compile Include="BIFS\bifs_gui.py" />
+    <Compile Include="BIFS\bifs_util\util.py" />
+    <Compile Include="BIFS\priors\AbstractPrior.py" />
+    <Compile Include="BIFS\priors\FunctionalPrior.py" />
+    <Compile Include="BIFS\pset_dialogs.py" />
     <Compile Include="bifs\test.py" />
     <Compile Include="bifs\__init__.py" />
     <Compile Include="examples\bifs_cl_1D.py" />

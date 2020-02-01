@@ -26,14 +26,14 @@ import os
 import itertools
 import re
 
-for x in ('Param_Fourier_Space_Dialog', 'Prior_Dialog', 'Likelihood_Dialog', 'Slice3D_Dialog',
-         'AddBump_Dialog', 'DeleteBump_Dialog'):
-    globals()[x] = getattr(BIFS.pset_dialogs, x)
+#for x in ('Param_Fourier_Space_Dialog', 'Prior_Dialog', 'Likelihood_Dialog', 'Slice3D_Dialog',
+#         'AddBump_Dialog', 'DeleteBump_Dialog'):
+#    globals()[x] = getattr(BIFS.pset_dialogs, x)
 # following don't work with are current packages structure
 # previous code is intended as the equivalent
-#from BIFS.pset_dialogs import Param_Fourier_Space_Dialog,Prior_Dialog
-#from BIFS.pset_dialogs import Likelihood_Dialog,Slice3D_Dialog
-#from BIFS.pset_dialogs import AddBump_Dialog,DeleteBump_Dialog
+from BIFS.pset_dialogs import Param_Fourier_Space_Dialog,Prior_Dialog
+from BIFS.pset_dialogs import Likelihood_Dialog,Slice3D_Dialog
+from BIFS.pset_dialogs import AddBump_Dialog,DeleteBump_Dialog
 
 # gastly hack
 # but currently if this is run in debug mode it has a different working directory than

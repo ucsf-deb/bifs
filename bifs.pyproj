@@ -26,26 +26,13 @@
   <ItemGroup>
     <Folder Include="bifs\" />
     <Folder Include="BIFS\bases\" />
-    <Folder Include="BIFS\bases\__pycache__\" />
     <Folder Include="BIFS\bifs_util\" />
     <Folder Include="BIFS\priors\" />
     <Folder Include="examples\" />
     <Folder Include="tests\" />
-    <Folder Include="tests\images\" />
-    <Folder Include="tests\__pycache__\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bifs\.DS_Store" />
-    <Content Include="BIFS\bases\__pycache__\fourier.cpython-37.pyc" />
     <Content Include="bifs\bifs.pyproj" />
-    <Content Include="BIFS\ep1.npz" />
-    <Content Include="BIFS\ep2.npz" />
-    <Content Include="BIFS\PET2_nifti.out" />
-    <Content Include="tests\images\kinda_noisy_lena512.bmp" />
-    <Content Include="tests\images\lena512.bmp" />
-    <Content Include="tests\images\my1dfunc.txt" />
-    <Content Include="tests\images\test3Dnoisy_sphere.tiff" />
-    <Content Include="tests\__pycache__\test_reset.cpython-37-pytest-5.0.1.pyc" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BIFS\bases\fourier.py" />

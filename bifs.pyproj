@@ -5,12 +5,14 @@
     <ProjectGuid>b580896b-29ca-4a24-82be-0c6bf6ae80a8</ProjectGuid>
     <ProjectHome>.</ProjectHome>
     <StartupFile>bifs\src\bifs_gui.py</StartupFile>
-    <SearchPath>..\bifs</SearchPath>
+    <SearchPath>
+    </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>bifs</Name>
     <RootNamespace>bifs</RootNamespace>
     <SuppressEnvironmentCreationPrompt>True</SuppressEnvironmentCreationPrompt>
+    <TestFramework>Pytest</TestFramework>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>

@@ -186,6 +186,7 @@ class bifs:
         self.basis_choices = ["Fourier"]
         self.basis = basis
         self.bas = None
+        self.bumps = {}
         # Expand the following to if/else when more basis choices added
         # For now set default parameters here; make them editable via
         # pop widget
@@ -675,10 +676,12 @@ class bifs:
     def BIFS_MAP(self):
         """
 
-        performs MAP otpimization individually at each k-space 
-        point using multiprocessing package and the above specific 
-        MAP estimation functions, recombines the results, performs
-        inverse transform and returns final image 
+        performs MAP optimization individually at each k-space 
+        point using the MAP estimation functions above,
+        recombines the results, performs inverse transform and returns final image.
+
+        This seemed like a good place to use the multiprocessing package, but initial
+        testing found that to be slower, and so we removed the code.
 
         Inputs:
 

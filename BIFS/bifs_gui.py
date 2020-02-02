@@ -39,7 +39,7 @@ from BIFS.pset_dialogs import AddBump_Dialog,DeleteBump_Dialog
 # but currently if this is run in debug mode it has a different working directory than
 # if run from command line.  To avoid problems, hard code whole path.
 # Empirical Prior file
-EPFILE = r"ep1.npz"
+EPFILE = r"C:\Users\rdboylan\Documents\Kornak\ep1.npz"
 
 class MainWindow(QtWidgets.QMainWindow):
     """
@@ -124,7 +124,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.nImages = 0
         benchmarkHdr = None
         mismatch = set()  # holds keys that had a mismatch
-        reFile = re.compile(r"^mniwSUVR_.*\.nii(\.gz)$", re.I)
+        reFile = re.compile(r"^mniwSUVR_.*\.nii(\.gz)?$", re.I)
 
         for root, dirs, files in os.walk(rootDir):
             # avoid our target case for whom we are trying to predict
@@ -140,16 +140,15 @@ class MainWindow(QtWidgets.QMainWindow):
             if files:
                 for f in files:
                     #if not f.endswith(".nii"):
-                    if reFile.match(f):
+                    if not reFile.match(f):
                         continue
                     if f.find("10933")>=0:
                         print("Skipping {}".format(f))
-                        nKill += 1
                         continue
                     self.nImages += 1
                     b = self.mybifs.copy_params()
                     b.load_image_file(os.path.join(root, f))
-                    self._statsAccumulate(b.mod_image)
+                    self._statsAccumulate(b.mod_image())
                     hdr = b.read_imfile.header
                     del b
                     if not benchmarkHdr:
@@ -248,7 +247,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         try:
             self.mybifs.load_image_file(self.fileName)
-            self.mybifs.image_file_loaded = True
             self.show_initial_image()
             return
         except:
@@ -263,7 +261,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         """
         # Do MAP estimation
-        if np.isscalar(self.mybifs.init_image):
+        if np.isscalar(self.mybifs.init_image()):
             QtWidgets.QMessageBox.information(self,"MAP Estimator", "Can't perform MAP without an image - load image using Load Initial Image... option from BIFS menu")
             return
         else:
@@ -278,9 +276,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.mybifs = self.mybifs.copy_params()
             self.mybifs.load_image_file(self.fileName)
             self.mybifs.image_file_loaded = True
-            self.mybifs.BIFS_MAP()
-            self.didMAP = True
+            #self.mybifs.BIFS_MAP() should now happen implicitly
             self.show_post_proc_images()
+            self.didMAP = True
             #except:
             #    QtWidgets.QMessageBox.information(self,"MAP Estimator", "MAP estimate failed") 
             return
@@ -297,25 +295,25 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.canvas.draw()
                 self.ax1.set_title("Initial Image")
                 if self.mybifs.imdim == 1:
-                    self.ax1.plot(self.mybifs.init_image) 
+                    self.ax1.plot(self.mybifs.init_image()) 
                 elif self.mybifs.imdim == 2:
-                    self.ax1.imshow(self.mybifs.init_image,cmap = cm.Greys_r,norm=NoNorm())
+                    self.ax1.imshow(self.mybifs.init_image(),cmap = cm.Greys_r,norm=NoNorm())
                 else: # assume for now that the only other possibility is 3D
                       # can change later
-                    slice_index = np.int(np.round(self.mybifs.view3Dslice[1]*self.mybifs.init_image.shape[self.mybifs.view3Dslice[0]]))
+                    slice_index = np.int(np.round(self.mybifs.view3Dslice[1]*self.mybifs.init_image().shape[self.mybifs.view3Dslice[0]]))
                     if self.mybifs.view3Dslice[0] == 0:
-                        init_im_slice = self.mybifs.init_image[slice_index,:,:]
+                        init_im_slice = self.mybifs.init_image()[slice_index,:,:]
                     elif self.mybifs.view3Dslice[0] == 1:
-                        init_im_slice = self.mybifs.init_image[:,slice_index,:]
+                        init_im_slice = self.mybifs.init_image()[:,slice_index,:]
                     elif self.mybifs.view3Dslice[0] == 2:
-                        init_im_slice = self.mybifs.init_image[:,:,slice_index]
+                        init_im_slice = self.mybifs.init_image()[:,:,slice_index]
                     else:
                         print("Sorry slice index needs to be one of 0,1,2")
                     self.ax1.imshow(init_im_slice, cmap = cm.Greys_r)
                 self.canvas.draw()
             return
         except:
-            QtWidgets.QMessageBox.information(self, "Image Viewer","No image loaded %s.")
+            QtWidgets.QMessageBox.information(self, "Image Viewer","No image loaded.")
             return
         
     def show_post_proc_images(self):
@@ -334,18 +332,18 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.canvas.draw()
                 self.ax2.set_title("Reconstructed Image")
                 if self.mybifs.imdim == 1:
-                    self.ax2.plot(self.mybifs.final_image) 
+                    self.ax2.plot(self.mybifs.final_image()) 
                 elif self.mybifs.imdim == 2:
-                    self.ax2.imshow(self.mybifs.final_image,cmap = cm.Greys_r)
+                    self.ax2.imshow(self.mybifs.final_image(),cmap = cm.Greys_r)
                 else: # assume for now that the only other possibility is 3D
                       # can change later
-                    slice_index = np.int(np.round(self.mybifs.view3Dslice[1]*self.mybifs.final_image.shape[self.mybifs.view3Dslice[0]]))
+                    slice_index = np.int(np.round(self.mybifs.view3Dslice[1]*self.mybifs.final_image().shape[self.mybifs.view3Dslice[0]]))
                     if self.mybifs.view3Dslice[0] == 0:
-                        final_im_slice = self.mybifs.final_image[slice_index,:,:]
+                        final_im_slice = self.mybifs.final_image()[slice_index,:,:]
                     elif self.mybifs.view3Dslice[0] == 1:
-                        final_im_slice = self.mybifs.final_image[:,slice_index,:]
+                        final_im_slice = self.mybifs.final_image()[:,slice_index,:]
                     elif self.mybifs.view3Dslice[0] == 2:
-                        final_im_slice = self.mybifs.final_image[:,:,slice_index]
+                        final_im_slice = self.mybifs.final_image()[:,:,slice_index]
                     else:
                         print("Sorry slice index needs to be one of 0,1,2")
                     self.ax2.imshow(final_im_slice, cmap = cm.Greys_r)
@@ -355,20 +353,20 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.canvas.draw()
                 self.ax3.set_title("Initial K-Space Modulus Image")
                 if self.mybifs.imdim == 1:
-                    showim1k = np.roll(np.roll(self.mybifs.mod_image,self.mybifs.mod_image.shape[0]//2,0),1)
+                    showim1k = np.roll(np.roll(self.mybifs.mod_image(),self.mybifs.mod_image().shape[0]//2,0),1)
                     self.ax3.plot(np.log(showim1k)) 
                 elif self.mybifs.imdim == 2:
-                    showim1k = np.roll(np.roll(self.mybifs.mod_image,self.mybifs.mod_image.shape[0]//2,0),self.mybifs.mod_image.shape[1]//2,1)
+                    showim1k = np.roll(np.roll(self.mybifs.mod_image(),self.mybifs.mod_image().shape[0]//2,0),self.mybifs.mod_image().shape[1]//2,1)
                     self.ax3.imshow(np.log(showim1k),cmap = cm.Greys_r)
                 else: # assume for now that the only other possibility is 3D
                       # can change later
-                    slice_index = np.int(np.round(self.mybifs.view3Dslice[1]*self.mybifs.mod_image.shape[self.mybifs.view3Dslice[0]]))
+                    slice_index = np.int(np.round(self.mybifs.view3Dslice[1]*self.mybifs.mod_image().shape()[self.mybifs.view3Dslice[0]]))
                     if self.mybifs.view3Dslice[0] == 0:
-                        init_mod_im_slice = self.mybifs.mod_image[slice_index,:,:]
+                        init_mod_im_slice = self.mybifs.mod_image()[slice_index,:,:]
                     elif self.mybifs.view3Dslice[0] == 1:
-                        init_mod_im_slice = self.mybifs.mod_image[:,slice_index,:]
+                        init_mod_im_slice = self.mybifs.mod_image()[:,slice_index,:]
                     elif self.mybifs.view3Dslice[0] == 2:
-                        init_mod_im_slice = self.mybifs.mod_image[:,:,slice_index]
+                        init_mod_im_slice = self.mybifs.mod_image()[:,:,slice_index]
                     else:
                         print("Sorry slice index needs to be one of 0,1,2")
 
@@ -380,20 +378,20 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.canvas.draw()
                 self.ax4.set_title("BIFS K-Space Image")
                 if self.mybifs.imdim == 1:
-                    showim2k = np.roll(np.roll(self.mybifs.bifsk_image,self.mybifs.bifsk_image.shape[0]//2,0),1)
+                    showim2k = np.roll(np.roll(self.mybifs.bifsk_image(),self.mybifs.bifsk_image().shape[0]//2,0),1)
                     self.ax4.plot(np.log(showim2k)) 
                 elif self.mybifs.imdim == 2:
-                    showim2k = np.roll(np.roll(self.mybifs.bifsk_image,self.mybifs.bifsk_image.shape[0]//2,0),self.mybifs.bifsk_image.shape[1]//2,1)
+                    showim2k = np.roll(np.roll(self.mybifs.bifsk_image(),self.mybifs.bifsk_image().shape[0]//2,0),self.mybifs.bifsk_image().shape[1]//2,1)
                     self.ax4.imshow(np.log(showim2k),cmap = cm.Greys_r)
                 else: # assume for now that the only other possibility is 3D
                       # can change later
-                    slice_index = np.int(np.round(self.mybifs.view3Dslice[1]*self.mybifs.bifsk_image.shape[self.mybifs.view3Dslice[0]]))
+                    slice_index = np.int(np.round(self.mybifs.view3Dslice[1]*self.mybifs.bifsk_image().shape[self.mybifs.view3Dslice[0]]))
                     if self.mybifs.view3Dslice[0] == 0:
-                        bifs_mod_im_slice = self.mybifs.bifsk_image[slice_index,:,:]
+                        bifs_mod_im_slice = self.mybifs.bifsk_image()[slice_index,:,:]
                     elif self.mybifs.view3Dslice[0] == 1:
-                        bifs_mod_im_slice = self.mybifs.bifsk_image[:,slice_index,:]
+                        bifs_mod_im_slice = self.mybifs.bifsk_image()[:,slice_index,:]
                     elif self.mybifs.view3Dslice[0] == 2:
-                        bifs_mod_im_slice = self.mybifs.bifsk_image[:,:,slice_index]
+                        bifs_mod_im_slice = self.mybifs.bifsk_image()[:,:,slice_index]
                     else:
                         print("Sorry slice index needs to be one of 0,1,2")
 
@@ -401,7 +399,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.ax4.imshow(np.log(showim2k), cmap = cm.Greys_r)
                 self.canvas.draw()
         except:
-            QtWidgets.QMessageBox.information(self, "Image Viewer","No image loaded %s.")
+            QtWidgets.QMessageBox.information(self, "Image Viewer","No image loaded.")
             return
         return
     
@@ -412,7 +410,7 @@ class MainWindow(QtWidgets.QMainWindow):
         to save the results of analysis.  
 
         """
-        if np.isscalar(self.mybifs.final_image):
+        if np.isscalar(self.mybifs.final_image()):
             QtWidgets.QMessageBox.information(self,"Save Current Results","No Results to Output Yet; Probably need to run - Get MAP Estimate Image - first")
         else:
             print("Saving Current Results")
@@ -577,7 +575,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.mybifs.likelihood_scale = dialog.getScale()
 
     def setAddBump(self):
-        if np.isscalar(self.mybifs.init_image):
+        if np.isscalar(self.mybifs.init_image()):
             QtWidgets.QMessageBox.information(self,"Add Bump", "Can't add bump without k-space structure, need to first load image using Load Initial Image... option from BIFS menu")
             return
         else:

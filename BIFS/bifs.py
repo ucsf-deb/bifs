@@ -241,40 +241,36 @@ class bifs:
           saves time stamped files containing images and bifs parameters
 
         """
-        if np.isscalar(self.final_image):
-            print("Error: There is no final image to output: probably need to run BIFS_MAP()")
-            return
+        # Date stamp for parameter output file
+        date_stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        # Output file names
+        if self.image_file_loaded:
+            # Assume here that input file is in standard 2 section,
+            # period seperated form with file suffix as image type
+            # First strip off any possible preceeding directory names
+            in_file_name = self.initial_image_file_name
+            in_file = in_file_name.split('/')[-1]
+            file_prefix = in_file.split('.')[0]
+            image_type = in_file.split('.')[1]
         else:
-            # Date stamp for parameter output file
-            date_stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-            # Output file names
-            if self.image_file_loaded:
-                # Assume here that input file is in standard 2 section,
-                # period seperated form with file suffix as image type
-                # First strip off any possible preceeding directory names
-                in_file_name = self.initial_image_file_name
-                in_file = in_file_name.split('/')[-1]
-                file_prefix = in_file.split('.')[0]
-                image_type = in_file.split('.')[1]
-            else:
-                # file_prefix = 'bifs_np_array_input'
-                in_file_name = "Numpy Array"
-                image_type = 'bmp'
+            # file_prefix = 'bifs_np_array_input'
+            in_file_name = "Numpy Array"
+            image_type = 'bmp'
             
-            # Parameter file:
-            out_p = 'bifs_params_'+date_stamp+'.bifspout'
-            out_im = 'bifs_output_image_'+date_stamp+'.'+image_type
-            out_k = 'bifs_output_kspace_'+date_stamp+'.'+image_type
-            # Center final K-space image
-            out_k_im = np.roll(np.roll(self.bifsk_image,self.bifsk_image.shape[0]//2+1,0),self.bifsk_image.shape[1]//2,1)
-            # Output images
-            plt.imsave(out_im,self.final_image,cmap = cm.Greys_r)
-            plt.imsave(out_k,np.log(out_k_im),cmap = cm.Greys_r)
-            # Output paramter file
-            param_file = open(out_p, "w")
-            param_file.write(jsp.encode(self))
-            param_file.close()
-            return
+        # Parameter file:
+        out_p = 'bifs_params_'+date_stamp+'.bifspout'
+        out_im = 'bifs_output_image_'+date_stamp+'.'+image_type
+        out_k = 'bifs_output_kspace_'+date_stamp+'.'+image_type
+        # Center final K-space image
+        out_k_im = np.roll(np.roll(self.bifsk_image(),self.bifsk_image().shape[0]//2+1,0),self.bifsk_image().shape[1]//2,1)
+        # Output images
+        plt.imsave(out_im,self.final_image(),cmap = cm.Greys_r)
+        plt.imsave(out_k,np.log(out_k_im),cmap = cm.Greys_r)
+        # Output paramter file
+        param_file = open(out_p, "w")
+        param_file.write(jsp.encode(self))
+        param_file.close()
+        return
 
     def copy_params(self):
         """
@@ -341,7 +337,6 @@ class bifs:
                         # we have a 2D, or maybe 1D, image
                         self.read_imfile = imageio.imread(self.initial_image_file_name)
                         read_image = np.asarray(self.read_imfile)
-            self.image_file_loaded = True
             self.load_image(read_image, invalidate=False)
         except:
             print("BIFS Couldn't read image file: ",fileName)
@@ -369,6 +364,7 @@ class bifs:
         self._init_image = init_image
         self._init_image[np.isnan(init_image)] = 0.0
         self.imdim = len(init_image.shape)
+        self.image_file_loaded = True
         return
 
     def init_image(self):

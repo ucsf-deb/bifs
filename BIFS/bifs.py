@@ -476,7 +476,7 @@ class bifs:
         """ Set up prior object
         pft is the name of a type of prior function
         """
-        if np.isscalar(self._init_image):
+        if not self.image_file_loaded:
             self.param_func_type = pft
             self._prior = None
             # Nothing more can be done until image is loaded
@@ -555,7 +555,7 @@ class bifs:
            sets up k-space parameter function
 
         """
-        if np.isscalar(self._init_image):
+        if not self.image_file_loaded:
             print("Error: The Transform Space parameter function can only be set after loading an initial image")
             return
         # test ##########
@@ -741,7 +741,7 @@ class bifs:
         # to multiprocessing - this is stupid and unecessarily
         # time consuming but I still need to figure out how to send
         # chunks of multivariate arrays to a multiprocessing pool
-        if np.isscalar(self._init_image):
+        if not self.image_file_loaded:
             print ("Error: Need to load an image before running MAP")
             return
         self._final_setup()

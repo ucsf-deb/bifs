@@ -261,7 +261,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         """
         # Do MAP estimation
-        if np.isscalar(self.mybifs.init_image()):
+        if not self.mybifs.image_file_loaded:
             QtWidgets.QMessageBox.information(self,"MAP Estimator", "Can't perform MAP without an image - load image using Load Initial Image... option from BIFS menu")
             return
         else:
@@ -410,7 +410,8 @@ class MainWindow(QtWidgets.QMainWindow):
         to save the results of analysis.  
 
         """
-        if np.isscalar(self.mybifs.final_image()):
+        if not self.mybifs.final_image():
+            # probably the test will throw an error rather than return
             QtWidgets.QMessageBox.information(self,"Save Current Results","No Results to Output Yet; Probably need to run - Get MAP Estimate Image - first")
         else:
             print("Saving Current Results")
@@ -575,7 +576,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.mybifs.likelihood_scale = dialog.getScale()
 
     def setAddBump(self):
-        if np.isscalar(self.mybifs.init_image()):
+        if not self.mybifs.image_file_loaded:
             QtWidgets.QMessageBox.information(self,"Add Bump", "Can't add bump without k-space structure, need to first load image using Load Initial Image... option from BIFS menu")
             return
         else:

@@ -265,22 +265,21 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.information(self,"MAP Estimator", "Can't perform MAP without an image - load image using Load Initial Image... option from BIFS menu")
             return
         else:
-            #try:
-            print("Performing k-space MAP estimation")
-            # Reinitialize bifs object but keep current parameter setttings
-            # RB: I refactored the parameter copying to the bifs object itself.
-            # However, this means I set the parameters and then load the image file.
-            # The original code loaded the image file and then set the parameters.
-            # Since I don't understand why the reinitialization was necessary at all,
-            # it's possible this change in sequence will break something.
-            self.mybifs = self.mybifs.copy_params()
-            self.mybifs.load_image_file(self.fileName)
-            self.mybifs.image_file_loaded = True
-            #self.mybifs.BIFS_MAP() should now happen implicitly
-            self.show_post_proc_images()
-            self.didMAP = True
-            #except:
-            #    QtWidgets.QMessageBox.information(self,"MAP Estimator", "MAP estimate failed") 
+            try:
+                print("Performing k-space MAP estimation")
+                # RB: original version of code created a new bifs instance.
+                # I changed that to making one with copy_params.
+                # Then I had it reload the image.  But under the current scheme that
+                # will eliminate all customizations, which copy_params mostly does anyway.
+                # Hopefully the original invalidity with mutliple image loads will no longer 
+                # be possible in the new scheme.  Although loading a new image will destroy 
+                # all customization in the new scheme.
+
+                #self.mybifs.BIFS_MAP() should now happen implicitly
+                self.show_post_proc_images()
+                self.didMAP = True
+            except:
+                QtWidgets.QMessageBox.information(self,"MAP Estimator", "MAP estimate failed") 
             return
             
     def show_initial_image(self):

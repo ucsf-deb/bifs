@@ -81,8 +81,8 @@ Empirical Priors
 One can scan a set of images and use them to form a prior in Fourier space for
 later analysis.  To do so, select "BIFS Operations" and then "Empirical Prior". 
 Then select the top directory that holds all your images.  The code scans all subdirectories
-and reads all files named suvr_pons.nii.  It complains if they don't all have the same
-dimensions.
+and reads all files matching a regular expression, optionally skipping some of them.
+It complains if the images don't all have the same dimensions.
 
 You will probably want to do something different; you can edit the code in bifs_gui.py for
 _scanImages.
@@ -102,20 +102,14 @@ The package is separated into a class representing the calculation
 engine and a main GUI class. The files contained in the package
 are:
 
-bifs.py           - the main class containing the BIFS functions
+BIFS/			- python package directory
+	bifs.py           - the main class containing the BIFS functions
 
-bifs_gui.py       - the gui interface to bifs.py
+	bifs_gui.py       - the gui interface to bifs.py
 
-bifs_cl_1D.py     - an example script showing how to perform
-                    a BIFS analysis for 1D function in a
-		    python or ipython shell (can also just be
-		    run as a script)
+	pset_dialogs.py   - set up functions for the BIFS Gui dialog boxes
 
-bifs_cl_2D.py     - similar to bifs_cl_1D.py but for a 2D image
-
-bifs_cl_3D.py     - similar to bifs_cl_1D.py but for a 3D data set
-
-pset_dialogs.py   - set up functions for the BIFS Gui dialog boxes
+	bifs.pyproj, bifs.sln  - MS Visual Studio 2019 project files
 
 bifs_util/util.py - some utility functions (used in the above scripts)
 
@@ -129,134 +123,72 @@ bases/fourier.py  - in principle a BIFS style analysis could be
 		    functions currently implemented are those for
 		    Fourier bases. fourier.py contains the Fourier
 		    specific functions.
+
+examples/		- sample code that uses BIFS package
+	bifs_cl_1D.py     - an example script showing how to perform
+						a BIFS analysis for 1D function in a
+				python or ipython shell (can also just be
+				run as a script)
+
+	bifs_cl_2D.py     - similar to bifs_cl_1D.py but for a 2D image
+
+	bifs_cl_3D.py     - similar to bifs_cl_1D.py but for a 3D data set
+
+priors/	- definitions of different types of prior distributions
+	FunctionalPrior.py  - priors based on smooth functions
+
+tests/  -  test scripts.  For the pytests framework.
 		   
 Package Details
 ---------------
 
-Much of the following information can be obtained at the Python
-command line by importing the bifs package and typing help(bifs),
-i.e. by issuing the following commands at the Python command line:
+At the Python command line:
 
 >>> import bifs
 >>> help(bifs)
 
-A number of class variables are available in the biffs class; many are
-set to defaults by the class constructor and many are calculated and
-set automatically when an initial image is loaded. To see how to set various
-variables and perform an analysis using them, view the example scripts
-provided with the package (and mentioned above).
+Or see the class documentation in BIFS/bifs.py.
 
-Class variables available to constructor:
 
-    init_image - initial loaded image
-    k_image - initial k-space image
-    mod_image - initial modulus image in k-space
-    phase_image - initial phase image in k-space
-    bifsk_image - final BIFS modulus image in k-space
-    final_image - final reconstructed image in image space
+To Do
+-----
 
-    NOTE: All these images are currently stored in the BIFS object
-    re. testing and experimentation - in future more
-    parsimonious options may be provided re. production runs.
+These are for the package developers.
 
-    image_file_loaded - whether an image is loaded (True,False)
-    initial_image_file_name - file name of initial image
-    imdim - int image dimension (1,2 or 3)
-    imdim1 - int specifying size of 1st dimension of image
-    imdim2 - int specifying size of 2nd dimension of image
-    imdim3 - int specifying size of possible 3rd dimension of "image"
-    kdist = distance function on the shifted k-space lattice
+  1. Settle overall package structure.
+      - presence and location of src directory
+	  - location of other directories
+	  - invocation of test machinery
+	  - merge various branches of development
+	  - capitalization of project name and class names, i.e., class names should start 
+	    upper case.
+  #. Ensure existing tests work with current code.
+  #. Ensure existing examples work with current code.
+  #. Consider which materials should be  distributed.
+     - things to consider eliminating
+	     * Visual Studio specific files and dirs
+		 * some of the example code, i.e., Ross's
+		 * git files
+		 * other work files?
+	 - decide how to eliminate them.  Could use a branch in git or a build script.
+	#. Handling of multiple image loads in same session
+		- could be via GUI or via program, as in  presentation.py
+		- define desired functionality, which I think is and was to retain as many settings as possible.
+		- current behavior simply blows away previous settings
+	#. Review and possibly remove bifs.copy_params
+	#. Create  some general way to generate and use empirical priors.
+		- do not release with hard-coded path to store empirical prior.
+	#. Incorporate empirical priors into priors/ directory.
+	#. Move much of the empirical prior logic out of bifs_gui.py.
+	#. bifs class should throw exceptions rather than print error messages
+	#. bifs_gui should catch and display the exceptions.
+	#. Continue delegation of model details to components of bifs.
+		- material currently stored in bifs should be obtained from
+		  objects it holds, e.g., allowed function types, specific parameters.
+		- GUI will need to become more dynamic in response.
+	#.  @Karl Verify that the changes relating to isxcbanded are semantically correct; they are at least syntactically correct now.
+	#. *If* more documentation outside the source code is desirable, e.g., this file used to have what was basically a copy
+		of the class comment for bifs, consider how to achieve that automatically.
+	#. Review: NaNs in input file are now silently converted to 0 by bifs.load_image.  Is that desirable?
+	   NaNs cause later processing to fail.
 
-    view3Dslice - for 3D data this is a 2D array [a,b] where:
-                  a = axis perpendicular to slice
-                  b = fraction of maximum along that direction 
-                      for slice location
-    
-    prior - string specifying the prior distribution function to use
-            current choices are:
-            'Gaussian'
-
-    prior_choices - list of current prior distribution
-                    function choices (see above)
-    prior_mean_init - prior mean before parameter space function
-                      is set up (used for tests)
-    prior_mean - the prior mean defined at each k-space point 
-                 by the k-space parameter function
-    prior_std - the prior std defined at each k-space point
-    prior_scale - the overall scale of the prior variance
-    prior_scale_orig - prior scale at the origin - generally set huge
-                       to allow the image data to determine overall scale
-
-    likelihood - string specifying likelihood distribution function to use
-                 current choices are:
-                 'Gaussian'
-                 'Rician'
-
-    likelihood_choices - list of current choices (see above)
-    likelihood_scale - the assumed (const) noise level in k-space
-
-    bessel_approx_lims - limits for bessel approximation for rice
-                         distribution - see paper referenced in code
-
-    bessel_approx_array - array for bessel approximation for rice
-                         distribution - see paper referenced in code
-    
-    rice_denom_cutoff - cutoff for the denominator of the closed form
-                        of the posterior with a Gaussian prior and
-                        Rician likelihood derived from bessel approximation
-                        see paper referenced in code
-
-    param_func_type - string specifying the k-space BIFS parameter
-                      function to use
-                      current choices are:
-                      "Inverse Power Decay"
-                      "Banded Inverse Power Decay"
-                      "Linear Decay"
-                      "Empirical"
-		      
-    param_func_choices - list of current choices (see above)
-    decay - float decay exponent for the inverse power parameter function
-    bvec - 2D float array specifying intercept and amplitude for parameter
-           space functions 
-    banded_cutoff - cutoff for banded, inverse power k-space parameter function
-
-    basis - string specifying the basis to use - currently only choice
-            is "Fourier"
-	    
-    basis_choices - list of current choices (see above)
-
-    bumps - dictionary containing set of "bump filters" to implement
-            note: these "bump filters" are elements that are added
-	    to the parameter function to increase (or decrease if the
-	    amplitude is specified as negative) the sensitivity of the
-	    analysis to frequency ranges known in advance to be important
-	    (or missing) in the analyzed images. E.g. if there is a
-	    predominance of features of a give size, adding filters at
-	    wavelengths corresponding to that size could enhance the
-	    sensitivity of the analysis. The scipy.signal package
-	    provides a number of filters meant to applied in
-	    the time (image) domain to characterize properties in the
-	    Fourier domain. Providing these shapes for application in
-	    the Fourier domain for BIFS was straightforward and might
-	    be interesting to experiment with re. effective image
-	    feature enhancement.
-	    
-	    
-    bump_types - set of choices for "bump" filter types to add to k-space
-                 parameter function; uses scipy.signal window types
-                 so consult that documentation for available types - 
-                 currently only types that only require window type name
-                 and size are used - current choices are: 
-                 "boxcar"
-                 "blackman"
-                 "hann"
-                 "bartlett"
-                 "flattop"
-                 "parzen"
-                 "bohman"
-                 "blackmanharris"
-                 "nuttall"
-                 "barthann"
-    bump_default_type - the default window type used (currently "blackman")
-
-    

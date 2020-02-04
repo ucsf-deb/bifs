@@ -166,6 +166,7 @@ These are for the package developers.
   #. Ensure existing examples work with current code.
      Done for the following:
 	     - presentation.py
+		 - presentation03.py
   #. Consider which materials should be  distributed.
      - things to consider eliminating
 	     * Visual Studio specific files and dirs

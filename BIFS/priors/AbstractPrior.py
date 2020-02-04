@@ -70,6 +70,15 @@ class AdjustmentPrior(AbstractPrior):
                     "barthann"
     bump_default_type - the default window type used (currently "blackman")
 
+    Subclasses must provide methods
+    _markDirty()
+    mean() which should call _adjustMean()
+    sd()
+
+    And should set the instance variable
+    _iorigin
+    early on.  It is index of appropriate type and dimension to origin.
+
     """
 
 
@@ -118,6 +127,7 @@ class AdjustmentPrior(AbstractPrior):
 
     def _markDirty(self):
         "invalidate all cached values"
+
 
     def setbvec(self, bs):
         self._bvec = bs

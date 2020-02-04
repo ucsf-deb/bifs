@@ -31,7 +31,11 @@
     <Folder Include="tests\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bifs\bifs.pyproj" />
+    <Content Include="LICENSE" />
+    <Content Include="MANIFEST.in" />
+    <Content Include="README.md" />
+    <Content Include="README.rst" />
+    <Content Include="ROSS.rst" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BIFS\bases\fourier.py" />
@@ -40,6 +44,9 @@
     <Compile Include="BIFS\bifs_util\util.py" />
     <Compile Include="BIFS\priors\AbstractPrior.py" />
     <Compile Include="BIFS\priors\FunctionalPrior.py" />
+    <Compile Include="bifs\priors\EmpiricalPrior.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="BIFS\pset_dialogs.py" />
     <Compile Include="bifs\test.py" />
     <Compile Include="bifs\__init__.py" />
@@ -50,6 +57,7 @@
     <Compile Include="examples\scan.py" />
     <Compile Include="examples\viewer.py" />
     <Compile Include="examples\viewer2.py" />
+    <Compile Include="setup.py" />
     <Compile Include="tests\test_reset.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />

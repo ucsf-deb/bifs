@@ -20,6 +20,8 @@ from multiprocessing import Pool, TimeoutError
 from datetime import datetime
 import jsonpickle as jsp
 from .priors import FunctionalPrior as FP
+from .priors import EmpiricalPrior as EP
+
 import copy
 
 class bifs:
@@ -511,12 +513,8 @@ class bifs:
             elif pft == "Linear Decay":
                 self._prior = FP.LinearDecayPrior(self.bas, self.kdist(), scale = self.prior_scale, scale_origin = self.prior_scale_orig)
             elif pft == "Empirical":
-                raise RuntimeError("Empirical Prior to be implemented")
-                # should already have loaded prior_mean and prior_std
-                self.prior_std *= self.prior_scale
-                # ugly: this is done elsewhere for all other types
-                # which is weird since we reset the sd for some of the other types just above
-                self.prior_std2 = self.prior_std*self.prior_std
+                # This should already have been handled via set_empirical()
+                assert self._prior.name() == "Empirical"
             else:
                 raise RuntimeError("Please specify recognized transform space parameter function, one of:"+
                                    ", ".join(self.param_func_choices))
@@ -540,108 +538,29 @@ class bifs:
             self.set_prior_func_type(self.param_func_type)
         return self._prior
 
-
-    def set_prior_from_param_func(self,pft):
-        """ THIS METHOD IS OBSOLETE.  See the _prior and AbstractPrior classes.
-        Keeping it partly for references when implementing EmpiricalPrior.
-
-        sets up k-space parameter function based on default or 
-        specified paramters
-
-        Inputs:
-           pft = paramter space function type
-
-        Outputs:
-           sets up k-space parameter function
-
-        """
-        if not self.image_file_loaded:
-            print("Error: The Transform Space parameter function can only be set after loading an initial image")
-            return
-        # test ##########
-        # The following doesn't work and I don't know why
-        # It seems that the prior function (in particulr the decay
-        # function) should be normalized by the zero k-space value
-        # of the image (i.e. the total "power") rather than an arbitrary
-        # value like 500
-        # self.bvec[1] = self.mod_image[0,0]
-        # print("Zero k-space value:",self.mod_image[0,0])
-        # self.bvec[1] = 50.0
-        # test ##########
-        if self.basis == "Fourier": # the usual re. elses for other tx spaces
-            # Try setting bvec[1] = self.mod_image[0]
-            # if self.imdim == 1:
-            #    self.bvec[1] = self.mod_image[0]
-            # elif self.imdim == 2:
-            #    self.bvec[1] = self.mod_image[0,0]
-            # elif self.imdim == 3:
-            #    self.bvec[1] = self.mod_image[0,0,0]
-            # else:
-            #    pass
-                
-            if pft == "Inverse Power Decay":
-                self.prior_mean = self.bas.ixsc(self.bvec,self.kdist(),self.decay)
-                self.prior_std = self.prior_scale*self.prior_mean # default for now
-                                                    # i.e. strong prior
-            elif pft == "Banded Inverse Power Decay":
-                self.prior_mean = self.bas.ixscbanded(self.bvec,self.kdist(),self.decay,self.banded_cutoff)
-                self.prior_std = self.prior_scale*self.prior_mean # default for now
-                                                    # i.e. strong prior
-            elif pft == "Linear Decay":
-                self.prior_mean = self.bas.linsc(self.bvec,self.kdist())
-                self.prior_std = self.prior_scale*self.prior_mean # default for now
-                                                    # i.e. strong prior
-            elif pft == "Empirical":
-                # should already have loaded prior_mean and prior_std
-                self.prior_std *= self.prior_scale
-                # ugly: this is done elsewhere for all other types
-                # which is weird since we reset the sd for some of the other types just above
-                self.prior_std2 = self.prior_std*self.prior_std
-            else:
-                print("Please specify recognized transform space parameter function, one of:")
-                for pf in self.param_func_choices:
-                    print(pf)
-                return
-        # Add bumps if there are any
-        if self.bumps:
-            # print("Adding some bumps ",self.bumps)
-            self.prior_mean += self.bas.add_bumps_to_pf(self.bvec,self.kdist(),self.bumps,np.int(np.max(self.kdist())))
-        # "Zero" center of transform space prior and
-        # set large std at origin
-        if self.imdim == 1:
-            self.prior_mean_init = self.prior_mean[0]
-            self.prior_mean[0] = 0.
-            # self.prior_mean[0] = 1.
-            self.prior_std[0] = self.prior_scale_orig
-        elif self.imdim == 2:
-            self.prior_mean_init = self.prior_mean[0,0]
-            self.prior_mean[0,0] = 0.
-            # self.prior_mean[0,0] = 1.
-            self.prior_std[0,0] = self.prior_scale_orig
-        elif self.imdim == 3:
-            self.prior_mean_init = self.prior_mean[0,0,0]
-            self.prior_mean[0,0,0] = 0.
-            # self.prior_mean[0,0,0] = 1.
-            self.prior_std[0,0,0] = self.prior_scale_orig
-        else:
-            pass
-        return
-
     def load_empirical(self, fname):
         """Load empirical prior from named file and set mode to Empirical
-        Also sets prior scale to 1, since the default value is very small.
+        """
+        x = np.load(fname)
+        return self.set_empirical(x)
+
+
+    def set_empirical(self, x):
+        """x is an object with the mean and sd of distn at each voxel
+        It is presumed to be empirically derived, though you could make one up
+        if you wanted to.
+
+        Sets prior scale to 1, since the default value is very small.
         You can and probably should make it larger via the Gaussian gui specification.
+
+        Note that because this requires self.bas and self.kdist the *image must be loaded first*.
         """
         self._invalidate_final()
-        x = np.load(fname)
-        self.prior_mean = x["mean"]
-        self.prior_std = x["sd"]
+        self._prior = EP.EmpiricalPrior(x, self.bas, self.kdist(), scale = 1.0, scale_origin = self.prior_scale_orig)
         self.param_func_type = "Empirical"
-        self.prior_scale = 1.0
-     
+
     def bifs_map_gauss_gauss(self, prior, mf, ds2):
         """
-
         returns MAP estimate for posterior function using 
         gaussian prior and likelihood and uses analytic 
         conjugate function

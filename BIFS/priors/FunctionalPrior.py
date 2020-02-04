@@ -76,6 +76,9 @@ class InversePowerDecayPrior(FunctionalPrior):
             self._decay = decay
             self._markDirty()
 
+    def decay(self):
+        return self._decay
+
     def _compute_mean(self):
         mean = self._basis.ixsc(self._bvec, self._kdist, self._decay)
         return self._adjustMean(mean)
@@ -96,6 +99,9 @@ class BandedInversePowerDecayPrior(InversePowerDecayPrior):
     def setbanded_cutoff(self, bc):
         self._banded_cutoff = bc
         self._markDirty()
+
+    def banded_cutoff(self):
+        return self._banded_cutoff
 
     def _compute_mean(self):
         mean = self._basis.ixscbanded(self._bvec, self._kdist, self._decay, self._banded_cutoff)

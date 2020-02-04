@@ -167,6 +167,7 @@ These are for the package developers.
      Done for the following:
 	     - presentation.py
 		 - presentation03.py
+		 - bifs_cl_1D.py
   #. Consider which materials should be  distributed.
      - things to consider eliminating
 	     * Visual Studio specific files and dirs

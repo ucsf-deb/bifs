@@ -151,6 +151,22 @@ class AdjustmentPrior(AbstractPrior):
                 self._bumps = {}
             self._markDirty()
 
+    def bvec(self):
+        return self._bvec
+
+    def scale(self):
+        return self._scale
+
+    def scale_origin(self):
+        return self._scale_origin
+
+    def bump_type(self):
+        return self._bump_type
+
+    def bumps(self):
+        "consider this read only access"
+        return self._bumps
+
     def add_bump(self,my_key,position,amplitude,width):
         """
 

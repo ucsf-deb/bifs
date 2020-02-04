@@ -71,12 +71,13 @@ def voxel_dist(bifs_obj,vox_coord,do_plots=False):
     # Normalization options:
     # 1. Match power in prior to power in image
     # 2. No normalization
-    # norm = (np.sum(mybifs.mod_image))/(np.sum(mybifs.prior_mean))
+    # norm = (np.sum(mybifs.mod_image()))/(np.sum(mybifs.prior_object(invalidate=False).mean()))
     norm = 1.0
         
-    prior_mn = norm*bifs_obj.prior_mean[tuple(vox_coord)]
-    prior_sc = norm*bifs_obj.prior_std[tuple(vox_coord)]
-    data_mn = bifs_obj.mod_image[tuple(vox_coord)]
+    myPrior = bifs_obj.prior_object(invalidate=False)
+    prior_mn = norm*myPrior.mean()[tuple(vox_coord)]
+    prior_sc = norm*myPrior.sd()[tuple(vox_coord)]
+    data_mn = bifs_obj.mod_image()[tuple(vox_coord)]
     data_sc = bifs_obj.likelihood_scale*data_mn
     
     # Shape parmeter for Rician
@@ -180,24 +181,25 @@ def plot_param_func(bifs_obj):
     Plots current paramter function
 
     """
-
+    prior = bifs_obj.prior_object(invalidate=False)
     if bifs_obj.imdim == 1 or bifs_obj.imdim == 3:
         plt.title("K Space Parameter Function") 
         plt.xlabel("kx")
-        KX = np.arange(bifs_obj.imdim1)
+        KX = np.arange(bifs_obj.init_image().shape[0])
         # For now have to do the following by hand
         # Should figure some way to automate
         # when new parameter functions are added
         if bifs_obj.param_func_type == "Inverse Power Decay":
-            Z = bifs_obj.bas.ixsc(bifs_obj.bvec,KX,bifs_obj.decay)
+            Z = bifs_obj.bas.ixsc(prior.bvec(), KX, prior.decay())
         elif bifs_obj.param_func_type == "Banded Inverse Power Decay":
-            Z = bifs_obj.bas.ixscbanded(bifs_obj.bvec,KX,bifs_obj.decay,bifs_obj.banded_cutoff)
+            Z = bifs_obj.bas.ixscbanded(prior.bvec(), KX, prior.decay(), prior.banded_cutoff())
         elif bifs_obj.param_func_type == "Linear Decay":
-            Z = bifs_obj.bas.linsc(bifs_obj.bvec,KX) 
+            Z = bifs_obj.bas.linsc(prior.bvec(), KX) 
         else:
             pass
         if bifs_obj.bumps:
-            Z += bifs_obj.bas.add_bumps(bifs_obj.bvec,bifs_obj.kdist,bifs_obj.bumps,np.max(bifs_obj.kdist))
+            kdist = bifs_obj.kdist()
+            Z += bifs_obj.bas.add_bumps(prior.bvec(), kdist, prior.bumps(), np.max(kdist))
         plt.plot(KX,Z)
     else: # Sort of silly since the parameter function is rotationally
           # symmetric (unless there's a trivial deviation due to kx != ky)
@@ -212,15 +214,16 @@ def plot_param_func(bifs_obj):
         KX, KY = np.meshgrid(KX, KY)
         Kdist = np.sqrt(KX**2 + KY**2)
         if bifs_obj.param_func_type == "Inverse Power Decay":
-            Z = bifs_obj.bas.ixsc(bifs_obj.bvec,Kdist,bifs_obj.decay)
+            Z = bifs_obj.bas.ixsc(prior.bvec(), Kdist, prior.decay())
         elif bifs_obj.param_func_type == "Banded Inverse Power Decay":
-            Z = bifs_obj.bas.ixscbanded(bifs_obj.bvec,Kdist,bifs_obj.decay,bifs_obj.banded_cutoff)
+            Z = bifs_obj.bas.ixscbanded(prior.bvec(), Kdist, prior.decay(), prior.banded_cutoff())
         elif bifs_obj.param_func_type == "Linear Decay":
-            Z = bifs_obj.bas.linsc(bifs_obj.bvec,Kdist) 
+            Z = bifs_obj.bas.linsc(prior.bvec(), Kdist) 
         else:
             do_nothing = None
-        if bifs_obj.bumps:
-            Z += bifs_obj.bas.add_bumps_to_pf(bifs_obj.bvec,bifs_obj.kdist,bifs_obj.bumps,np.max(bifs_obj.kdist))
+        if bifs_obj.bumps():
+            kdist = bifs_obj.kdist()
+            Z += bifs_obj.bas.add_bumps_to_pf(prior.bvec(), kdist, prior.bumps(), np.max(kdist))
         ZRoll = np.roll(np.roll(Z,(Z.shape[0]//2),0),(Z.shape[1]//2),1)
         surf = ax.plot_surface(KX, KY, ZRoll, cmap=cm.coolwarm,linewidth=0, antialiased=False)
 

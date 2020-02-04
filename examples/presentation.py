@@ -14,9 +14,7 @@ from matplotlib.colors import NoNorm
 from matplotlib import cm
 import matplotlib.pyplot as plt
 
-# hack the path to load bifs
-sys.path.insert(0, Path.cwd() / "bifs")
-import bifs
+import BIFS
 
 class OneImage:
     """data holder for a single image
@@ -46,9 +44,8 @@ subjects = {}  # keys are ids, values are dictionaries of type, OneImage
 
 def addFile(path : Path, type : str ):
     "populate the subjects dictionary. return the <OneImage>"
-    b = bifs.bifs()
+    b = BIFS.bifs()
     b.load_image_file(str(path))
-    b.image_file_loaded = True
     animage = OneImage(path, b, type)
     # I hope the {} is not shared...
     aSubject = subjects.setdefault(animage.id(), {})
@@ -87,13 +84,13 @@ def example01():
         for frac in [0.3, 0.5, 0.7]:
             # borrowed from bifs_gui.py show_initial_image
             for f, b in SUPER6:
-                slice_index = np.int(np.round(frac*b.init_image.shape[ix]))
+                slice_index = np.int(np.round(frac*b.init_image().shape[ix]))
                 if ix == 0:
-                    init_im_slice = b.init_image[slice_index,:,:]
+                    init_im_slice = b.init_image()[slice_index,:,:]
                 elif ix == 1:
-                    init_im_slice = b.init_image[:,slice_index,:]
+                    init_im_slice = b.init_image()[:,slice_index,:]
                 elif ix == 2:
-                    init_im_slice = b.init_image[:,:,slice_index]
+                    init_im_slice = b.init_image()[:,:,slice_index]
                 else:
                     print("Sorry slice index needs to be one of 0,1,2")
                 fig = Figure()
@@ -155,17 +152,17 @@ def example02():
     aMRI = aSubject["MRI"]
     aPET = aSubject["PET"]
 
-    init_image = slice(aMRI.bifs.init_image, ix = ix, frac = frac)
+    init_image = slice(aMRI.bifs.init_image(), ix = ix, frac = frac)
     plot_prep(init_image)
     #plt.title("Initial MRI image")
     plot_post(pp)
 
-    init_image = slice(aPET.bifs.init_image, ix = ix, frac = frac)
+    init_image = slice(aPET.bifs.init_image(), ix = ix, frac = frac)
     plot_prep(init_image)
     #plt.title("Initial PET image")
     plot_post(pp)
 
-    im_slice = slice(MNI.bifs.init_image, ix=ix, frac=frac)
+    im_slice = slice(MNI.bifs.init_image(), ix=ix, frac=frac)
     plot_prep(im_slice)
     #plt.title("MNI Reference Image")
     plot_post(pp)
@@ -177,8 +174,12 @@ def example02():
         scale = b.prior_object()._scale
         for sc in [scale/10, scale, scale*10]:
             aprior.setScale(sc)
-            b.BIFS_MAP()
-            im_slice = slice(b.final_image, ix=ix, frac=frac)
+
+            # ideally setScale would trigger this automatically
+            b._invalidate_final()
+
+            b.BIFS_MAP()  # unnecessary; call to final_image() triggers it anyway
+            im_slice = slice(b.final_image(), ix=ix, frac=frac)
             plot_prep(im_slice)
             myTitle = aMRI.filename()
             if len(myTitle)>40:

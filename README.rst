@@ -144,8 +144,8 @@ Package Details
 
 At the Python command line:
 
->>> import bifs
->>> help(bifs)
+>>> import BIFS
+>>> help(BIFS.bifs)
 
 Or see the class documentation in BIFS/bifs.py.
 

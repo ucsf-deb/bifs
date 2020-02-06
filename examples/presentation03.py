@@ -16,12 +16,17 @@ from matplotlib import cm
 import matplotlib.pyplot as plt
 
 import BIFS
+import BIFS.bifs_util.EmpiricalScanner as EmpScnr
 
 # Use the empirical prior to alter the raw MRI.  We'd like to get close to the true PET
 MRIFILE = r"C:\Users\rdboylan\Documents\Kornak\ExternalData\ycobigo\round3\ana_res-2019-02-21_SPM\CBF_PVC_GM\mniwCBF_PVC_GM_10933_2012-09-21.nii"
 PETFILE = r"C:\Users\rdboylan\Documents\Kornak\ExternalData\ycobigo\round3\ana_res-2019-02-21_SPM\T1\mniwSUVR_10933_2012-09-21.nii"
 # Empirical Prior file
 EPFILE = r"C:\Users\rdboylan\Documents\Kornak\ep1.npz"
+
+TOPPET = r"C:\Users\rdboylan\Documents\Kornak\ExternalData\ycobigo\round3\ana_res-2019-02-21_SPM\T1"
+PETMATCH = r"^mniwSUVR_.*\.nii(\.gz)?$"
+PETEXCLUDE = r"10933"
 
 def slice(image, ix=0, frac=0.5):
     "return rotated 2D slice of 3D image"
@@ -52,21 +57,65 @@ def plot_post(pp):
     # the text just the final plt.text persisted across figures without the next line
     plt.clf()
 
+def referenceVoxels():
+    """return  sorted array of voxels from images scanned"""
+    scanner = EmpScnr.EmpiricalScanner(sampleFraction=0.10, topDir=TOPPET, matchFile=PETMATCH, exclude=PETEXCLUDE)
+    r = scanner.vox
+    del scanner
+    return r
+
+def adjustImage(img):
+    """
+    Adjust the distribution of pixels in the input image.
+    Returns an input image of the same size with the intensity distribution adjusted 
+    to match that in some scanned files.  Roughly the n'th percentile of image brightness in img
+    will be assigned the n'th percentile of the reference images.
+    """
+    ref = referenceVoxels()
+    # argsort appears to break ties in a way that preserves the order it encounters elements
+    flat = img.reshape(-1)
+    ix = flat.argsort()
+    # The parentheses around ref.size/img.size are essential.
+    # Otherwise values wrap around
+    subi = np.array(np.round(np.arange(img.size)*(ref.size/img.size)), dtype='int')
+    refx = ref[subi]
+    # not having much luck doing adjustments in place
+    r = np.empty_like(flat)
+    r[ix] = refx
+    return r.reshape(img.shape)
+
+
 def example03():
     """ Illustrate Use of Empirical Prior"""
     b = BIFS.bifs()
     b.load_image_file(MRIFILE)
     b.load_empirical(EPFILE)
 
-    pp = PdfPages('example03a.pdf')
+    Path('example03b.pdf').unlink()
+    pp = PdfPages('example03b.pdf')
 
     #info on slice to display
     ix = 0
     frac = 0.5
 
     init_image = slice(b.init_image(), ix = ix, frac = frac)
+    # make sure aliasing doesn't overwrite this
+    original = init_image.copy()
+    print(type(b.init_image()), b.init_image().dtype)
+    print(b.init_image().max())
     plot_prep(init_image)
     plt.title("Initial MRI image")
+    plot_post(pp)
+
+    b._init_image = adjustImage(b._init_image)
+    init_image = slice(b.init_image(), ix = ix, frac = frac)
+    plot_prep(init_image)
+    plt.title("MRI image with PET distribution")
+    print("After adjustment")
+    x1 = b.init_image()
+    print(type(x1), x1.dtype)
+    x2 = np.ravel(x1)
+    print(x2.max())
     plot_post(pp)
 
     prior = b.prior_object()
@@ -77,8 +126,8 @@ def example03():
         plot_prep(img)
         plt.title("MRI after Empirical Prior, scale {}".format(scale))
         plot_post(pp)
-        plot_prep(img-init_image)
-        plt.title("Delta from initial image")
+        plot_prep(img - original)
+        plt.title("Delta from original MRI image")
         plot_post(pp)
 
     pet = BIFS.bifs()

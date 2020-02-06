@@ -149,7 +149,7 @@ class EmpiricalScanner(AbstractEmpiricalScanner):
                             print("Skipping {}".format(f))
                             continue
                     self._bifs.load_image_file(os.path.join(root, f))
-                    #self._statsAccumulate(self._bifs.mod_image())
+                    self._statsAccumulate(self._bifs.mod_image())
                     if self.sampleFraction>0:
                         self._voxAccumulate(self._bifs.init_image())
                     hdr = self._bifs.read_imfile.header
@@ -172,4 +172,4 @@ class EmpiricalScanner(AbstractEmpiricalScanner):
                             v2 = hdr[key]
                             if (v1 != v2).any():
                                 mismatch.add(key)
-        self._voxPost()
+        self._post()

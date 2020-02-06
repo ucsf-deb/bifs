@@ -182,6 +182,10 @@ These are for the package developers.
 	#. Review and possibly remove bifs.copy_params
 	#. Create  some general way to generate and use empirical priors.
 		- do not release with hard-coded path to store empirical prior.
+		- done with EmpiricalPrior helper.
+		- consider modifying it so that it will do voxel only accumulation
+		- note it doesn't write data to file; maybe add that.
+		- remove the present code in bifs_gui that does the same thing.
 	#. Move much of the empirical prior logic out of bifs_gui.py.
 	#. bifs class should throw exceptions rather than print error messages
 	#. bifs_gui should catch and display the exceptions.

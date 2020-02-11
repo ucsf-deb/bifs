@@ -15,12 +15,16 @@ from matplotlib.colors import NoNorm
 from matplotlib import cm
 import matplotlib.pyplot as plt
 
+import nibabel
+
 import BIFS
 import BIFS.bifs_util.EmpiricalScanner as EmpScnr
 
 # Use the empirical prior to alter the raw MRI.  We'd like to get close to the true PET
 MRIFILE = r"C:\Users\rdboylan\Documents\Kornak\ExternalData\ycobigo\round3\ana_res-2019-02-21_SPM\CBF_PVC_GM\mniwCBF_PVC_GM_10933_2012-09-21.nii"
 PETFILE = r"C:\Users\rdboylan\Documents\Kornak\ExternalData\ycobigo\round3\ana_res-2019-02-21_SPM\T1\mniwSUVR_10933_2012-09-21.nii"
+ATLASFILE = r"C:\Users\rdboylan\Documents\Kornak\ExternalData\RosenProject\Desikan.nii"
+
 # Empirical Prior file
 EPFILE = r"C:\Users\rdboylan\Documents\Kornak\ep1.npz"
 
@@ -70,6 +74,9 @@ def adjustImage(img):
     Returns an input image of the same size with the intensity distribution adjusted 
     to match that in some scanned files.  Roughly the n'th percentile of image brightness in img
     will be assigned the n'th percentile of the reference images.
+
+    Earlier work revealed interference patterns outside the active area.
+    This uses an atlas to blank the boundary.
     """
     ref = referenceVoxels()
     # argsort appears to break ties in a way that preserves the order it encounters elements
@@ -82,8 +89,11 @@ def adjustImage(img):
     # not having much luck doing adjustments in place
     r = np.empty_like(flat)
     r[ix] = refx
-    return r.reshape(img.shape)
-
+    r = r.reshape(img.shape)
+    # and blank the area outside the brain
+    mp = nibabel.load(ATLASFILE).get_fdata()
+    r[mp == 0] = 0.0
+    return r, mp
 
 def example03():
     """ Illustrate Use of Empirical Prior"""
@@ -107,10 +117,17 @@ def example03():
     plt.title("Initial MRI image")
     plot_post(pp)
 
-    b._init_image = adjustImage(b._init_image)
+    b._init_image, mp = adjustImage(b._init_image)
+    print(b._init_image.shape, mp.shape)
+    mp[mp>0] = 1
+    mp_slice = slice(mp, ix = ix, frac = frac)
+    plot_prep(mp_slice)
+    plt.title("ATLAS Boundary")
+    plot_post(pp)
+
     init_image = slice(b.init_image(), ix = ix, frac = frac)
     plot_prep(init_image)
-    plt.title("MRI image with PET distribution")
+    plt.title("MRI image with PET distribution and blanked margins")
     print("After adjustment")
     x1 = b.init_image()
     print(type(x1), x1.dtype)
@@ -140,6 +157,46 @@ def example03():
 
     pp.close()
 
+def flippy():
+    """
+    Try to figure out why atlas is not working.
+    Output example03-atlas.pdf
+    """
+    b = BIFS.bifs()
+    b.load_image_file(MRIFILE)
+
+    try:
+        Path('example03-atlas.pdf').unlink()
+    except:
+        pass
+    pp = PdfPages('example03-atlas.pdf')
+
+    #info on slice to display
+    ix = 0
+    frac = 0.5
+
+    im3 = b.init_image()
+    im3[im3>3.5] = 3.5
+    flip_one(im3, "MRI, limited range", pp)
+
+    mp = nibabel.load(ATLASFILE).get_fdata()
+    #mp[mp>0] = 1.0
+    flip_one(mp, "ATLAS", pp)
+    pp.close()
+
+def flip_one(d, title, pp):
+    """ Display various slices of an image
+    d  3D image data
+    title  title for plots
+    pp  PdfPages object to plot to
+    """
+    for ix in range(3):
+        for frac in (0.2, 0.5, 0.75):
+            s = slice(d, ix = ix, frac = frac)
+            plot_prep(s)
+            plt.title("{} ix={}, frac={}".format(title, ix, frac))
+            plot_post(pp)
+
 if __name__ == "__main__":
 
-    example03()
+    flippy()

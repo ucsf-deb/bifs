@@ -20,6 +20,9 @@ import nibabel
 import BIFS
 import BIFS.bifs_util.EmpiricalScanner as EmpScnr
 
+# results go here
+OUTPUTFILE = "example03c.pdf"
+
 # Use the empirical prior to alter the raw MRI.  We'd like to get close to the true PET
 MRIFILE = r"C:\Users\rdboylan\Documents\Kornak\ExternalData\ycobigo\round3\ana_res-2019-02-21_SPM\CBF_PVC_GM\mniwCBF_PVC_GM_10933_2012-09-21.nii"
 PETFILE = r"C:\Users\rdboylan\Documents\Kornak\ExternalData\ycobigo\round3\ana_res-2019-02-21_SPM\T1\mniwSUVR_10933_2012-09-21.nii"
@@ -101,11 +104,14 @@ def example03():
     b.load_image_file(MRIFILE)
     b.load_empirical(EPFILE)
 
-    Path('example03b.pdf').unlink()
-    pp = PdfPages('example03b.pdf')
+    try:
+        Path(OUTPUTFILE).unlink()
+    except:
+        pass
+    pp = PdfPages(OUTPUTFILE)
 
     #info on slice to display
-    ix = 0
+    ix = 2
     frac = 0.5
 
     init_image = slice(b.init_image(), ix = ix, frac = frac)
@@ -199,4 +205,4 @@ def flip_one(d, title, pp):
 
 if __name__ == "__main__":
 
-    flippy()
+    example03()

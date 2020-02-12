@@ -114,9 +114,8 @@ def example03():
     ix = 2
     frac = 0.5
 
+    original = b.init_image()  # 3d, so can use mask
     init_image = slice(b.init_image(), ix = ix, frac = frac)
-    # make sure aliasing doesn't overwrite this
-    #original = init_image.copy()
     print(type(b.init_image()), b.init_image().dtype)
     print(b.init_image().max())
     plot_prep(init_image)
@@ -128,7 +127,14 @@ def example03():
     mp[mp>0] = 1
     mp_slice = slice(mp, ix = ix, frac = frac)
     plot_prep(mp_slice)
-    plt.title("ATLAS Boundary")
+    plt.title("Atlas Boundary")
+    plot_post(pp)
+
+    original[mp==0.0] = 0.0
+    # original in not really original any more!
+    masked = slice(original, ix = ix, frac = frac)
+    plot_prep(masked)
+    plt.title("Masked MRI image")
     plot_post(pp)
 
     init_image = slice(b.init_image(), ix = ix, frac = frac)
@@ -161,6 +167,13 @@ def example03():
     init_image = slice(pet.init_image(), ix = ix, frac = frac)
     plot_prep(init_image)
     plt.title("Actual PET image")
+    plot_post(pp)
+
+    masked = pet.init_image().copy()
+    masked[mp == 0.0] = 0.0
+    img = slice(masked, ix=ix, frac=frac)
+    plot_prep(img)
+    plt.title("Masked PET image")
     plot_post(pp)
 
     pp.close()

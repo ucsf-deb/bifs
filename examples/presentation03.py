@@ -21,7 +21,7 @@ import BIFS
 import BIFS.bifs_util.EmpiricalScanner as EmpScnr
 
 # results go here
-OUTPUTFILE = "example03c.pdf"
+OUTPUTFILE = "example03d.pdf"
 
 # Use the empirical prior to alter the raw MRI.  We'd like to get close to the true PET
 MRIFILE = r"C:\Users\rdboylan\Documents\Kornak\ExternalData\ycobigo\round3\ana_res-2019-02-21_SPM\CBF_PVC_GM\mniwCBF_PVC_GM_10933_2012-09-21.nii"
@@ -116,7 +116,7 @@ def example03():
 
     init_image = slice(b.init_image(), ix = ix, frac = frac)
     # make sure aliasing doesn't overwrite this
-    original = init_image.copy()
+    #original = init_image.copy()
     print(type(b.init_image()), b.init_image().dtype)
     print(b.init_image().max())
     plot_prep(init_image)
@@ -132,7 +132,9 @@ def example03():
     plot_post(pp)
 
     init_image = slice(b.init_image(), ix = ix, frac = frac)
+
     plot_prep(init_image)
+    baseline = init_image.copy()
     plt.title("MRI image with PET distribution and blanked margins")
     print("After adjustment")
     x1 = b.init_image()
@@ -149,8 +151,8 @@ def example03():
         plot_prep(img)
         plt.title("MRI after Empirical Prior, scale {}".format(scale))
         plot_post(pp)
-        plot_prep(img - original)
-        plt.title("Delta from original MRI image")
+        plot_prep(img - baseline)
+        plt.title("Delta from rescaled, cropped MRI image")
         plot_post(pp)
 
     pet = BIFS.bifs()

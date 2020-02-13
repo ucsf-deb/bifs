@@ -21,7 +21,10 @@ import BIFS
 import BIFS.bifs_util.EmpiricalScanner as EmpScnr
 
 # results go here
-OUTPUTFILE = "example03d.pdf"
+OUTPUTFILE = "example03e.pdf"
+
+# whether to output titles
+HEADINGS=False
 
 # Use the empirical prior to alter the raw MRI.  We'd like to get close to the true PET
 MRIFILE = r"C:\Users\rdboylan\Documents\Kornak\ExternalData\ycobigo\round3\ana_res-2019-02-21_SPM\CBF_PVC_GM\mniwCBF_PVC_GM_10933_2012-09-21.nii"
@@ -119,7 +122,8 @@ def example03():
     print(type(b.init_image()), b.init_image().dtype)
     print(b.init_image().max())
     plot_prep(init_image)
-    plt.title("Initial MRI image")
+    if HEADINGS:
+        plt.title("Initial MRI image")
     plot_post(pp)
 
     b._init_image, mp = adjustImage(b._init_image)
@@ -127,21 +131,24 @@ def example03():
     mp[mp>0] = 1
     mp_slice = slice(mp, ix = ix, frac = frac)
     plot_prep(mp_slice)
-    plt.title("Atlas Boundary")
+    if HEADINGS:
+        plt.title("Atlas Boundary")
     plot_post(pp)
 
     original[mp==0.0] = 0.0
     # original in not really original any more!
     masked = slice(original, ix = ix, frac = frac)
     plot_prep(masked)
-    plt.title("Masked MRI image")
+    if HEADINGS:
+        plt.title("Masked MRI image")
     plot_post(pp)
 
     init_image = slice(b.init_image(), ix = ix, frac = frac)
 
     plot_prep(init_image)
     baseline = init_image.copy()
-    plt.title("MRI image with PET distribution and blanked margins")
+    if HEADINGS:
+        plt.title("MRI image with PET distribution and blanked margins")
     print("After adjustment")
     x1 = b.init_image()
     print(type(x1), x1.dtype)
@@ -150,15 +157,17 @@ def example03():
     plot_post(pp)
 
     prior = b.prior_object()
-    for scale in (0.4, 0.8, 1.0, 2.0, 4.0):
+    for scale in (.001, .01, .1, 0.4, 0.8, 1.0, 2.0, 4.0, 40.0, 100.0):
         prior.setScale(scale)
         b._invalidate_final()  # would be unnecessary in perfect world
         img = slice(b.final_image(), ix = ix, frac = frac)
         plot_prep(img)
-        plt.title("MRI after Empirical Prior, scale {}".format(scale))
+        if HEADINGS:
+            plt.title("MRI after Empirical Prior, scale {}".format(scale))
         plot_post(pp)
         plot_prep(img - baseline)
-        plt.title("Delta from rescaled, cropped MRI image")
+        if HEADINGS:
+            plt.title("Delta from rescaled, cropped MRI image")
         plot_post(pp)
 
     pet = BIFS.bifs()
@@ -166,14 +175,16 @@ def example03():
 
     init_image = slice(pet.init_image(), ix = ix, frac = frac)
     plot_prep(init_image)
-    plt.title("Actual PET image")
+    if HEADINGS:
+        plt.title("Actual PET image")
     plot_post(pp)
 
     masked = pet.init_image().copy()
     masked[mp == 0.0] = 0.0
     img = slice(masked, ix=ix, frac=frac)
     plot_prep(img)
-    plt.title("Masked PET image")
+    if HEADINGS:
+        plt.title("Masked PET image")
     plot_post(pp)
 
     pp.close()

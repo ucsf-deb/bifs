@@ -21,10 +21,10 @@ import BIFS
 import BIFS.bifs_util.EmpiricalScanner as EmpScnr
 
 # results go here
-OUTPUTFILE = "example03e.pdf"
+OUTPUTFILE = "example03e-title.pdf"
 
 # whether to output titles
-HEADINGS=False
+HEADINGS=True
 
 # Use the empirical prior to alter the raw MRI.  We'd like to get close to the true PET
 MRIFILE = r"C:\Users\rdboylan\Documents\Kornak\ExternalData\ycobigo\round3\ana_res-2019-02-21_SPM\CBF_PVC_GM\mniwCBF_PVC_GM_10933_2012-09-21.nii"

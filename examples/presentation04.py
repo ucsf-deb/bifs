@@ -1,5 +1,6 @@
-# Prepare slides for a presentation on empirical priors
-# output example03a.pdf
+# Post-conference output of selected data files
+# presentation04.py
+# OUTPUT example04.npz
 
 # Python 3.5+ required by pathlib
 # MUST be run from top level of project directory
@@ -21,10 +22,14 @@ import BIFS
 import BIFS.bifs_util.EmpiricalScanner as EmpScnr
 
 # results go here
-OUTPUTFILE = "example03e-title.pdf"
+OUTPUTFILE = "example04.npz"
+PERSIST = {}  # keys are <str> names, values are np arrays
 
 # whether to output titles
-HEADINGS=True
+HEADINGS=False
+
+# whether to produce pdf
+MAKEPDF=False
 
 # Use the empirical prior to alter the raw MRI.  We'd like to get close to the true PET
 MRIFILE = r"C:\Users\rdboylan\Documents\Kornak\ExternalData\ycobigo\round3\ana_res-2019-02-21_SPM\CBF_PVC_GM\mniwCBF_PVC_GM_10933_2012-09-21.nii"
@@ -55,6 +60,8 @@ def slice(image, ix=0, frac=0.5):
 
 def plot_prep(image):
     "standard plot preparation for a 2D image"
+    if not MAKEPDF:
+        return
     fig = Figure()
     plt.rcParams["axes.grid"] = False # turn off grid lines for images
     plt.rcParams["xtick.color"] = (1,1,1,0)
@@ -63,6 +70,8 @@ def plot_prep(image):
 
 def plot_post(pp):
     "standard processing after all plotting of this page done"
+    if not MAKEPDF:
+        return
     pp.savefig()
     # the text just the final plt.text persisted across figures without the next line
     plt.clf()
@@ -101,17 +110,21 @@ def adjustImage(img):
     r[mp == 0] = 0.0
     return r, mp
 
-def example03():
+def example04():
     """ Illustrate Use of Empirical Prior"""
     b = BIFS.bifs()
     b.load_image_file(MRIFILE)
     b.load_empirical(EPFILE)
 
-    try:
-        Path(OUTPUTFILE).unlink()
-    except:
-        pass
-    pp = PdfPages(OUTPUTFILE)
+    if MAKEPDF:
+        try:
+            Path(OUTPUTFILE).unlink()
+        except:
+            pass
+        pp = PdfPages(OUTPUTFILE)
+    else:
+        print("There will be no PDF output.  {} has data.".format(OUTPUTFILE))
+        pp = None
 
     #info on slice to display
     ix = 2
@@ -119,6 +132,9 @@ def example03():
 
     original = b.init_image()  # 3d, so can use mask
     init_image = slice(b.init_image(), ix = ix, frac = frac)
+    PERSIST["MRIORIGINAL"] = b.init_image().copy()
+    PERSIST["MRIK"] = b.k_image().copy()
+    PERSIST["MRIMOD"] = b.mod_image().copy()
     print(type(b.init_image()), b.init_image().dtype)
     print(b.init_image().max())
     plot_prep(init_image)
@@ -127,8 +143,10 @@ def example03():
     plot_post(pp)
 
     b._init_image, mp = adjustImage(b._init_image)
+    PERSIST["MRIADJUST"] = b._init_image.copy()
     print(b._init_image.shape, mp.shape)
     mp[mp>0] = 1
+    PERSIST["MASK"] = mp.copy()
     mp_slice = slice(mp, ix = ix, frac = frac)
     plot_prep(mp_slice)
     if HEADINGS:
@@ -147,6 +165,7 @@ def example03():
 
     plot_prep(init_image)
     baseline = init_image.copy()
+    PERSIST["MRIBASELINE"] = baseline
     if HEADINGS:
         plt.title("MRI image with PET distribution and blanked margins")
     print("After adjustment")
@@ -165,13 +184,19 @@ def example03():
         if HEADINGS:
             plt.title("MRI after Empirical Prior, scale {}".format(scale))
         plot_post(pp)
-        plot_prep(img - baseline)
+        delta = img-baseline
+        PERSIST["MRIEP{}".format(scale)] = delta.copy()
+        plot_prep(delta)
         if HEADINGS:
             plt.title("Delta from rescaled, cropped MRI image")
         plot_post(pp)
 
     pet = BIFS.bifs()
     pet.load_image_file(PETFILE)
+
+    PERSIST["PETORIGINAL"] = pet.init_image().copy()
+    PERSIST["PETK"] = pet.k_image()
+    PERSIST["PETMOD"] = pet.mod_image()
 
     init_image = slice(pet.init_image(), ix = ix, frac = frac)
     plot_prep(init_image)
@@ -187,7 +212,10 @@ def example03():
         plt.title("Masked PET image")
     plot_post(pp)
 
-    pp.close()
+    if MAKEPDF:
+        pp.close()
+
+    np.savez_compressed(OUTPUTFILE, **PERSIST)
 
 def flippy():
     """
@@ -231,4 +259,4 @@ def flip_one(d, title, pp):
 
 if __name__ == "__main__":
 
-    example03()
+    example04()

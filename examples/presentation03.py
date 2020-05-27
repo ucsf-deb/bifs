@@ -91,7 +91,11 @@ def example03():
     b.load_image_file(MRIFILE)
     b.load_empirical(EPFILE)
 
-    Path('example03b.pdf').unlink()
+    try:
+        Path('example03b.pdf').unlink()
+    except:
+        # for file not found
+        pass
     pp = PdfPages('example03b.pdf')
 
     #info on slice to display

@@ -33,13 +33,13 @@ mybifs.likelihood = "Gaussian" # Choices are currently: "Gaussian","Rician"
 # "Gaussian" is actually the default but again for illustration...
 
 # Parameter Space Function
-# mybifs.param_func_type = "Inverse Power Decay"
-mybifs.param_func_type = "Linear Decay"
+mybifs.param_func_type = "Inverse Power Decay"
+# mybifs.param_func_type = "Linear Decay"
 # Current choices are: "Inverse Power Decay","Banded Inverse Power Decay",
 # "Linear Decay" with default "Inverse Power Decay",
 # but again for illustration...
 
-# Can check comments in bifs.py for description of other parametere to set
+# Can check comments in bifs.py for description of other parameters to set
 
 # Load the image - note, typically just start here re. loading a noisy image
 mybifs.load_image(y)
@@ -51,7 +51,7 @@ else:
   print("Running BIFS_MAP() on image")
   mybifs.BIFS_MAP()
 
-# Take a look at the current paramter function
+# Take a look at the current parameter function
 bu.plot_param_func(mybifs)
 
 # Look at the prior, liklelihood, and posterior at a voxel

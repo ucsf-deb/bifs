@@ -2,29 +2,25 @@ BIFS Module Repository
 ========================
 
 This project is an implementation of Bayesian imaging in Fourier Space
-(BIFS). For details on the method see, e.g.:
+(BIFS). For details on the method see:
 
-J. Kornak, K. Young, N. Schuff, A. Du, A. A. Maudsley, M. W. Weiner.
-   K-Bayes Reconstruction for Perfusion MRI I: Concepts and Application. Journal of Digital Imaging. (2009) Feb 10
-J. Kornak, K. Young.
-   K-Bayes Reconstruction for Perfusion MRI II: Modeling Motivation
-   and Technical Development. Journal of Digital Imaging. (2009) Mar 10
-J. Kornak , K. Young, B.J. Soher, A.A. Maudsley.
-   Bayesian k -space-time reconstruction of MR spectroscopic imaging for enhanced resolution. IEEE Trans Med Imaging. 2010 Jul;29(7):1333-50.
+Kornak, J. - Bayesian image analysis in Fourier space (BIFS). In JSM Proceedings, Statistics in Imaging Section. Alexandria, VA: American Statistical Association. 1487-1492. 2014.
+
+Kornak, J., Boylan, R., Young, K., Wolf, A., Cobigo, Y. and Rosen, H. - Bayesian image analysis in Fourier Space using data-driven priors (DD-BIFS)
 
 The basic idea is to perform something like a Bayesian image
-restoration, that would ordinarily use an optimization technique
-like Markov Chain Monte Carlo, but to try to do so in a more
+restoration, that would ordinarily use an iterative optimization technique
+like conjugate gradients or Markov chain Monte Carlo, but to try to do so in a more
 efficient way by transforming to a space in which the degrees of
 freedom can, at least approximately, be treated independently.
-For a large class of images, transforming to a Fourier space
+For a large class of images and prior image characterizations, transforming to a Fourier space
 representation appears to accomplish this quite well.
 And to emphasize a point that sometimes arises as a point of
 confusion regarding this method, the goal is NOT to find a transform
 that results in a parsimonious representation of the image, but one
 that results in independence of the modes, so that the optimization
-step can be performed independently on the modes, greatly increasing
-efficiency.
+step can be performed independently across the modes, thereby greatly increasing
+efficiency by avoiding iterative optimization processes.
 
 
 Installation
@@ -36,7 +32,7 @@ In the meantime one can just get the package from GitHub (e.g. via
 clone) and manually install the dependencies, e.g. via the pip command
 (a good way to automatically install a number of the dependencies is to
 start with an environment designed for scientific processing in
-Python, e.g. Enthought's Canopy environment).
+Python, e.g. the Anaconda data science platform https://www.anaconda.com/).
 
 The currently required packages are (BIFS is known to work with
 the following versions but will typically work with many earlier
@@ -57,7 +53,7 @@ Using the Package
 Once the dependencies are installed and the BIFS package has
 been obtained from GitHub one can go to the directory containing
 the class definition file, bifs.py, and the BIFS GUI, bifs_gui.py
-(on typical install that will be ../bifs/src:) and run the GUI
+(on typical install that will be ./bifs/src:) and run the GUI
 via the command:
 
 python bifs_gui.py
@@ -75,11 +71,11 @@ To gain full access to the capabilities of BIFS one can: 1) run python,
 commands in one of the scripts (e.g. bifs_cl_2D.py) described below
 to suit one's particular project.
 
-Empirical Priors
-~~~~~~~~~~~~~~~~
+Data-Driven Priors
+~~~~~~~~~~~~~~~~~~
 
 One can scan a set of images and use them to form a prior in Fourier space for
-later analysis.  To do so, select "BIFS Operations" and then "Empirical Prior". 
+later application to new images.  To do so, select "BIFS Operations" and then "Data-Driven Prior".
 Then select the top directory that holds all your images.  The code scans all subdirectories
 and reads all files named suvr_pons.nii.  It complains if they don't all have the same
 dimensions.
@@ -129,7 +125,7 @@ bases/fourier.py  - in principle a BIFS style analysis could be
 		    functions currently implemented are those for
 		    Fourier bases. fourier.py contains the Fourier
 		    specific functions.
-		   
+
 Package Details
 ---------------
 
@@ -169,9 +165,9 @@ Class variables available to constructor:
 
     view3Dslice - for 3D data this is a 2D array [a,b] where:
                   a = axis perpendicular to slice
-                  b = fraction of maximum along that direction 
+                  b = fraction of maximum along that direction
                       for slice location
-    
+
     prior - string specifying the prior distribution function to use
             current choices are:
             'Gaussian'
@@ -180,7 +176,7 @@ Class variables available to constructor:
                     function choices (see above)
     prior_mean_init - prior mean before parameter space function
                       is set up (used for tests)
-    prior_mean - the prior mean defined at each k-space point 
+    prior_mean - the prior mean defined at each k-space point
                  by the k-space parameter function
     prior_std - the prior std defined at each k-space point
     prior_scale - the overall scale of the prior variance
@@ -200,7 +196,7 @@ Class variables available to constructor:
 
     bessel_approx_array - array for bessel approximation for rice
                          distribution - see paper referenced in code
-    
+
     rice_denom_cutoff - cutoff for the denominator of the closed form
                         of the posterior with a Gaussian prior and
                         Rician likelihood derived from bessel approximation
@@ -213,16 +209,16 @@ Class variables available to constructor:
                       "Banded Inverse Power Decay"
                       "Linear Decay"
                       "Empirical"
-		      
+
     param_func_choices - list of current choices (see above)
     decay - float decay exponent for the inverse power parameter function
     bvec - 2D float array specifying intercept and amplitude for parameter
-           space functions 
+           space functions
     banded_cutoff - cutoff for banded, inverse power k-space parameter function
 
     basis - string specifying the basis to use - currently only choice
             is "Fourier"
-	    
+
     basis_choices - list of current choices (see above)
 
     bumps - dictionary containing set of "bump filters" to implement
@@ -240,13 +236,13 @@ Class variables available to constructor:
 	    the Fourier domain for BIFS was straightforward and might
 	    be interesting to experiment with re. effective image
 	    feature enhancement.
-	    
-	    
+
+
     bump_types - set of choices for "bump" filter types to add to k-space
                  parameter function; uses scipy.signal window types
-                 so consult that documentation for available types - 
+                 so consult that documentation for available types -
                  currently only types that only require window type name
-                 and size are used - current choices are: 
+                 and size are used - current choices are:
                  "boxcar"
                  "blackman"
                  "hann"
@@ -258,5 +254,3 @@ Class variables available to constructor:
                  "nuttall"
                  "barthann"
     bump_default_type - the default window type used (currently "blackman")
-
-    

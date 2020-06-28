@@ -93,3 +93,6 @@ ENV/
 /ep1_compressed.npz
 /ep1.npz
 /bifs/src/ep1.npz
+
+# Apple file
+.DS_Store

@@ -1,0 +1,11 @@
+
+To do list for bifs Gui
+-----------------------
+
+BIFS K-Space Image -- rename as BIFS K-Space Modulus image
+
+Make sure both K-space images are normalized to range that covers intensity of both _scanImages
+
+Offer option for Initial image and reconstructed image to be displayed on same gray scale (i.e. based on range of intensities across both images -- maybe that is more useful to display in the bottom two images than the K-space -- or maybe have a 3x2 panel display)
+
+Change Empirical Prior to Data-Driven Prior.

@@ -19,7 +19,8 @@
 #     image files pointed to by subsample, MRI and PET
 #
 # OUTPUTS
-#   presentation04-<id>-<dx>.pdf set of results
+#   presentation04/<id>.pdf set of results
+#   presentation04/guide.csv  guide to files
 # Python 3.5+ required by pathlib
 # MUST be run from top level of project directory
 
@@ -54,7 +55,9 @@ if not ODIR.exists():
 
 # ids are floating point without the assist
 subsample = pd.read_feather(SUBFILE).astype({"id": int})
-
+# to enhance blinding, reorder
+subsample = subsample.sort_values(by=["id"])
+subsample.to_csv(str(ODIR / "guide.csv"))
 segs = nibabel.load(str(SEGFILE)).get_fdata()
 seg_names = ("GM",  "WM", "CSP", "SK", "BH", "OUT")
 # segnames[i] is the probabilities given by segs[,,,i]

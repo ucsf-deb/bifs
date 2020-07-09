@@ -150,16 +150,19 @@ def do_one(i : int):
     pp.close()  
 
 def slice(image, ix=0, frac=0.5):
-    "return rotated 2D slice of 3D image"
+    "return rotated, masked 2D slice of 3D image."
     # rotate 90 degrees counter clockwise
     # ix and frac apply before rotation
     slice_index = np.int(np.round(frac*image.shape[ix]))
     if ix == 0:
         im_slice = image[slice_index,:,:]
+        im_slice[mask[slice_index,:,:]] = 0.0
     elif ix == 1:
         im_slice = image[:,slice_index,:]
+        im_slice[mask[:,slice_index,:]] = 0.0
     elif ix == 2:
         im_slice = image[:,:,slice_index]
+        im_slice[mask[:, :, slice_index]] = 0.0
     else:
         raise RuntimeError("Sorry slice index needs to be one of 0,1,2")
     return np.rot90(im_slice)

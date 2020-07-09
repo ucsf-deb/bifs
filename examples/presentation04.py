@@ -52,7 +52,8 @@ ODIR = TOPDIR / "presentation04"
 if not ODIR.exists():
     ODIR.mkdir()
 
-subsample = pd.read_feather(SUBFILE)
+# ids are floating point without the assist
+subsample = pd.read_feather(SUBFILE).astype({"id": int})
 
 segs = nibabel.load(str(SEGFILE)).get_fdata()
 seg_names = ("GM",  "WM", "CSP", "SK", "BH", "OUT")
@@ -104,7 +105,7 @@ def do_one(i : int):
     aPET = read_image(Path(subsample.at[i, "fn.pet"]), "PET")
     dx = subsample.at[i, "DX"]
     subject = subsample.at[i, "id"]
-    ofile = ODIR / "{}_{}.pdf".format(dx, subject )
+    ofile = ODIR / "{}.pdf".format(subject )
     pp = PdfPages(str(ofile))
 
     #info on slice to display

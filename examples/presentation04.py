@@ -36,6 +36,7 @@ from matplotlib.colors import NoNorm
 from matplotlib import cm
 import matplotlib.pyplot as plt
 
+sys.path.insert(0, ".")
 import BIFS
 
 import nibabel
@@ -187,6 +188,6 @@ def plot_post(pp):
 
 
 if __name__ == "__main__":
-#    with concurrent.futures.ProcessPoolExecutor(max_workers=3) as executor:
-#        executor.map(do_one, range(0, subsample.shape[0]))
-    do_one(0)
+    with concurrent.futures.ProcessPoolExecutor(max_workers=3) as executor:
+        executor.map(do_one, range(0, subsample.shape[0]))
+#    do_one(0)

@@ -145,7 +145,7 @@ def do_one(i : int):
             if len(myTitle)>40:
                 myTitle = myTitle[:40]+"...."
             plt.title(myTitle)
-            plt.text(0, im_slice.shape[0]+10, "{} (scale {}). Slice {}% along axis {}".format(pft, sc, frac*100, ix))
+            plt.text(0, im_slice.shape[0]+10, "{} (scale {}). Slice {}% along axis {}".format(pft, sc, round(frac*100), ix))
             plot_post(pp)
 
     pp.close()  

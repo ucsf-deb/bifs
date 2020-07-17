@@ -116,15 +116,16 @@ def do_one(i : int):
     ix = 2
     frac = 0.57
 
-    init_image = slice(aMRI.bifs.init_image(), ix = ix, frac = frac)
-    plot_prep(init_image)
-    plt.title("Initial MRI image")
-    plot_post(pp)
-
     init_image = slice(aPET.bifs.init_image(), ix = ix, frac = frac)
     plot_prep(init_image)
-    plt.title("Initial PET image")
+    plt.title("FDG-PET")
     plot_post(pp)
+
+    init_image = slice(aMRI.bifs.init_image(), ix = ix, frac = frac)
+    plot_prep(init_image)
+    plt.title("Raw ASL perfusion CBF")
+    plot_post(pp)
+
 
     #im_slice = slice(MNI.bifs.init_image(), ix=ix, frac=frac)
     #plot_prep(im_slice)
@@ -132,6 +133,7 @@ def do_one(i : int):
     #plot_post(pp)
 
     b = aMRI.bifs
+    variant = 1
     for pft in aMRI.bifs.param_func_choices:
         b.set_prior_func_type(pft)
         aprior = b.prior_object()
@@ -145,12 +147,11 @@ def do_one(i : int):
             b.BIFS_MAP()  # unnecessary; call to final_image() triggers it anyway
             im_slice = slice(b.final_image(), ix=ix, frac=frac)
             plot_prep(im_slice)
-            myTitle = aMRI.filename()
-            if len(myTitle)>40:
-                myTitle = myTitle[:40]+"...."
+            myTitle = "BIFS reconstructed ASL perfusion CBF #{}".format(variant)
             plt.title(myTitle)
             plt.text(0, im_slice.shape[0]+10, "{} (scale {}). Slice {}% along axis {}".format(pft, sc, round(frac*100), ix))
             plot_post(pp)
+            variant += 1
 
     pp.close()  
 

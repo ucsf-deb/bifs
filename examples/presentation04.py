@@ -146,7 +146,9 @@ def do_one(i : int):
             scales += [scale*(10**(-2/3)), scale*(10**(-1/3))]
             scales.sort()
         elif pft == "Linear Decay":
-            scales = [scale*(10**p) for p in range(-3, 1)]
+            scales = [scale*(10**p) for p in range(-2, 1)]
+            scales += [scale*(10**(-2+p)) for p in (1/3, 2/3, 4/3, 5/3)]
+            scales.sort()
         for sc in scales:
             aprior.setScale(sc)
 
@@ -158,7 +160,7 @@ def do_one(i : int):
             plot_prep(im_slice)
             myTitle = "BIFS reconstructed ASL perfusion CBF #{}".format(variant)
             plt.title(myTitle)
-            plt.text(0, im_slice.shape[0]+10, "{} (scale {}). Slice {}% along axis {}".format(pft, sc, round(frac*100), ix))
+            plt.text(0, im_slice.shape[0]+10, "{} (scale {:5.1e}). Slice {}% along axis {}".format(pft, sc, round(frac*100), ix))
             plot_post(pp)
             variant += 1
 
@@ -198,6 +200,6 @@ def plot_post(pp):
 
 
 if __name__ == "__main__":
-    with concurrent.futures.ProcessPoolExecutor(max_workers=3) as executor:
+    with concurrent.futures.ProcessPoolExecutor(max_workers=7) as executor:
         executor.map(do_one, range(0, subsample.shape[0]))
 #    do_one(0)

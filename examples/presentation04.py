@@ -135,10 +135,19 @@ def do_one(i : int):
     b = aMRI.bifs
     variant = 1
     for pft in aMRI.bifs.param_func_choices:
+        if pft == "Banded Inverse Power Decay":
+            # not interesting until we know know which frequencies to accentuate"
+            continue
         b.set_prior_func_type(pft)
         aprior = b.prior_object()
         scale = b.prior_object()._scale
-        for sc in [scale/10, scale, scale*10]:
+        scales = [scale/10, scale, scale*10]
+        if pft == "Inverse Power Decay":
+            scales += [scale*(10**(-2/3)), scale*(10**(-1/3))]
+            scales.sort()
+        elif pft == "Linear Decay":
+            scales = [scale*(10**p) for p in range(-3, 1)]
+        for sc in scales:
             aprior.setScale(sc)
 
             # ideally setScale would trigger this automatically

@@ -146,8 +146,8 @@ def do_one(i : int):
             scales += [scale*(10**(-2/3)), scale*(10**(-1/3))]
             scales.sort()
         elif pft == "Linear Decay":
-            scales = [scale*(10**p) for p in range(-2, 1)]
-            scales += [scale*(10**(-2+p)) for p in (1/3, 2/3, 4/3, 5/3)]
+            scales = [scale*(10**p) for p in range(-1, 1)]
+            scales += [scale*(10**(-2+p)) for p in (2/3, 4/3)]
             scales.sort()
         for sc in scales:
             aprior.setScale(sc)

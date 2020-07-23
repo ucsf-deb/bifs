@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>b580896b-29ca-4a24-82be-0c6bf6ae80a8</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>examples\presentation04.py</StartupFile>
+    <StartupFile>examples\presentation05.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -59,6 +59,7 @@
     <Compile Include="examples\bifs_cl_3D.py" />
     <Compile Include="examples\presentation.py" />
     <Compile Include="examples\presentation04.py" />
+    <Compile Include="examples\presentation05.py" />
     <Compile Include="examples\presentation03.py">
       <SubType>Code</SubType>
     </Compile>

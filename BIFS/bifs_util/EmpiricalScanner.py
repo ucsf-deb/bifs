@@ -22,8 +22,20 @@ class AbstractEmpiricalScanner:
     mns and sds are arrays in the same shape as the images with the mean and sd at each pixel.
     vox is a 1-D array of voxel values, sorted in ascending order.  If sampleFraction<1 it will be a subset
     of all values seen.
+
+    image_mask optionally indicates which areas of the image to ignore.
+        It must be a boolean array with the same shape as image files.
+        All voxels selected by image_mask are set to zero before doing BIFS processing.
+        The mask applies to the original image NOT to the fourier space version, which will
+        generally have non-0 values in the image_mask region.
+        It is the subclass responsibility to implement these semantics.
+        Note the "mask" here is not a mask in the numpy sense of a masked array, which
+        concerns missing values.
+
+    voxel sampling should be done only from the non-ignored regions, but the number sampled will be based on
+        the total voxel count before masking.
     """
-    def __init__(self, sampleFraction=0, seed=85792359):
+    def __init__(self, sampleFraction=0, seed=85792359, image_mask=None):
         """Setup for scan of images
         if sampleFraction is >0 (and it should be <=1) then that fraction of the image voxels will be retained.
         In that case, seed is used to set the random number generator.
@@ -33,6 +45,11 @@ class AbstractEmpiricalScanner:
         if sampleFraction>0:
             self._vox = []
             self._rg = Generator(PCG64(seed))
+        self.masking = (image_mask is not None)
+        if self.masking:
+            self.image_mask = image_mask
+            self.image_keep = np.logical_not(image_mask)
+
 
     def _statsAccumulate(self, m):
         """
@@ -59,10 +76,16 @@ class AbstractEmpiricalScanner:
         is from k-space.  So we provide seperate functions for the 2 values.
         Calling this is pointless unless sampleFraction>0.
         """
-        # m.ravel is not an acceptable first argument to choice
-        # actually, it should have been np.ravel(m)
-        # m.flatten creates a copy, unfortunately
-        self._vox.append(self._rg.choice(m.flatten(), int(m.size*self.sampleFraction)))
+        # always base number sampled on the complete image size
+        nSamp = int(m.size*self.sampleFraction)
+
+        if self.masking:
+            self._vox.append(self._rg.choice(m[self.image_keep], nSamp))
+        else:
+            # m.ravel is not an acceptable first argument to choice
+            # actually, it should have been np.ravel(m)
+            # m.flatten and the mask selection above both create copies, unfortunately
+            self._vox.append(self._rg.choice(m.flatten(), nSamp))
 
 
     def _statsPost(self):
@@ -93,7 +116,6 @@ class AbstractEmpiricalScanner:
         self._voxPost()
 
 
-## modified to only get voxels
 class EmpiricalScanner(AbstractEmpiricalScanner):
     """Scan selected images on disk, ensuring they are alll compatible.
 
@@ -104,12 +126,14 @@ class EmpiricalScanner(AbstractEmpiricalScanner):
     exclude     <String> optional regular expression.  Any directory matching this pattern is excluded.
         Any file that satisfies matchFile is excluded if it also matches exclude.
 
+    See AbstractEmpiricalScanner for sampleFraction, seed and image_mask.
+
     The files are read in and converted to k-space.  We compute  the mean and sd of the k-space images,
     and optionally accumulate voxels from the original image.
 
     We also check that the headers are consistent.  This works for .nii files, and may or may not for others.
     """
-    def __init__(self, sampleFraction=0, seed=85792359, topDir=".", matchFile="", exclude=None):
+    def __init__(self, sampleFraction=0, seed=85792359, topDir=".", matchFile="", exclude=None, image_mask=None):
         super().__init__(sampleFraction, seed)
         self._topDir = topDir
         self._matchRE = re.compile(matchFile, re.I)
@@ -149,7 +173,10 @@ class EmpiricalScanner(AbstractEmpiricalScanner):
                             print("Skipping {}".format(f))
                             continue
                     self._bifs.load_image_file(os.path.join(root, f))
-                    #self._statsAccumulate(self._bifs.mod_image())
+                    if self.masking:
+                        # dirty trick.  But doesn't invalidate anything else in _bifs.
+                        self._bifs._init_image[self.image_mask] = 0.0
+                    self._statsAccumulate(self._bifs.mod_image())
                     if self.sampleFraction>0:
                         self._voxAccumulate(self._bifs.init_image())
                     hdr = self._bifs.read_imfile.header
@@ -172,4 +199,4 @@ class EmpiricalScanner(AbstractEmpiricalScanner):
                             v2 = hdr[key]
                             if (v1 != v2).any():
                                 mismatch.add(key)
-        self._voxPost()
+        self._post()

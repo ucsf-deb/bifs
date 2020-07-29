@@ -116,7 +116,7 @@ class EmpiricalScanner(AbstractEmpiricalScanner):
         if exclude:
             self._excludeRE = re.compile(exclude, re.I)
         else:
-            self._excludeRE
+            self._excludeRE = None
         self._benchmarkHdr = None  # checks for consistent headers
         self._mismatch = set()  # holds keys that had a mismatch
         self._bifs = bifs()

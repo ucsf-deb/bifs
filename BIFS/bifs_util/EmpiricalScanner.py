@@ -172,31 +172,35 @@ class EmpiricalScanner(AbstractEmpiricalScanner):
                         if self._excludeRE.search(f):
                             print("Skipping {}".format(f))
                             continue
-                    self._bifs.load_image_file(os.path.join(root, f))
-                    if self.masking:
-                        # dirty trick.  But doesn't invalidate anything else in _bifs.
-                        self._bifs._init_image[self.image_mask] = 0.0
-                    self._statsAccumulate(self._bifs.mod_image())
-                    if self.sampleFraction>0:
-                        self._voxAccumulate(self._bifs.init_image())
-                    hdr = self._bifs.read_imfile.header
-                    if not self._benchmarkHdr:
-                        # first header encountered
-                        self._benchmarkHdr = hdr
-                        # could not delete the following key
-                        # it actually doesn't appear in the objects attributes
-                        #del benchmarkHdr.__dict__['db_name']  # differences expected and no concern
-                    else:
-                        for key in self._benchmarkHdr:
-                            if key == 'db_name':
-                                continue
+                    self._do_one(os.path.join(root, f))
 
-                            if key.startswith("scl_"):
-                                # values were array(nan, dtype=float32) and I had no luck testing for them
-                                # in various ways
-                                continue
-                            v1 = self._benchmarkHdr[key]
-                            v2 = hdr[key]
-                            if (v1 != v2).any():
-                                mismatch.add(key)
         self._post()
+
+    def _do_one(self, file):
+        "file is a path-like object. Read it in and accumulate information"
+        self._bifs.load_image_file(file)
+        if self.masking:
+            # dirty trick.  But doesn't invalidate anything else in _bifs.
+            self._bifs._init_image[self.image_mask] = 0.0
+        self._statsAccumulate(self._bifs.mod_image())
+        if self.sampleFraction>0:
+            self._voxAccumulate(self._bifs.init_image())
+        hdr = self._bifs.read_imfile.header
+        if not self._benchmarkHdr:
+            # first header encountered
+            self._benchmarkHdr = hdr
+            # could not delete the following key
+            # it actually doesn't appear in the objects attributes
+            #del benchmarkHdr.__dict__['db_name']  # differences expected and no concern
+        else:
+            for key in self._benchmarkHdr:
+                if key == 'db_name':
+                    continue
+                if key.startswith("scl_"):
+                    # values were array(nan, dtype=float32) and I had no luck testing for them
+                    # in various ways
+                    continue
+                v1 = self._benchmarkHdr[key]
+                v2 = hdr[key]
+                if (v1 != v2).any():
+                    self._mismatch.add(key)

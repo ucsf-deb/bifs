@@ -166,7 +166,7 @@ class EmpiricalScanner(AbstractEmpiricalScanner):
     We also check that the headers are consistent.  This works for .nii files, and may or may not for others.
     """
     def __init__(self, sampleFraction=0, seed=85792359, topDir=".", matchFile="", exclude=None, image_mask=None):
-        super().__init__(sampleFraction, seed)
+        super().__init__(sampleFraction, seed, image_mask)
         self._topDir = topDir
         self._matchRE = re.compile(matchFile, re.I)
         if exclude:
@@ -202,4 +202,16 @@ class EmpiricalScanner(AbstractEmpiricalScanner):
                             print("Skipping {}".format(f))
                             continue
                     self._do_one(os.path.join(root, f))
+        self._post()
+
+class FeedScanner(AbstractEmpiricalScanner):
+    """A scanner that accepts anything iterable as a list of file names to scan"""
+    def __init__(self, files, sampleFraction=0, seed=85792359, image_mask=None):
+        super().__init__(sampleFraction, seed, image_mask)
+        self._files = files
+        self.go()
+
+    def go(self):
+        for f in self._files:
+            self._do_one(f)
         self._post()

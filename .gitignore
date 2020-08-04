@@ -93,3 +93,8 @@ ENV/
 /ep1_compressed.npz
 /ep1.npz
 /bifs/src/ep1.npz
+
+#RB additions
+*.npz
+*.xlsx
+*.pdf

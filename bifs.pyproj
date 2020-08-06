@@ -61,7 +61,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="examples\presentation.py" />
-    <Compile Include="examples\presentation04.py" />
+    <Compile Include="examples\presentation04-empirical.py" />
     <Compile Include="examples\presentation05.py" />
     <Compile Include="examples\presentation03.py">
       <SubType>Code</SubType>

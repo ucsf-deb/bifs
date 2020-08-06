@@ -25,12 +25,15 @@
 #
 # HISTORY
 # 2020-08-06 copied from presentation04.py
+#   borrow new path setup from empirical_scan.py
 #
-# MUST be run from top level of project directory
+## I think the code below means you can run from anywhere at or under \Kornak\bifs
 
 import concurrent.futures
 import sys
+import nibabel
 import numpy as np
+import pandas as pd
 from pathlib import Path
 
 import matplotlib
@@ -40,17 +43,15 @@ from matplotlib.colors import NoNorm
 from matplotlib import cm
 import matplotlib.pyplot as plt
 
-sys.path.insert(0, ".")
-import BIFS
-
-import nibabel
-import pandas as pd
-
 ## Establish input and output paths
 
 TOPDIR = Path.cwd()
 while TOPDIR.name != "Kornak":
+    BIFSDIR = TOPDIR
     TOPDIR = TOPDIR.parent
+sys.path.insert(0, str(BIFSDIR))
+
+import BIFS
 
 SEGFILE = TOPDIR / "ExternalData/ycobigo/round3/TPM.nii"
 SUBFILE = TOPDIR / "RKornak" / "subsamples.feather"

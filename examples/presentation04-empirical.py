@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
-#  File: presentation04.py
+#  File: presentation04-empirical.py
 #  Author: Ross Boylan
-#  Created: 2020-07-07
+#  Created: 2020-08-06
 #  
 # Prepare slides for evaluation by Howie
 # uses analytic priors only on a selection of images
@@ -19,9 +19,13 @@
 #     image files pointed to by subsample, MRI and PET
 #
 # OUTPUTS
-#   presentation04/<id>.pdf set of results
-#   presentation04/guide.csv  guide to files
+#   presentation04/<id>-emp.pdf set of results
+#   presentation04/guide-emp.csv  guide to files
 # Python 3.5+ required by pathlib
+#
+# HISTORY
+# 2020-08-06 copied from presentation04.py
+#
 # MUST be run from top level of project directory
 
 import concurrent.futures
@@ -58,7 +62,7 @@ if not ODIR.exists():
 subsample = pd.read_feather(SUBFILE).astype({"id": int})
 # to enhance blinding, reorder
 subsample = subsample.sort_values(by=["id"])
-subsample.to_csv(str(ODIR / "guide.csv"))
+subsample.to_csv(str(ODIR / "guide-emp.csv"))
 segs = nibabel.load(str(SEGFILE)).get_fdata()
 seg_names = ("GM",  "WM", "CSP", "SK", "BH", "OUT")
 # segnames[i] is the probabilities given by segs[,,,i]
@@ -109,7 +113,7 @@ def do_one(i : int):
     aPET = read_image(Path(subsample.at[i, "fn.pet"]), "PET")
     dx = subsample.at[i, "DX"]
     subject = subsample.at[i, "id"]
-    ofile = ODIR / "{}.pdf".format(subject )
+    ofile = ODIR / "{}-emp.pdf".format(subject )
     pp = PdfPages(str(ofile))
 
     #info on slice to display

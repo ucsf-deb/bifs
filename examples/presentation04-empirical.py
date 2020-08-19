@@ -17,6 +17,8 @@
 #     subsamples.feather  file names and dx for input images
 #         each row in subsample will produce a pdf
 #     image files pointed to by subsample, MRI and PET
+#     ep3.npz  The empirical prior
+#     vox3.npz sample  of voxels for rescaling
 #
 # OUTPUTS
 #   presentation04/<id>-emp.pdf set of results
@@ -53,6 +55,8 @@ sys.path.insert(0, str(BIFSDIR))
 
 import BIFS
 
+EPNAME = "ep3.npz"
+VOXNAME = "vox3.npz"
 SEGFILE = TOPDIR / "ExternalData/ycobigo/round3/TPM.nii"
 SUBFILE = TOPDIR / "RKornak" / "subsamples.feather"
 ODIR = TOPDIR / "presentation04"
@@ -70,6 +74,35 @@ seg_names = ("GM",  "WM", "CSP", "SK", "BH", "OUT")
 
 # True for voxels to set to 0
 mask = segs[..., 3:6].sum(3) > 0.80
+focus = np.logical_not(mask)
+
+# if we parallelize, easier to load this once
+refVoxels = np.load(VOXNAME)["samp"]
+
+def referenceVoxels():
+    """return  sorted array of voxels from images scanned"""
+    return refVoxels
+
+def adjustImage(img):
+    """
+    Adjust the distribution of pixels in the focus area of input image.
+    Returns an input image of the same size with the intensity distribution adjusted 
+    to match that in some scanned files.  Roughly the n'th percentile of image brightness in img
+    will be assigned the n'th percentile of the reference images.
+    """
+    ref = referenceVoxels()
+
+    # directly updating the image does not work reliably
+    img = np.copy(img, order='C')
+    # argsort appears to break ties in a way that preserves the order it encounters elements
+    flat = img[focus]
+    ix = flat.argsort()
+    # The parentheses around ref.size/flat.size are essential.
+    # Otherwise values wrap around
+    subi = np.array(np.round(np.arange(flat.size)*(ref.size/flat.size)), dtype='int')
+    flat[ix]  = ref[subi]
+    img[focus] = flat
+    return img
 
 
 class OneImage:
@@ -126,48 +159,44 @@ def do_one(i : int):
     plt.title("FDG-PET")
     plot_post(pp)
 
-    init_image = slice(aMRI.bifs.init_image(), ix = ix, frac = frac)
+    b = aMRI.bifs
+    init_image = slice(b.init_image(), ix = ix, frac = frac)
     plot_prep(init_image)
     plt.title("Raw ASL perfusion CBF")
     plot_post(pp)
 
+
+    b.load_image(adjustImage(b._init_image))
+    init_image = slice(b.init_image(), ix = ix, frac = frac)
+    img0 = np.copy(b.init_image())
+    plot_prep(init_image)
+    plt.title("MRI image with PET distribution")
+    plot_post(pp)
+    print("PET max={}, min={}".format(np.max(img0), np.min(img0)))
 
     #im_slice = slice(MNI.bifs.init_image(), ix=ix, frac=frac)
     #plot_prep(im_slice)
     #plt.title("MNI Reference Image")
     #plot_post(pp)
 
-    b = aMRI.bifs
     variant = 1
-    for pft in aMRI.bifs.param_func_choices:
-        if pft == "Banded Inverse Power Decay":
-            # not interesting until we know know which frequencies to accentuate"
-            continue
-        b.set_prior_func_type(pft)
-        aprior = b.prior_object()
-        scale = b.prior_object()._scale
-        scales = [scale/10, scale, scale*10]
-        if pft == "Inverse Power Decay":
-            scales += [scale*(10**(-2/3)), scale*(10**(-1/3))]
-            scales.sort()
-        elif pft == "Linear Decay":
-            scales = [scale*(10**p) for p in range(-1, 1)]
-            scales += [scale*(10**(-2+p)) for p in (2/3, 4/3)]
-            scales.sort()
-        for sc in scales:
-            aprior.setScale(sc)
+    b.load_empirical(EPNAME)
+    prior = b.prior_object()
+    for scale in (1e-10, 0.000001, 0.001, 0.01, 0.05, 0.4, 0.8, 1.0, 2.0, 4.0):
+        prior.setScale(scale)
+        b._invalidate_final()  # would be unnecessary in perfect world
+        b.BIFS_MAP()  # unnecessary; call to final_image() triggers it anyway
 
-            # ideally setScale would trigger this automatically
-            b._invalidate_final()
-
-            b.BIFS_MAP()  # unnecessary; call to final_image() triggers it anyway
-            im_slice = slice(b.final_image(), ix=ix, frac=frac)
-            plot_prep(im_slice)
-            myTitle = "BIFS reconstructed ASL perfusion CBF #{}".format(variant)
-            plt.title(myTitle)
-            plt.text(0, im_slice.shape[0]+10, "{} (scale {:5.1e}). Slice {}% along axis {}".format(pft, sc, round(frac*100), ix))
-            plot_post(pp)
-            variant += 1
+        im_slice = slice(b.final_image(), ix=ix, frac=frac)
+        deltatop = np.amax(img0-b.final_image())
+        deltabot = np.amin(img0-b.final_image())
+        print("With scale {} delta top = {}, bottom = {}.".format(scale, deltatop, deltabot))
+        plot_prep(im_slice)
+        myTitle = "BIFS reconstructed ASL perfusion CBF #{}".format(variant)
+        plt.title(myTitle)
+        plt.text(0, im_slice.shape[0]+10, "Emprcl Prior (scale {:5.1e}). Slice {}% along axis {}".format(scale, round(frac*100), ix))
+        plot_post(pp)
+        variant += 1
 
     pp.close()  
 
@@ -207,4 +236,4 @@ def plot_post(pp):
 if __name__ == "__main__":
     with concurrent.futures.ProcessPoolExecutor(max_workers=7) as executor:
         executor.map(do_one, range(0, subsample.shape[0]))
-#    do_one(0)
+    #do_one(0)

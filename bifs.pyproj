@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>b580896b-29ca-4a24-82be-0c6bf6ae80a8</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>examples\presentation04-empirical.py</StartupFile>
+    <StartupFile>examples\investigate06.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -58,6 +58,9 @@
     <Compile Include="examples\bifs_cl_2D.py" />
     <Compile Include="examples\bifs_cl_3D.py" />
     <Compile Include="examples\empirical_scan.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="examples\investigate06.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="examples\presentation.py" />

@@ -75,22 +75,32 @@ def get_mask():
     mask = segs[..., 3:6].sum(3) > 0.80
     return mask
 
+mask = get_mask()
+
+
 def slice(image, ix=0, frac=0.5):
     "return rotated, masked 2D slice of 3D image."
     # rotate 90 degrees counter clockwise
     # ix and frac apply before rotation
     slice_index = np.int(np.round(frac*image.shape[ix]))
+    delta = 0.5
     if ix == 0:
         im_slice = image[slice_index,:,:]
-        #im_slice[mask[slice_index,:,:]] = 0.0
+        im_mask = mask[slice_index,:,:]
+
     elif ix == 1:
         im_slice = image[:,slice_index,:]
-        #im_slice[mask[:,slice_index,:]] = 0.0
+        im_mask = mask[:,slice_index,:]
     elif ix == 2:
         im_slice = image[:,:,slice_index]
-        #im_slice[mask[:, :, slice_index]] = 0.0
+        im_mask= mask[:, :, slice_index]
     else:
         raise RuntimeError("Sorry slice index needs to be one of 0,1,2")
+    vmin = im_slice.min()
+    vmax = im_slice.max()
+    adjust = np.full_like(im_slice, vmax)
+    adjust[im_mask] = vmin
+    im_slice = (im_slice + adjust)/2.0
     return np.rot90(im_slice)
 
 def plot_prep(image):
@@ -117,7 +127,7 @@ def go():
     ix = 2
     frac = 0.57
 
-    init_image = slice(mask, ix = ix, frac = frac)
+    init_image = slice(np.zeros(mask.shape), ix = ix, frac = frac)
     plot_prep(init_image)
     plt.title("mask")
     plot_post(pp)

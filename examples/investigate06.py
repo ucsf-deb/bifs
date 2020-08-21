@@ -78,7 +78,7 @@ def get_mask():
 mask = get_mask()
 
 
-def slice(image, ix=0, frac=0.5):
+def slice_fancy(image, ix=0, frac=0.5):
     "return rotated, masked 2D slice of 3D image."
     # rotate 90 degrees counter clockwise
     # ix and frac apply before rotation
@@ -103,13 +103,34 @@ def slice(image, ix=0, frac=0.5):
     im_slice = (im_slice + adjust)/2.0
     return np.rot90(im_slice)
 
+def slice2(image, ix=0, frac=0.5):
+    "return rotated, masked 2D slice of 3D image."
+    # rotate 90 degrees counter clockwise
+    # ix and frac apply before rotation
+    slice_index = np.int(np.round(frac*image.shape[ix]))
+    if ix == 0:
+        im_slice = image[slice_index,:,:]
+        im_mask = mask[slice_index,:,:]
+    elif ix == 1:
+        im_slice = image[:,slice_index,:]
+        im_mask = mask[:,slice_index,:]
+    elif ix == 2:
+        im_slice = image[:,:,slice_index]
+        im_mask= mask[:, :, slice_index]
+    else:
+        raise RuntimeError("Sorry slice index needs to be one of 0,1,2")
+    m = np.zeros(im_mask.shape)
+    m[im_mask] = 1.0
+    return (np.rot90(im_slice), np.rot90(m))
+
 def plot_prep(image):
     "standard plot preparation for a 2D image"
     fig = Figure()
     plt.rcParams["axes.grid"] = False # turn off grid lines for images
     plt.rcParams["xtick.color"] = (1,1,1,0)
     plt.rcParams["ytick.color"] = (1,1,1,0)
-    plt.imshow(image, cmap = cm.Greys_r)
+    plt.imshow(image, cmap = cm.Reds, alpha=0.6)
+
 
 def plot_post(pp):
     "standard processing after all plotting of this page done"
@@ -118,7 +139,6 @@ def plot_post(pp):
     plt.clf()
 
 def go():
-    mask = get_mask()
     b = BIFS.bifs()
 
     pp = PdfPages("investigate06.pdf")
@@ -127,19 +147,26 @@ def go():
     ix = 2
     frac = 0.57
 
-    init_image = slice(np.zeros(mask.shape), ix = ix, frac = frac)
-    plot_prep(init_image)
+    init_image,  init_mask = slice2(np.zeros(mask.shape), ix = ix, frac = frac)
+    plot_prep(init_mask)
     plt.title("mask")
     plot_post(pp)
+    n=0
 
     for fpath in mypaths():
         b.load_image_file(str(fpath))
         img = b.init_image()
         #img[mask] =0.0  leave it for now
-        init_image = slice(img, ix = ix, frac = frac)
+        init_image, init_mask = slice2(img, ix = ix, frac = frac)
         plot_prep(init_image)
+        plt.colorbar()
+        plt.imshow(init_mask, cmap=cm.Blues, alpha=0.4)
         plt.title("ADNI for "+fpath.name)
+
         plot_post(pp)
+        if n>1:
+            break
+        n += 1
 
     pp.close()
 

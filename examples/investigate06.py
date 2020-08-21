@@ -123,9 +123,10 @@ def slice2(image, ix=0, frac=0.5):
     m[im_mask] = 1.0
     return (np.rot90(im_slice), np.rot90(m))
 
-def plot_prep(image):
+def plot_prep(image, ix):
     "standard plot preparation for a 2D image"
     fig = Figure()
+    plt.subplot(1, 3, ix+1)
     plt.rcParams["axes.grid"] = False # turn off grid lines for images
     plt.rcParams["xtick.color"] = (1,1,1,0)
     plt.rcParams["ytick.color"] = (1,1,1,0)
@@ -147,25 +148,26 @@ def go():
     ix = 2
     frac = 0.57
 
-    init_image,  init_mask = slice2(np.zeros(mask.shape), ix = ix, frac = frac)
-    plot_prep(init_mask)
+    for ix in range(3):
+        init_image,  init_mask = slice2(np.zeros(mask.shape), ix = ix, frac = frac)
+        plot_prep(init_mask, ix)
     plt.title("mask")
     plot_post(pp)
+
     n=0
 
     for fpath in mypaths():
         b.load_image_file(str(fpath))
         img = b.init_image()
         #img[mask] =0.0  leave it for now
-        init_image, init_mask = slice2(img, ix = ix, frac = frac)
-        plot_prep(init_image)
-        plt.colorbar()
-        plt.imshow(init_mask, cmap=cm.Blues, alpha=0.4)
+        for ix in range(3):
+            init_image, init_mask = slice2(img, ix = ix, frac = frac)
+            plot_prep(init_image, ix)
+            #plt.colorbar()
+            plt.imshow(init_mask, cmap=cm.Blues, alpha=0.4)
         plt.title("ADNI for "+fpath.name)
 
         plot_post(pp)
-        if n>1:
-            break
         n += 1
 
     pp.close()

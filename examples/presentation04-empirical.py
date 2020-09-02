@@ -29,6 +29,9 @@
 # 2020-08-06 copied from presentation04.py
 #   borrow new path setup from empirical_scan.py
 #
+# 2020-09-02
+#    reference voxels have ~1/3 that are near 0. eliminate them.
+#
 ## I think the code below means you can run from anywhere at or under \Kornak\bifs
 
 import concurrent.futures
@@ -78,6 +81,9 @@ focus = np.logical_not(mask)
 
 # if we parallelize, easier to load this once
 refVoxels = np.load(VOXNAME)["samp"]
+# cut out the near 0, which we think is in error
+refCut = 0.1
+refVoxels = refVoxels[refVoxels>refCut]
 
 def referenceVoxels():
     """return  sorted array of voxels from images scanned"""
@@ -170,7 +176,7 @@ def do_one(i : int):
     init_image = slice(b.init_image(), ix = ix, frac = frac)
     img0 = np.copy(b.init_image())
     plot_prep(init_image)
-    plt.title("MRI image with PET distribution")
+    plt.title("MRI image with PET distribution values > {}".format(refCut))
     plot_post(pp)
     print("PET max={}, min={}".format(np.max(img0), np.min(img0)))
 

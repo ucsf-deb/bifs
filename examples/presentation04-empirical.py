@@ -171,14 +171,18 @@ def do_one(i : int):
     plt.title("Raw ASL perfusion CBF")
     plot_post(pp)
 
-
+    before = b.init_image()[focus]
     b.load_image(adjustImage(b._init_image))
+    after = b.init_image()[focus]
     init_image = slice(b.init_image(), ix = ix, frac = frac)
     img0 = np.copy(b.init_image())
     plot_prep(init_image)
     plt.title("MRI image with PET distribution values > {}".format(refCut))
     plot_post(pp)
     print("PET max={}, min={}".format(np.max(img0), np.min(img0)))
+
+    plot_transform(before, after, pp)
+
 
     #im_slice = slice(MNI.bifs.init_image(), ix=ix, frac=frac)
     #plot_prep(im_slice)
@@ -200,7 +204,9 @@ def do_one(i : int):
         plot_prep(im_slice)
         myTitle = "BIFS reconstructed ASL perfusion CBF #{}".format(variant)
         plt.title(myTitle)
-        plt.text(0, im_slice.shape[0]+10, "Emprcl Prior (scale {:5.1e}). Slice {}% along axis {}".format(scale, round(frac*100), ix))
+        plt.text(0, im_slice.shape[0], 
+                 "Emprcl Prior (scale {:5.1e})\ndelta top = {:7.3G}, bottom = {:7.3G}.\nSlice {}% along axis {}".format(scale, deltatop, deltabot, round(frac*100), ix),
+                 verticalalignment="top")
         plot_post(pp)
         variant += 1
 
@@ -238,8 +244,20 @@ def plot_post(pp):
     # the text just the final plt.text persisted across figures without the next line
     plt.clf()
 
+def plot_transform(before, after, pp):
+    fig = Figure()  # RB not sure this is necessary
+    plt.rcParams["axes.grid"] = True
+    plt.rcParams["xtick.color"] = (0,0,0,1)
+    plt.rcParams["ytick.color"] = (0,0,0,1)
+    ix = np.argsort(before)
+    ix = ix[np.linspace(0, ix.size-1, num=2000, endpoint = True, dtype = int)]
+    plt.title("Transformation from MRI to PET in focal area")
+    plt.plot(before[ix], after[ix], linestyle = "None", marker=".")
+    pp.savefig()
+    plt.clf()
+
 
 if __name__ == "__main__":
-    with concurrent.futures.ProcessPoolExecutor(max_workers=7) as executor:
-        executor.map(do_one, range(0, subsample.shape[0]))
-    #do_one(0)
+    #with concurrent.futures.ProcessPoolExecutor(max_workers=7) as executor:
+    #    executor.map(do_one, range(0, subsample.shape[0]))
+    do_one(0)

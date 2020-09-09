@@ -247,13 +247,25 @@ def plot_post(pp):
 def plot_transform(before, after, pp):
     fig = Figure()  # RB not sure this is necessary
     plt.rcParams["axes.grid"] = True
-    plt.rcParams["xtick.color"] = (0,0,0,1)
-    plt.rcParams["ytick.color"] = (0,0,0,1)
+    plt.rcParams["xtick.color"] = (0,0,0,0.5)
+    plt.rcParams["ytick.color"] = (0,0,0,0.5)
+    plt.minorticks_on()
     ix = np.argsort(before)
     ix = ix[np.linspace(0, ix.size-1, num=2000, endpoint = True, dtype = int)]
     plt.title("Transformation from MRI to PET in focal area")
     plt.plot(before[ix], after[ix], linestyle = "None", marker=".")
     #plt.hist(before) completely screws up previous graph
+    pp.savefig()
+    plt.clf()
+    plt.title("Distribution of focal voxels")
+    plt.minorticks_on()
+    plt.hist(before, bins=500)
+    pp.savefig()
+    plt.clf()
+    plt.title("Distribution of focal voxels in (0, 10]")
+    plt.minorticks_on()
+    # use & for and in next line didn't work
+    plt.hist(before[ np.logical_and(before>0, before<=10)], bins=100)
     pp.savefig()
     plt.clf()
 

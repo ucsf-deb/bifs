@@ -253,6 +253,7 @@ def plot_transform(before, after, pp):
     ix = ix[np.linspace(0, ix.size-1, num=2000, endpoint = True, dtype = int)]
     plt.title("Transformation from MRI to PET in focal area")
     plt.plot(before[ix], after[ix], linestyle = "None", marker=".")
+    #plt.hist(before) completely screws up previous graph
     pp.savefig()
     plt.clf()
 

@@ -279,6 +279,6 @@ def plot_transform(before, after, pp):
 
 
 if __name__ == "__main__":
-    #with concurrent.futures.ProcessPoolExecutor(max_workers=7) as executor:
-    #    executor.map(do_one, range(0, subsample.shape[0]))
-    do_one(0)
+    with concurrent.futures.ProcessPoolExecutor(max_workers=7) as executor:
+        executor.map(do_one, range(0, subsample.shape[0]))
+    #do_one(0)

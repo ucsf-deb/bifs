@@ -95,19 +95,27 @@ def adjustImage(img):
     Returns an input image of the same size with the intensity distribution adjusted 
     to match that in some scanned files.  Roughly the n'th percentile of image brightness in img
     will be assigned the n'th percentile of the reference images.
+
+    All focal values < 5 are assigned the same value from the reference distribution.
+    Rationale: All negative values are measurement errors.
     """
     ref = referenceVoxels()
 
     # directly updating the image does not work reliably
     img = np.copy(img, order='C')
     # argsort appears to break ties in a way that preserves the order it encounters elements
+    iFloor = np.logical_and(focus, img < 5.0)  # all these will be recoded to the floor value
+    nFloor = np.sum(iFloor)
     flat = img[focus]
     ix = flat.argsort()
     # The parentheses around ref.size/flat.size are essential.
     # Otherwise values wrap around
     subi = np.array(np.round(np.arange(flat.size)*(ref.size/flat.size)), dtype='int')
     flat[ix]  = ref[subi]
+    vFloor = ref[subi][nFloor]
     img[focus] = flat
+    # reset all floor value
+    img[iFloor] = vFloor
     return img
 
 

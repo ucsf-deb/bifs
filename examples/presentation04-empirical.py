@@ -32,6 +32,10 @@
 # 2020-09-02
 #    reference voxels have ~1/3 that are near 0. eliminate them.
 #
+# 2020-09-15
+#   change low value after recoding to zero by substracting a constant from all
+#   transformed values.
+#
 ## I think the code below means you can run from anywhere at or under \Kornak\bifs
 
 import concurrent.futures
@@ -104,18 +108,20 @@ def adjustImage(img):
     # directly updating the image does not work reliably
     img = np.copy(img, order='C')
     # argsort appears to break ties in a way that preserves the order it encounters elements
-    iFloor = np.logical_and(focus, img < 5.0)  # all these will be recoded to the floor value
-    nFloor = np.sum(iFloor)
+    cut = 5.0  # < cut in MRI space will be recoded to 0
     flat = img[focus]
+    iFloor = flat < cut
+    nFloor = np.sum(flat < cut)
     ix = flat.argsort()
     # The parentheses around ref.size/flat.size are essential.
     # Otherwise values wrap around
     subi = np.array(np.round(np.arange(flat.size)*(ref.size/flat.size)), dtype='int')
     flat[ix]  = ref[subi]
     vFloor = ref[subi][nFloor]
+    flat[iFloor] = vFloor
+    # reset min to 0
+    flat = flat - vFloor
     img[focus] = flat
-    # reset all floor value
-    img[iFloor] = vFloor
     return img
 
 

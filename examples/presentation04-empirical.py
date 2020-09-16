@@ -33,8 +33,9 @@
 #    reference voxels have ~1/3 that are near 0. eliminate them.
 #
 # 2020-09-15
-#   change low value after recoding to zero by substracting a constant from all
-#   transformed values.
+#   1. change low value after recoding to zero by substracting a constant from all
+#      transformed values.
+#   2. Use constant scale from voxel intensity to brightness across all images
 #
 ## I think the code below means you can run from anywhere at or under \Kornak\bifs
 
@@ -85,6 +86,7 @@ focus = np.logical_not(mask)
 
 # if we parallelize, easier to load this once
 refVoxels = np.load(VOXNAME)["samp"]
+maxIntensity = np.max(refVoxels)  #  for plotting
 # cut out the near 0, which we think is in error
 refCut = 0.1
 refVoxels = refVoxels[refVoxels>refCut]
@@ -181,7 +183,7 @@ def do_one(i : int):
 
     b = aMRI.bifs
     init_image = slice(b.init_image(), ix = ix, frac = frac)
-    plot_prep(init_image)
+    plot_prep(init_image, rescale=False)
     plt.title("Raw ASL perfusion CBF")
     plot_post(pp)
 
@@ -219,7 +221,8 @@ def do_one(i : int):
         myTitle = "BIFS reconstructed ASL perfusion CBF #{}".format(variant)
         plt.title(myTitle)
         plt.text(0, im_slice.shape[0], 
-                 "Emprcl Prior (scale {:5.1e})\ndelta top = {:7.3G}, bottom = {:7.3G}.\nSlice {}% along axis {}".format(scale, deltatop, deltabot, round(frac*100), ix),
+                 "Emprcl Prior (scale {:5.1e})\ndelta top = {:7.3G}, bottom = {:7.3G}.\nSlice {}% along axis {} with max intensity {:5.2f}".format(\
+                 scale, deltatop, deltabot, round(frac*100), ix, np.max(im_slice)),
                  verticalalignment="top")
         plot_post(pp)
         variant += 1
@@ -244,13 +247,16 @@ def slice(image, ix=0, frac=0.5):
         raise RuntimeError("Sorry slice index needs to be one of 0,1,2")
     return np.rot90(im_slice)
 
-def plot_prep(image):
+def plot_prep(image, rescale=True):
     "standard plot preparation for a 2D image"
     fig = Figure()
     plt.rcParams["axes.grid"] = False # turn off grid lines for images
     plt.rcParams["xtick.color"] = (1,1,1,0)
     plt.rcParams["ytick.color"] = (1,1,1,0)
-    plt.imshow(image, cmap = cm.Greys_r)
+    if rescale:
+        plt.imshow(image, cmap = cm.Greys_r, vmin = 0.0, vmax = maxIntensity)
+    else:
+        plt.imshow(image, cmap = cm.Greys_r)
 
 def plot_post(pp):
     "standard processing after all plotting of this page done"

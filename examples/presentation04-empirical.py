@@ -192,6 +192,7 @@ def do_one(i : int):
     after = b.init_image()[focus]
     init_image = slice(b.init_image(), ix = ix, frac = frac)
     img0 = np.copy(b.init_image())
+    slice0 = slice(img0, ix=ix, frac=frac)
     plot_prep(init_image)
     plt.title("MRI image with PET distribution values > {}".format(refCut))
     plot_post(pp)
@@ -214,17 +215,29 @@ def do_one(i : int):
         b.BIFS_MAP()  # unnecessary; call to final_image() triggers it anyway
 
         im_slice = slice(b.final_image(), ix=ix, frac=frac)
-        deltatop = np.amax(img0-b.final_image())
-        deltabot = np.amin(img0-b.final_image())
+        deltatop = np.amax(b.final_image()-img0)
+        deltabot = np.amin(b.final_image()-img0)
+        slice_deltatop = np.amax(im_slice-slice0)
+        slice_deltabot = np.amin(im_slice-slice0)
         print("With scale {} delta top = {}, bottom = {}.".format(scale, deltatop, deltabot))
+        plt.subplot(121)
         plot_prep(im_slice)
         myTitle = "BIFS reconstructed ASL perfusion CBF #{}".format(variant)
-        plt.title(myTitle)
-        plt.text(0, im_slice.shape[0], 
-                 "Emprcl Prior (scale {:5.1e})\ndelta top = {:7.3G}, bottom = {:7.3G}.\nSlice {}% along axis {} with max intensity {:5.2f}".format(\
-                 scale, deltatop, deltabot, round(frac*100), ix, np.max(im_slice)),
-                 verticalalignment="top")
+        plt.suptitle(myTitle)
+        plt.subplot(122)
+        sz = plt.rcParams["font.size"]
+        plt.rcParams["font.size"] = 5
+        txt = plt.text(0.04, 0.75, 
+                 "Emprcl Prior (scale {:5.1e}).\n\n3D Image $\\delta$ top = {:7.3G}, bottom = {:7.3G}.\n\n"
+                 "Slice {}% along axis {}\n with intensity [{:5.2f}, {:5.2f}].\n  Max @ {} / {}.\n"
+                 "Slice $\\delta$ top = {:7.3G}, bottom = {:7.3G}.\n\n".format(\
+                 scale, deltatop, deltabot,
+                 round(frac*100), ix, np.min(im_slice), np.max(im_slice), 
+                 np.unravel_index(np.argmax(im_slice), im_slice.shape), im_slice.shape,
+                 slice_deltatop, slice_deltabot),
+                 verticalalignment="top", wrap=True, fontsize=6)
         plot_post(pp)
+        plt.rcParams["font.size"] = sz
         variant += 1
 
     pp.close()  
@@ -249,7 +262,7 @@ def slice(image, ix=0, frac=0.5):
 
 def plot_prep(image, rescale=True):
     "standard plot preparation for a 2D image"
-    fig = Figure()
+    fig = Figure(figsize=(10, 8), frameon = False)
     plt.rcParams["axes.grid"] = False # turn off grid lines for images
     plt.rcParams["xtick.color"] = (1,1,1,0)
     plt.rcParams["ytick.color"] = (1,1,1,0)
@@ -291,6 +304,6 @@ def plot_transform(before, after, pp):
 
 
 if __name__ == "__main__":
-    with concurrent.futures.ProcessPoolExecutor(max_workers=7) as executor:
-        executor.map(do_one, range(0, subsample.shape[0]))
-    #do_one(0)
+    #with concurrent.futures.ProcessPoolExecutor(max_workers=7) as executor:
+    #    executor.map(do_one, range(0, subsample.shape[0]))
+    do_one(0)

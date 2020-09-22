@@ -37,8 +37,23 @@
 #      transformed values.
 #   2. Use constant scale from voxel intensity to brightness across all images
 #
+# 2020-09-21
+#    1. Switch sign on deltas so they are delta vs baseline.  With this fix, the mystery of how
+#       max voxel intensity could change so much goes away.
+#    2. Provide second panel with text only to hold fuller description of the image.
+#    3. Add text on slice statistics and deltas.
+#    4. Add index of max intensity voxel in slice.
+#    5. Add gridlines to first plot of posteriors (on p. 7) to assist locating index in 4.
+#       This was not intentional, but seems helpful.
+#    6. Start using tex notation for symbol \delta.
+#    7. Set font.size in rcParams since setting
+#       size, fontsize, or wrap in plot.text seemed ineffective.
+#    8. Apply same voxel intensity -> brightness for all posteriors.
+#       Unlike the earlier versions, no constant scale before that.
+#
 ## I think the code below means you can run from anywhere at or under \Kornak\bifs
 
+from collections import namedtuple
 import concurrent.futures
 import sys
 import nibabel
@@ -90,6 +105,9 @@ maxIntensity = np.max(refVoxels)  #  for plotting
 # cut out the near 0, which we think is in error
 refCut = 0.1
 refVoxels = refVoxels[refVoxels>refCut]
+
+# hold key posterior image data
+Pimage = namedtuple("Pimage", "scale slice allmax allmin")
 
 def referenceVoxels():
     """return  sorted array of voxels from images scanned"""
@@ -183,7 +201,7 @@ def do_one(i : int):
 
     b = aMRI.bifs
     init_image = slice(b.init_image(), ix = ix, frac = frac)
-    plot_prep(init_image, rescale=False)
+    plot_prep(init_image)   # completely different scale than the others
     plt.title("Raw ASL perfusion CBF")
     plot_post(pp)
 
@@ -206,9 +224,11 @@ def do_one(i : int):
     #plt.title("MNI Reference Image")
     #plot_post(pp)
 
-    variant = 1
     b.load_empirical(EPNAME)
     prior = b.prior_object()
+    alltogether = []  # Holds <Pimage>s
+    slice_min = 1000
+    slice_max = -1000
     for scale in (1e-10, 0.000001, 0.001, 0.01, 0.05, 0.4, 0.8, 1.0, 2.0, 4.0):
         prior.setScale(scale)
         b._invalidate_final()  # would be unnecessary in perfect world
@@ -217,11 +237,19 @@ def do_one(i : int):
         im_slice = slice(b.final_image(), ix=ix, frac=frac)
         deltatop = np.amax(b.final_image()-img0)
         deltabot = np.amin(b.final_image()-img0)
+        #"Pimage", "scale slice allmax allmin")
+        alltogether.append(Pimage(scale, im_slice, deltatop, deltabot))
+        slice_min = min(slice_min, np.min(im_slice))
+        slice_max = max(slice_max, np.max(im_slice))
+
+    variant = 1
+    for pi in alltogether:
+        im_slice = pi.slice
         slice_deltatop = np.amax(im_slice-slice0)
         slice_deltabot = np.amin(im_slice-slice0)
-        print("With scale {} delta top = {}, bottom = {}.".format(scale, deltatop, deltabot))
+        print("With scale {} delta top = {}, bottom = {}.".format(pi.scale, pi.allmax, pi.allmin))
         plt.subplot(121)
-        plot_prep(im_slice)
+        plot_prep(im_slice, vmin=slice_min, vmax=slice_max)
         myTitle = "BIFS reconstructed ASL perfusion CBF #{}".format(variant)
         plt.suptitle(myTitle)
         plt.subplot(122)
@@ -231,7 +259,7 @@ def do_one(i : int):
                  "Emprcl Prior (scale {:5.1e}).\n\n3D Image $\\delta$ top = {:7.3G}, bottom = {:7.3G}.\n\n"
                  "Slice {}% along axis {}\n with intensity [{:5.2f}, {:5.2f}].\n  Max @ {} / {}.\n"
                  "Slice $\\delta$ top = {:7.3G}, bottom = {:7.3G}.\n\n".format(\
-                 scale, deltatop, deltabot,
+                 pi.scale, pi.allmax, pi.allmin,
                  round(frac*100), ix, np.min(im_slice), np.max(im_slice), 
                  np.unravel_index(np.argmax(im_slice), im_slice.shape), im_slice.shape,
                  slice_deltatop, slice_deltabot),
@@ -260,14 +288,14 @@ def slice(image, ix=0, frac=0.5):
         raise RuntimeError("Sorry slice index needs to be one of 0,1,2")
     return np.rot90(im_slice)
 
-def plot_prep(image, rescale=True):
+def plot_prep(image, vmin=None, vmax=None):
     "standard plot preparation for a 2D image"
     fig = Figure(figsize=(10, 8), frameon = False)
     plt.rcParams["axes.grid"] = False # turn off grid lines for images
     plt.rcParams["xtick.color"] = (1,1,1,0)
     plt.rcParams["ytick.color"] = (1,1,1,0)
-    if rescale:
-        plt.imshow(image, cmap = cm.Greys_r, vmin = 0.0, vmax = maxIntensity)
+    if vmax is not None:
+        plt.imshow(image, cmap = cm.Greys_r, vmin = vmin, vmax = vmax)
     else:
         plt.imshow(image, cmap = cm.Greys_r)
 
@@ -304,6 +332,6 @@ def plot_transform(before, after, pp):
 
 
 if __name__ == "__main__":
-    #with concurrent.futures.ProcessPoolExecutor(max_workers=7) as executor:
-    #    executor.map(do_one, range(0, subsample.shape[0]))
-    do_one(0)
+    with concurrent.futures.ProcessPoolExecutor(max_workers=7) as executor:
+        executor.map(do_one, range(0, subsample.shape[0]))
+    #do_one(0)

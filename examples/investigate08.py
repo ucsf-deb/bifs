@@ -1,12 +1,13 @@
 #! /usr/bin/env python3
-#  File: investigate07.py
+#  File: investigate08.py
 #  Author: Ross Boylan
-#  Created: 2020-09-23
+#  Created: 2020-10-02
 
-# Do our local PETs and ADNI PETs have same distribution of focal intensities?
+# Explore the distribution of PET intensities in focal area
 #
 # INPUTS
 #     vox3.npz   voxel intensities in focal area of ADNI PETS (large sample)
+#     ep3.npz  The empirical prior
 #     local PET images
 #     TPM.nii segment map
 #     subsamples.feather  file names and dx for input images
@@ -14,7 +15,7 @@
 #     image files pointed to by subsample, MRI and PET
 
 # OUTPUTS
-#      investigate07.pdf  plots
+#      investigate09.pdf  plots
 
 import sys
 import nibabel
@@ -38,6 +39,7 @@ while TOPDIR.name != "Kornak":
     TOPDIR = TOPDIR.parent
 sys.path.insert(0, str(BIFSDIR))
 
+EPNAME = "ep3.npz"
 VOXNAME = "vox3.npz"
 SEGFILE = TOPDIR / "ExternalData/ycobigo/round3/TPM.nii"
 SUBFILE = TOPDIR / "RKornak" / "subsamples.feather"
@@ -89,7 +91,7 @@ def do_one(i: int, pp):
 
 def go():
     global subsample
-    ofile = ODIR / "investigate07.pdf"
+    ofile = ODIR / "investigate08.pdf"
     print_summary(refVoxels, "reference ADNI PETS (focal only)")
     pp = PdfPages(str(ofile))
     for i in range(0, subsample.shape[0]):

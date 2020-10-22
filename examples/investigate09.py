@@ -17,6 +17,8 @@
 # OUTPUTS
 #      investigate09.pdf  plots
 
+import math
+from math import pi
 import sys
 import nibabel
 import numpy as np
@@ -103,12 +105,15 @@ def do_dist(subj, dx, vs, desc, dists=None, labels=None):
     return dists, labels
 
 
-def do_one(i: int, pp):
+def do_one(i: int, pp, phase_generators):
     """plot subject i's PET distn vs ADNI
-    pp is the backend"""
+    pp is the backend
+    phase_generators is a collection of functions that, when called with dimensions,
+    return a random phase and a description"""
     global subsample, refVoxels
     b = BIFS.bifs()
     b.load_image_file(subsample.at[i, "fn.cbf"])
+    dims = b.init_image().shape
     before = b.init_image().ravel()
     b.load_image(adjustImage(b._init_image))
     after = b.init_image().ravel()
@@ -139,12 +144,20 @@ def do_one(i: int, pp):
         b._invalidate_final()  # would be unnecessary in perfect world
         b.BIFS_MAP()  # unnecessary; call to final_image() triggers it anyway
         dists, labels = do_dist(subject, dx, after, f"posterior, scale={scale}", dists, labels)
+    dists, labels = do_dist(subject, dx, b.phase_image().ravel(), "phase", dists, labels)
+    for f in phase_generators:
+        m, des = f(dims)
+        dists, labels = do_dist(subject, dx, m.ravel(), des, dists, labels)
+        img = np.real(b.bas.itxn(epmean*np.exp(1j*m))).ravel()
+        dists, labels = do_dist(subject, dx, img.ravel(), "img: "+des, dists, labels)
 
     fig = Figure(figsize=(10, 8), frameon = False)  # without this all the plots accumulate
     i = 0
+    nDists = len(dists)
+    nPanels = math.ceil(nDists/4)
     while i<len(dists):
         j = min(len(dists), i+4)
-        plt.subplot(2, 1, 1+i/4)
+        plt.subplot(nPanels, 1, 1+i/4)
         plt.hist(dists[i:j], bins=100, density=True, label=labels[i:j])
         plt.legend()
         i = j
@@ -153,12 +166,35 @@ def do_one(i: int, pp):
     pp.savefig()
     plt.clf()
 
+## phase distributions
+## each function takes a random seed as an argument and returns
+## a function the takes dimensions as an input and returns
+## a random phase array and a description
+def gen_uniform(seed):
+    dist = stats.uniform(loc= -pi, scale= 2*pi)
+    dist.random_state =seed
+    def f(dims):
+        return (dist.rvs(size=dims), "uniform")
+    return f
+
+def gen_uniform_sym(seed):
+    dist = stats.uniform(loc= -pi, scale= 2*pi)
+    dist.random_state = seed
+    def f(dims):
+        m = dist.rvs(size=dims)
+        # enforce Hermitian symmetry
+        dims = np.array(dims) # so I can do math with it
+
+        return (m, "uniform symtrc")
+    return f
+
 def go():
     global subsample
     ofile = ODIR / "investigate09.pdf"
     pp = PdfPages(str(ofile))
+    phase_dists = [gen_uniform(123)]
     for i in range(0, 2): #subsample.shape[0]):
-        do_one(i, pp)
+        do_one(i, pp, phase_dists)
     pp.close()
 
 if __name__ == "__main__":

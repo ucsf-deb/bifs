@@ -130,9 +130,13 @@ class Enforcer:
         nDim = len(dims)
         freshIndices = []  # holds all indices not seen before
         touched = np.full(dims, False) # True if value is seen or set
+        self.toZero = np.full(dims, False)  # cells that should be set to zero
         it = np.nditer(touched, flags = ['multi_index'])
         nTouched = 0
         maxTouched = touched.size
+        # the iteration of this loop is messed up
+        # multiple calls to iternext are not good
+        # but can't just while it.iternext since that skips first point
         while nTouched < maxTouched and not it.finished:
             ix = it.multi_index
             if touched[ix]:
@@ -142,6 +146,8 @@ class Enforcer:
             nTouched += 1
             if min(ix) == 0:
                 # 0 indices hold the mean value and have no corresponding "other" side
+                # always 0 in phase  space
+                self.toZero[ix] = True
                 it.iternext()
                 continue
             # without a tuple this returns a generator
@@ -168,6 +174,7 @@ class Enforcer:
         """Force a phase array a to obey Hermitian symmetry.
         updates a in place and returns it."""
         a[self.targeti] = -a[self.sourcei]
+        a[self.toZero] = 0.0
         return a
 
     def set_magnitude(self, a):

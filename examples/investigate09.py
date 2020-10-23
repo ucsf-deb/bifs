@@ -136,12 +136,20 @@ class Enforcer:
         while nTouched < maxTouched and not it.finished:
             ix = it.multi_index
             if touched[ix]:
+                it.iternext()
                 continue
-            # without a tuple this returns a generator
-            six = tuple( dims[i]-ix[i]-1 for i in range(nDim)) # symmetric index
             touched[ix] = True
             nTouched += 1
-            # setting this first will prevent us from entering "0" distance elements in the list to recode
+            if min(ix) == 0:
+                # 0 indices hold the mean value and have no corresponding "other" side
+                it.iternext()
+                continue
+            # without a tuple this returns a generator
+            six = tuple( dims[i]-ix[i] for i in range(nDim)) # symmetric index
+
+            # setting touched above prevents us from entering "0" distance elements in the list to recode
+            # these arise if a dimension has an even number of elements.  In that case, n/2 gives
+            # both the negative and positive frequency maximum
             if not touched[six]:
                 touched[six] = True
                 nTouched += 1

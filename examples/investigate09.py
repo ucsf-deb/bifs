@@ -17,6 +17,7 @@
 # OUTPUTS
 #      investigate09.pdf  plots
 
+from copy import deepcopy
 import math
 from math import pi
 import sys
@@ -62,7 +63,7 @@ refVoxels = np.load(VOXNAME)["samp"]
 
 def print_summary(x, desc):
     ptiles = [1, 2.5, 5, 10, 25, 50, 75, 90, 95, 97.5, 99]
-    print(" {} {}\n SS = {:10.5e}\n Quantiles {} ({})".format(desc, stats.describe(x), 
+    print(" {} {}\n    SS = {:10.5e}\n    Quantiles {} ({})".format(desc, stats.describe(x), 
                                            np.sum(np.square(x)),
                                            stats.scoreatpercentile(x, ptiles).round(2),
                                            ptiles))
@@ -95,7 +96,7 @@ def adjustImage(img):
 def do_dist(subj, dx, vs, desc, dists=None, labels=None):
     "handle all but final plot for a particular set of voxels vs"
     if dists is None:
-        print(f"Whole image Results for {subj} ({dx}):")
+        print(f"******Whole image Results for {subj} ({dx})******")
         dists = []
     if labels is None:
         labels = []
@@ -105,15 +106,102 @@ def do_dist(subj, dx, vs, desc, dists=None, labels=None):
     return dists, labels
 
 
-def do_one(i: int, pp, phase_generators):
+class Enforcer:
+    """Assure Hermitian symmetry
+    It includes the following instance variables once setup:
+    dims <ndarray> shape of arrays it will enforce Hermitian symmetry on. 
+    sourcei tuple of indices from which the values will be drawn
+    targeti corresponding indices that will get an appropriate conjugate value from the source
+    nSource number of constraints imposed
+
+    Anticipated useage pattern:
+    Initialize once with the dimensions of arrays it will get.
+    Call set_phase or set_magnitude repeatedly as appropriate on
+    arrays of the same size as the initial dimensions.
+
+    Note that set_* methods modify the array that is their argument to 
+    enforce the desired symmetry.
+    """
+    def __init__(self, dims):
+        "dims is a collection giving shape of arrays to be considered"
+        dims = np.array(dims, dtype=np.int16)
+        assert np.all(dims>0)
+        self.dims = dims
+        nDim = len(dims)
+        freshIndices = []  # holds all indices not seen before
+        touched = np.full(dims, False) # True if value is seen or set
+        it = np.nditer(touched, flags = ['multi_index'])
+        nTouched = 0
+        maxTouched = touched.size
+        while nTouched < maxTouched and not it.finished:
+            ix = it.multi_index
+            if touched[ix]:
+                continue
+            # without a tuple this returns a generator
+            six = tuple( dims[i]-ix[i]-1 for i in range(nDim)) # symmetric index
+            touched[ix] = True
+            nTouched += 1
+            # setting this first will prevent us from entering "0" distance elements in the list to recode
+            if not touched[six]:
+                touched[six] = True
+                nTouched += 1
+                freshIndices.append(ix)
+            it.iternext()
+        self.nSource = len(freshIndices)
+        self.sourcei = tuple(np.zeros(self.nSource, dtype=np.int16) for i in range(nDim))
+        self.targeti = deepcopy(self.sourcei)
+        for ir in range(self.nSource):
+            fi = freshIndices[ir]
+            for id in range(nDim):
+                self.sourcei[id][ir] = fi[id]
+                self.targeti[id][ir] = dims[id] - fi[id] -1
+
+    def set_phase(self, a):
+        """Force a phase array a to obey Hermitian symmetry.
+        updates a in place and returns it."""
+        a[self.targeti] = -a[self.sourcei]
+        return a
+
+    def set_magnitude(self, a):
+        """Force a magnitude/modulus array a to obey Hermitian symmetry.
+        updates a in place and returns it."""
+        a[self.targeti] = a[self.sourcei]
+        return a
+
+PHASE_GENERATOR = None  # will hold an instance of the class below
+
+class PG:
+    "produce random phase matrices with description"
+
+    def __init__(self, dims, seed):
+        """dims is the shape of the arrays to process
+        seed is the random seed
+        """
+        self.dims = dims
+        self.enf = Enforcer(dims)
+        self.uniform = stats.uniform(loc= -pi, scale= 2*pi)
+        self.uniform.random_state = seed
+
+    def gen(self):
+        p = self.uniform.rvs(size=self.dims)
+        yield (p, "uniform")
+        self.enf.set_phase(p)
+        yield (p, "uniform symm")
+
+
+
+def do_one(i: int, pp):
     """plot subject i's PET distn vs ADNI
     pp is the backend
     phase_generators is a collection of functions that, when called with dimensions,
     return a random phase and a description"""
+    global PHASE_GENERATOR
     global subsample, refVoxels
     b = BIFS.bifs()
     b.load_image_file(subsample.at[i, "fn.cbf"])
     dims = b.init_image().shape
+    if PHASE_GENERATOR is None:
+        PHASE_GENERATOR = PG(dims, 12890)
     before = b.init_image().ravel()
     b.load_image(adjustImage(b._init_image))
     after = b.init_image().ravel()
@@ -145,8 +233,7 @@ def do_one(i: int, pp, phase_generators):
         b.BIFS_MAP()  # unnecessary; call to final_image() triggers it anyway
         dists, labels = do_dist(subject, dx, after, f"posterior, scale={scale}", dists, labels)
     dists, labels = do_dist(subject, dx, b.phase_image().ravel(), "phase", dists, labels)
-    for f in phase_generators:
-        m, des = f(dims)
+    for  m, des in PHASE_GENERATOR.gen():
         dists, labels = do_dist(subject, dx, m.ravel(), des, dists, labels)
         img = np.real(b.bas.itxn(epmean*np.exp(1j*m))).ravel()
         dists, labels = do_dist(subject, dx, img.ravel(), "img: "+des, dists, labels)
@@ -166,35 +253,13 @@ def do_one(i: int, pp, phase_generators):
     pp.savefig()
     plt.clf()
 
-## phase distributions
-## each function takes a random seed as an argument and returns
-## a function the takes dimensions as an input and returns
-## a random phase array and a description
-def gen_uniform(seed):
-    dist = stats.uniform(loc= -pi, scale= 2*pi)
-    dist.random_state =seed
-    def f(dims):
-        return (dist.rvs(size=dims), "uniform")
-    return f
-
-def gen_uniform_sym(seed):
-    dist = stats.uniform(loc= -pi, scale= 2*pi)
-    dist.random_state = seed
-    def f(dims):
-        m = dist.rvs(size=dims)
-        # enforce Hermitian symmetry
-        dims = np.array(dims) # so I can do math with it
-
-        return (m, "uniform symtrc")
-    return f
 
 def go():
     global subsample
     ofile = ODIR / "investigate09.pdf"
     pp = PdfPages(str(ofile))
-    phase_dists = [gen_uniform(123)]
     for i in range(0, 2): #subsample.shape[0]):
-        do_one(i, pp, phase_dists)
+        do_one(i, pp)
     pp.close()
 
 if __name__ == "__main__":

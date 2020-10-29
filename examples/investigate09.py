@@ -144,14 +144,21 @@ class Enforcer:
                 continue
             touched[ix] = True
             nTouched += 1
-            if min(ix) == 0:
-                # 0 indices hold the mean value and have no corresponding "other" side
-                # always 0 in phase  space
+
+            # six is the symmetric index for ix
+            # indices of 0 have no  corresponding position
+            # and so we just flip the remaining indices
+            # need the tuple to make it a tuple rather than a generator
+            six = tuple((dims[i]-ix[i] if ix[i]>0 else 0) for i in range(nDim))
+            if np.all(np.equal(ix, np.array(six))):
+                # either ix is (0, 0, 0)
+                # or it is (n1/2, n2/2, ...) where each dimension is even
+                # when a dimension is even the center point represents the 
+                # positive and negative maximum frequency!
                 self.toZero[ix] = True
                 it.iternext()
                 continue
-            # without a tuple this returns a generator
-            six = tuple( dims[i]-ix[i] for i in range(nDim)) # symmetric index
+            # and the steps that follow need six as a tuple, not an array
 
             # setting touched above prevents us from entering "0" distance elements in the list to recode
             # these arise if a dimension has an even number of elements.  In that case, n/2 gives
@@ -168,7 +175,7 @@ class Enforcer:
             fi = freshIndices[ir]
             for id in range(nDim):
                 self.sourcei[id][ir] = fi[id]
-                self.targeti[id][ir] = dims[id] - fi[id]
+                self.targeti[id][ir] = dims[id] - fi[id] if fi[id] > 0 else 0
         # since getting at indices stored as tuples of arrays is painful
         # provide an alternate form as array
         self.sourcea = np.array(freshIndices)

@@ -168,7 +168,13 @@ class Enforcer:
             fi = freshIndices[ir]
             for id in range(nDim):
                 self.sourcei[id][ir] = fi[id]
-                self.targeti[id][ir] = dims[id] - fi[id] -1
+                self.targeti[id][ir] = dims[id] - fi[id]
+        # since getting at indices stored as tuples of arrays is painful
+        # provide an alternate form as array
+        self.sourcea = np.array(freshIndices)
+        self.targeta = dims - self.sourcea
+        self.zeroa = np.array(self.toZero.nonzero()).T
+
 
     def set_phase(self, a):
         """Force a phase array a to obey Hermitian symmetry.
@@ -176,6 +182,51 @@ class Enforcer:
         a[self.targeti] = -a[self.sourcei]
         a[self.toZero] = 0.0
         return a
+
+    def _print_symm(self, a, i):
+        findex = "{:4d}"*3
+        i = self.badMirrors[i]
+        ix = self.sourcea[i]
+        tix = self.targeta[i]
+        print((findex+" = {:10.6f}| {:10.6f}  = "+findex).format(*ix, a[tuple(ix)], a[tuple(tix)], *tix))
+
+    def check_phase(self, a, nobs=10):
+        """check if a satisfies the phase symmmetry conditions
+        nobs limit number of reported failures"""
+        bad = False
+        findex = "{:4d}"*3
+        self.badMirrors = np.nonzero(np.logical_not(np.isclose(a[self.targeti], -a[self.sourcei])))[0]
+        bad = np.any(self.badMirrors)
+        if bad:
+            nBad = self.badMirrors.size
+            print("{:6.1%} = {:,d} of {:,d} expected symmetries fail.".format(nBad/self.nSource, nBad, self.nSource))
+            for i in range(min(nobs, nBad)):
+                self._print_symm(a, i)
+            if i < nBad:
+                print("...")
+                j = max(i, nBad - nobs)
+                for i in range(j, nBad):
+                    self._print_symm(a, i)
+            print()
+        xx = a[self.toZero]
+        self.badZeros = np.nonzero(np.logical_not(np.isclose(a[self.toZero], 0)))[0]
+        if np.any(self.badZeros):
+            nBad = self.badZeros.size
+            nZero = self.toZero.sum()
+            bad = True
+            print("{:6.1%} = {:,d} of {:,d} expected zeros fail.".format(nBad/nZero, nBad, nZero))
+            for i in range(min(nobs, nBad)):
+                i2 = self.zeroa[self.badZeros[i], :]
+                print((findex+" {:10.6f}").format(*i2, a[tuple(i2)]))
+            if i < nBad:
+                print("...")
+                j = max(i, nBad - nobs)
+                for i in range(j, nZero):
+                    i2 = self.zeroa[self.badZeros[j], : ]
+                    print((findex+" {:10.6f}").format(*i2, a[tuple(i2)]))
+                    print((findex+" {:10.6f}").format(*self.zeroa[i,:], a[tuple(self.zeroa[i,:])]))
+            print()
+        return bad
 
     def set_magnitude(self, a):
         """Force a magnitude/modulus array a to obey Hermitian symmetry.
@@ -223,6 +274,7 @@ def do_one(i: int, pp):
     b.load_empirical(EPNAME)
     prior = b.prior_object()
     epmean = prior.mean()  # "origin" set to 0
+    isBad = PHASE_GENERATOR.enf.check_phase(b.phase_image())
     prior_as_image = np.real(b.bas.itxn(epmean*np.exp(1j*b.phase_image()))).ravel()
     prior_no_phase = np.real(b.bas.itxn(epmean)).ravel()
 

@@ -298,7 +298,7 @@ def do_one(i: int, pp):
         prior.setScale(scale)
         b._invalidate_final()  # would be unnecessary in perfect world
         b.BIFS_MAP()  # unnecessary; call to final_image() triggers it anyway
-        dists, labels = do_dist(subject, dx, after, f"posterior, scale={scale}", dists, labels)
+        dists, labels = do_dist(subject, dx, b.final_image().ravel(), f"posterior, scale={scale}", dists, labels)
     dists, labels = do_dist(subject, dx, b.phase_image().ravel(), "phase", dists, labels)
     for  m, des in PHASE_GENERATOR.gen():
         dists, labels = do_dist(subject, dx, m.ravel(), des, dists, labels)

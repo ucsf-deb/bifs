@@ -316,13 +316,15 @@ def do_one(i: int, pp):
     i = 0
     nDists = len(dists)
     nPanels = math.ceil(nDists/4)
+    topCut = 3.5  # the phase ranges all the way up to pi
+    truncDists = [x[x<topCut] for x in dists]
     while i<len(dists):
         j = min(len(dists), i+4)
         plt.subplot(nPanels, 1, 1+i/4)
-        plt.hist(dists[i:j], bins=100, density=True, label=labels[i:j])
+        plt.hist(truncDists[i:j], bins=100, density=True, label=labels[i:j])
         plt.legend()
         i = j
-    plt.suptitle("Focal voxel intensities {} {}".format(subject, dx))
+    plt.suptitle("Distribution of voxel or phase values < {} {} {}".format(topCut, subject, dx))
 
     pp.savefig()
     plt.clf()
@@ -332,7 +334,7 @@ def go():
     global subsample
     ofile = ODIR / "investigate09.pdf"
     pp = PdfPages(str(ofile))
-    for i in range(0, 2): #subsample.shape[0]):
+    for i in range(subsample.shape[0]):
         do_one(i, pp)
     pp.close()
 

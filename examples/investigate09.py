@@ -15,7 +15,10 @@
 #     image files pointed to by subsample, MRI and PET
 
 # OUTPUTS
-#      investigate09.pdf  plots
+#      investigate09b.pdf  plots
+
+# HISTORY
+# 2020-11-25 Set (0,0,0) modulus for prior to that of the image when using the means without Bayes
 
 from copy import deepcopy
 import math
@@ -278,9 +281,13 @@ def do_one(i: int, pp):
     before = b.init_image().ravel()
     b.load_image(adjustImage(b._init_image))
     after = b.init_image().ravel()
+    img_mod0 = b.mod_image()[0, 0, 0]  # overall mean intensity
     b.load_empirical(EPNAME)
     prior = b.prior_object()
-    epmean = prior.mean()  # "origin" set to 0
+    epmean = prior.mean().copy()  # "origin" set to 0
+    # copy is essential; otherwise it is just an alias and the next step
+    # will not set the value persistently.
+    epmean[0, 0, 0] = img_mod0
     isBad = PHASE_GENERATOR.enf.check_phase(b.phase_image())
     prior_as_image = np.real(b.bas.itxn(epmean*np.exp(1j*b.phase_image()))).ravel()
     prior_no_phase = np.real(b.bas.itxn(epmean)).ravel()
@@ -324,7 +331,7 @@ def do_one(i: int, pp):
         plt.hist(truncDists[i:j], bins=100, density=True, label=labels[i:j])
         plt.legend()
         i = j
-    plt.suptitle("Distribution of voxel or phase values < {} {} {}".format(topCut, subject, dx))
+    plt.suptitle("Distribution of voxel or phase values < {} {} {} (after centering 0,0,0 modulus)".format(topCut, subject, dx))
 
     pp.savefig()
     plt.clf()
@@ -332,7 +339,7 @@ def do_one(i: int, pp):
 
 def go():
     global subsample
-    ofile = ODIR / "investigate09.pdf"
+    ofile = ODIR / "investigate09b.pdf"
     pp = PdfPages(str(ofile))
     for i in range(subsample.shape[0]):
         do_one(i, pp)

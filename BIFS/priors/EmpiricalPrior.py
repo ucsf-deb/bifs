@@ -18,7 +18,6 @@ class EmpiricalPrior(AdjustmentPrior):
         super().__init__(basis, bvec, scale, scale_origin)
         self._emean = data["mean"]
         self._esd = data["sd"]
-        # I am not sure that 0 is the right index for the origin
         self._iorigin = tuple(0 for x in range(len(self._emean.shape)))
         
         # Assure all caches exist

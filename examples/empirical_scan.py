@@ -15,9 +15,19 @@
 #
 # OUTPUTS
 # ep3.npz  The empirical prior
+# ep3-phase.npz distribution of phase and correlation phase and modulus
+#    This is a separate file for now so that existing work that uses modulus only
+#    can load that info faster.
 # vox3.npz sample  of voxels
 #
 ## I think the code below means you can run from anywhere at or under \Kornak\bifs
+## but output files go to local dir.
+#
+# HISTORY
+# 2020-11-26 
+#    adapt to new interface for FeedScanner
+#    output correlation of phase
+#    output mean and sd of phase
 
 ADNI = r"ExternalData\ycobigo\round3\ADNI"
 
@@ -39,6 +49,7 @@ ADNIDIR = TOPDIR / ADNI
 SEGFILE = TOPDIR / "ExternalData/ycobigo/round3/TPM.nii"
 
 EPNAME = "ep3.npz"
+PHASENAME = "ep3-phase.npz"
 VOXNAME = "vox3.npz"
 
 import BIFS
@@ -75,15 +86,21 @@ def go():
         samp_frac, unmask_frac))
     start_t = time.perf_counter()
     print("will sample {:.1%} of unmasked voxels.".format(samp_frac/unmask_frac))
-    s = Scnr(mypaths(), samp_frac, image_mask=mask)
+    s = Scnr(mypaths(), samp_frac, image_mask=mask, corr=True)
     end_t = time.perf_counter()
     wall_t = end_t - start_t
-    print("\n{:7.1f}s/image.  {} images in {:10.1f} seconds.".format(wall_t/s.nImages, s.nImages, wall_t))
+    print("\n{:7.1f}s/image.  {} images in {:10.1f} seconds.".format(wall_t/s.nImages(), s.nImages(), wall_t))
     # and then output results to disk.
-    np.savez(EPNAME, mean=s.mns, sd=s.sds)
-    print("{} gets 2 {} matrices named mean and sd".format(EPNAME, s.mns.shape))
-    np.savez(VOXNAME, samp=np.array(s.vox))
-    print("{} gets {:,d} sample voxels named samp".format(VOXNAME, len(s.vox)))
+    accum = s.modulus()
+    np.savez(EPNAME, mean=accum.mean(), sd=accum.sd())
+    print("{} gets 2 {} matrices named mean and sd".format(EPNAME, accum.mean().shape))
+    vox = s.voxels()
+    np.savez(VOXNAME, samp=np.array(vox))
+    print("{} gets {:,d} sample voxels named samp".format(VOXNAME, len(vox)))
+
+    pa = s.phase()
+    np.savez(PHASENAME, corr=s.corr(), mean_phase=pa.mean(), sd_phase=pa.sd())
+    print("{} gets 3 matrices named corr, mean_phase, and sd_phase".format(PHASENAME))
 
 if __name__ == "__main__":
     go()

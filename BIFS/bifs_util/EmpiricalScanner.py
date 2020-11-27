@@ -9,19 +9,60 @@ from BIFS import bifs
 from numpy.random import Generator, PCG64
 import numpy as np
 
+class RunningMean:
+    """Accepts values one at a time and computes the mean and sd of all values seen so far.
+    The inputs are arrays, which must all have the same shape.  Mean and sd are accumulated
+    separately for each cell in the array.
+    """
+    def __init__(self, sd=True):
+        """If sd is false do not accumulate second moment.
+        Clients should not request information related to the sd in that case.
+        """
+        self.n = 0
+        self._second = sd  # as in second moment
+
+    def observation(self, x):
+        "x is an array-like object which is considered a single observation"
+        self.n += 1
+        if self.n == 1:
+            self._mns = x
+            if self._second:
+                # ss will turn into a matrix later
+                self._ss = 0.0
+        else:
+            lastdelta = x-self._mns
+            self._mns += (lastdelta)/self.n
+            if self._second:
+                # element by element multiplication in next line
+                self._ss += lastdelta*(x-self._mns)
+
+    def mean(self):
+        "return array of means so far"
+        return self._mns
+
+    def sd(self):
+        "return array of sd so far"
+        # element by element square root
+        return np.sqrt(self._ss/(self.n-1))
+
 class AbstractEmpiricalScanner:
-    """ This class consumes a list of images to generate an empirical distribution by voxel.
+    """ This class consumes a list of images and computes statistics on them.  Each statistic is computed separately for 
+    each voxel, i.e. the result in the (2, 5) cell refers to all the (2, 5) cells in all the images (or their Fourier counterparts).
     All images must have the same dimensions, and they should be aligned with each other
     for the results to be meaningful.
 
+    The mean and sd of the modulus is always accumulated; values for the phase can be requested as well, as can the correlations between the
+    phase and modulus (again, at each point in Fourier space).
+
+    Finally, one can request a sample of the original voxels in image space.
+
     Concrete classes provide particular ways to get images.  They then pass the images to _statsAccumulate and,
     optionally, _voxAccumulate (possibly different images for each) and call
-    _post when done.  At that point, and only that point, are results available in self.mns and self.sds
-    and, if requested, self.vox.
+    _post when done.  At that point, and only that point, are results available from self.modulus() and, if requested,
+    self.phase(), self.corr(), and self.voxels().
 
-    mns and sds are arrays in the same shape as the images with the mean and sd at each pixel.
-    vox is a 1-D array of voxel values, sorted in ascending order.  If sampleFraction<1 it will be a subset
-    of all values seen.
+    For backward compatility, self.mns, self.sds, and self.vox accessor return the mean and sd of self.modulus() and the voxels.
+    Don't rely on that in new code.
 
     image_mask optionally indicates which areas of the image to ignore.
         It must be a boolean array with the same shape as image files.
@@ -32,18 +73,27 @@ class AbstractEmpiricalScanner:
         Note the "mask" here is not a mask in the numpy sense of a masked array, which
         concerns missing values.
 
-    voxel sampling should be done only from the non-ignored regions, but the number sampled will be based on
+    voxel sampling only considers the non-ignored regions, but the number sampled will be based on
         the total voxel count before masking.
     """
-    def __init__(self, sampleFraction=0, seed=85792359, image_mask=None):
+    def __init__(self, sampleFraction=0, seed=85792359, image_mask=None, phase=False, corr=False):
         """Setup for scan of images
         if sampleFraction is >0 (and it should be <=1) then that fraction of the image voxels will be retained.
         In that case, seed is used to set the random number generator.
+        If phase is true, accumulate statistics on the phase as well as the modulus.
+        If corr is true, accumulate statistics on the phase and its covariance with the modulus.
+        Covariance is on  a cell by cell basis.
         """
-        self.nImages = 0
         self.sampleFraction = sampleFraction
+        self._modulus = RunningMean()
+        if phase or corr:
+            self._getPhase = True
+            self._phase = RunningMean()
+        if corr:
+            self._getcorr = True
+            self._xy = RunningMean(sd=False)
         if sampleFraction>0:
-            self._vox = []
+            self._voxels = []
             self._rg = Generator(PCG64(seed))
         self.masking = (image_mask is not None)
         if self.masking:
@@ -53,13 +103,45 @@ class AbstractEmpiricalScanner:
         self._mismatch = set()  # holds keys that had a mismatch
         self._bifs = bifs()
 
+    def modulus(self)->RunningMean:
+        return self._modulus
+
+    def phase(self)->RunningMean:
+        return self._phase
+
+    def corr(self):
+        "Note we return the correlation matrix itself, not an accumulator"
+        return (self._xy.mean()-self._modulus.mean()*self._phase.mean())/ \
+            (self._modulus.sd()*self._phase.sd())
+
+
+    def voxels(self):
+        "return 1-d array sorted by intensity"
+        return self._voxels
+
+    def __getattr__(self, name):
+        ## backward compatibility only
+        if name == "mns":
+            return self.modulus().mean()
+        if name == "sds":
+            return self.modulus().sd()
+        if name == "vox":
+            return self.voxels()
+        raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, name))
+
     def _do_one(self, file):
         "file is a path-like object. Read it in and accumulate information"
         self._bifs.load_image_file(file)
         if self.masking:
             # dirty trick.  But doesn't invalidate anything else in _bifs.
             self._bifs._init_image[self.image_mask] = 0.0
-        self._statsAccumulate(self._bifs.mod_image())
+        self._modulus.observation(self._bifs.mod_image())
+        if self._getPhase:
+            self._phase.observation(self._bifs.phase_image())
+            if self._getcorr:
+                # next multiplication is element by element
+                self._xy.observation(self._bifs.phase_image()*self._bifs.mod_image())
+
         if self.sampleFraction>0:
             self._voxAccumulate(self._bifs.init_image())
         hdr = self._bifs.read_imfile.header
@@ -82,26 +164,6 @@ class AbstractEmpiricalScanner:
                 if (v1 != v2).any():
                     self._mismatch.add(key)
 
-
-    def _statsAccumulate(self, m):
-        """
-        Accumulate running statistics on the values of m in different images
-        self.nImages gives the current image number; it starts at 1.
-        m is ordinarily the modulus, and must conform to numpy array protocols
-
-        Updates self._mns and self._ss currently.
-        """
-        self.nImages += 1
-        if self.nImages == 1:
-            self._mns = m
-            # ss will turn into a matrix later
-            self._ss = 0.0
-        else:
-            lastdelta = m-self._mns
-            self._mns += (lastdelta)/self.nImages
-            # element by element multiplication in next line
-            self._ss += lastdelta*(m-self._mns)
-
     def _voxAccumulate(self, m):
         """accumulate voxel values.
         In the most likely case, the voxels are from image space while the empirical prior
@@ -112,12 +174,12 @@ class AbstractEmpiricalScanner:
         nSamp = int(m.size*self.sampleFraction)
 
         if self.masking:
-            self._vox.append(self._rg.choice(m[self.image_keep], nSamp))
+            self._voxels.append(self._rg.choice(m[self.image_keep], nSamp))
         else:
             # m.ravel is not an acceptable first argument to choice
             # actually, it should have been np.ravel(m)
             # m.flatten and the mask selection above both create copies, unfortunately
-            self._vox.append(self._rg.choice(m.flatten(), nSamp))
+            self._voxels.append(self._rg.choice(m.flatten(), nSamp))
 
 
     def _statsPost(self):
@@ -127,25 +189,26 @@ class AbstractEmpiricalScanner:
 
         Results returned as arrays self.mns and self.sds.
         """
-        self.mns = self._mns
-        # element by element square root
-        self.sds = np.sqrt(self._ss/(self.nImages-1))
-        del self._mns
-        del self._ss
+        # currently handled by RunningMean instances automatically
+        pass
 
     def _voxPost(self):
         """
         Finalize accumulated voxels.
         """
         if self.sampleFraction>0:
-            self.vox = np.concatenate(self._vox)
-            self.vox.sort()
-            del self._vox
+            self._voxels = np.concatenate(self._voxels)
+            self._voxels.sort()
+
 
     def _post(self):
         "wrap up all processing"
         self._statsPost()
         self._voxPost()
+
+    def nImages(self) -> int:
+        "number of images processed so far = number of files read unless error"
+        return self._modulus.n
 
 
 class EmpiricalScanner(AbstractEmpiricalScanner):
@@ -165,8 +228,8 @@ class EmpiricalScanner(AbstractEmpiricalScanner):
 
     We also check that the headers are consistent.  This works for .nii files, and may or may not for others.
     """
-    def __init__(self, sampleFraction=0, seed=85792359, topDir=".", matchFile="", exclude=None, image_mask=None):
-        super().__init__(sampleFraction, seed, image_mask)
+    def __init__(self, sampleFraction=0, seed=85792359, topDir=".", matchFile="", exclude=None, image_mask=None, phase=False, corr=False):
+        super().__init__(sampleFraction, seed, image_mask, phase, corr)
         self._topDir = topDir
         self._matchRE = re.compile(matchFile, re.I)
         if exclude:
@@ -206,8 +269,8 @@ class EmpiricalScanner(AbstractEmpiricalScanner):
 
 class FeedScanner(AbstractEmpiricalScanner):
     """A scanner that accepts anything iterable as a list of file names to scan"""
-    def __init__(self, files, sampleFraction=0, seed=85792359, image_mask=None):
-        super().__init__(sampleFraction, seed, image_mask)
+    def __init__(self, files, sampleFraction=0, seed=85792359, image_mask=None, phase=False, corr=False):
+        super().__init__(sampleFraction, seed, image_mask, phase, corr)
         self._files = files
         self.go()
 

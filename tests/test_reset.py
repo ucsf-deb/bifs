@@ -3,17 +3,17 @@ import os
 import numpy as np
 
 def test_simple():
-	b = bifs.bifs()
+	b = bifs.BIFS()
 	b.load_image_file("tests/images/lena512.bmp")
 	b.BIFS_MAP()
 	assert (b.prior_object().var() == b.prior_object().sd()**2).all()
 
 def test_reset():
-	b = bifs.bifs()
+	b = bifs.BIFS()
 	b.load_image_file("tests/images/lena512.bmp")
 	b.BIFS_MAP()
 
-	b2 = bifs.bifs()
+	b2 = bifs.BIFS()
 	b2.load_image_file("tests/images/lena512.bmp")
 	b2.BIFS_MAP()
 	b2.set_prior_func_type("Linear Decay")
@@ -24,11 +24,11 @@ def test_reset():
 	assert b.prior_object().name() != b2.prior_object().name()
 
 def test_reset2():
-	b = bifs.bifs()
+	b = bifs.BIFS()
 	b.load_image_file("tests/images/lena512.bmp")
 	b.BIFS_MAP()
 
-	b2 = bifs.bifs()
+	b2 = bifs.BIFS()
 	b2.set_prior_func_type("Linear Decay")
 	b2.load_image_file("tests/images/lena512.bmp")
 	b2.BIFS_MAP()
@@ -39,7 +39,7 @@ def test_reset2():
 	assert b.prior_object().name() != b2.prior_object().name()
 
 def test_inverse():
-	b = bifs.bifs()
+	b = bifs.BIFS()
 	b.set_prior_func_type("Banded Inverse Power Decay")
 	b.load_image_file("tests/images/lena512.bmp")
 	b.BIFS_MAP()

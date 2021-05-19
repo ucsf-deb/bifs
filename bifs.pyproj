@@ -14,6 +14,7 @@
     <SuppressEnvironmentCreationPrompt>True</SuppressEnvironmentCreationPrompt>
     <TestFramework>Pytest</TestFramework>
     <IsWindowsApplication>False</IsWindowsApplication>
+    <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,32 +26,36 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="bifs\" />
-    <Folder Include="BIFS\bases\" />
-    <Folder Include="BIFS\bifs_util\" />
-    <Folder Include="BIFS\priors\" />
+    <Folder Include="bifs\bases\" />
+    <Folder Include="bifs\bifs_util\" />
+    <Folder Include="bifs\priors\" />
     <Folder Include="examples\" />
     <Folder Include="tests\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="LICENSE" />
     <Content Include="MANIFEST.in" />
+    <Content Include="pyrpoject.toml">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="README.md" />
     <Content Include="README.rst" />
+    <Content Include="requirements.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BIFS\bases\fourier.py" />
+    <Compile Include="bifs\bases\fourier.py" />
     <Compile Include="bifs\bifs.py" />
-    <Compile Include="BIFS\bifs_gui.py" />
+    <Compile Include="bifs\bifs_gui.py" />
     <Compile Include="bifs\bifs_util\EmpiricalScanner.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="BIFS\bifs_util\util.py" />
-    <Compile Include="BIFS\priors\AbstractPrior.py" />
-    <Compile Include="BIFS\priors\FunctionalPrior.py" />
+    <Compile Include="bifs\bifs_util\util.py" />
+    <Compile Include="bifs\priors\AbstractPrior.py" />
+    <Compile Include="bifs\priors\FunctionalPrior.py" />
     <Compile Include="bifs\priors\EmpiricalPrior.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="BIFS\pset_dialogs.py" />
+    <Compile Include="bifs\pset_dialogs.py" />
     <Compile Include="bifs\test.py" />
     <Compile Include="bifs\__init__.py" />
     <Compile Include="examples\bifs_cl_1D.py" />
@@ -83,6 +88,17 @@
     <Compile Include="examples\viewer2.py" />
     <Compile Include="setup.py" />
     <Compile Include="tests\test_reset.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Interpreter Include="env\">
+      <Id>env</Id>
+      <Version>3.9</Version>
+      <Description>env (Python 3.9 (64-bit))</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X64</Architecture>
+    </Interpreter>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

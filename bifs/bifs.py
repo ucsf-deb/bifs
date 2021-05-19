@@ -4,9 +4,6 @@
 ###         Class for performing Bayesian Image         ###
 ###         Restoration in Fourier Space (BIFS)         ###
 
-# for debugging
-import traceback
-
 
 import numpy as np
 import scipy as sp
@@ -24,9 +21,9 @@ from .priors import EmpiricalPrior as EP
 
 import copy
 
-class bifs:
+class BIFS:
     """
-    Class bifs for performing Bayesian image restoration
+    Class BIFS for performing Bayesian image restoration
     in k-space
 
      Class Variables
@@ -281,7 +278,7 @@ class bifs:
 
         Does not copy the image or filename
         """
-        newbifs = bifs()
+        newbifs = BIFS()
         newbifs.param_func_type = self.param_func_type
         newbifs.prior = self.prior
         newbifs.prior_scale = self.prior_scale

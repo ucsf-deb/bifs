@@ -403,7 +403,8 @@ class BIFS:
         
         if self.basis == "Fourier": # Add other basis functions as else...
             self._mod_image = abs(self.k_image()) # Get modulus image in k-space
-            self._phase_image = sp.angle(self.k_image()) # Get phase image in k-space
+            # sp.angle is deprecated
+            self._phase_image = np.angle(self.k_image()) # Get phase image in k-space
             # self.data_std =  self.likelihood_scale*self.mod_image
             self.image_exists = True
 

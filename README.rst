@@ -5,12 +5,12 @@ This project is an implementation of Bayesian imaging in Fourier Space
 (BIFS). For details on the method see, e.g.:
 
 * J. Kornak, K. Young, N. Schuff, A. Du, A. A. Maudsley, M. W. Weiner.
-   K-Bayes Reconstruction for Perfusion MRI I: Concepts and Application. Journal of Digital Imaging. (2009) Feb 10
+  K-Bayes Reconstruction for Perfusion MRI I: Concepts and Application. Journal of Digital Imaging. (2009) Feb 10
 * J. Kornak, K. Young.
-   K-Bayes Reconstruction for Perfusion MRI II: Modeling Motivation
-   and Technical Development. Journal of Digital Imaging. (2009) Mar 10
+  K-Bayes Reconstruction for Perfusion MRI II: Modeling Motivation
+  and Technical Development. Journal of Digital Imaging. (2009) Mar 10
 * J. Kornak , K. Young, B.J. Soher, A.A. Maudsley.
-   Bayesian k -space-time reconstruction of MR spectroscopic imaging for enhanced resolution. IEEE Trans Med Imaging. 2010 Jul;29(7):1333-50.
+  Bayesian k -space-time reconstruction of MR spectroscopic imaging for enhanced resolution. IEEE Trans Med Imaging. 2010 Jul;29(7):1333-50.
 
 The basic idea is to perform something like a Bayesian image
 restoration, that would ordinarily use an optimization technique

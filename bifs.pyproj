@@ -36,7 +36,6 @@
     <Content Include="MANIFEST.in" />
     <Content Include="README.md" />
     <Content Include="README.rst" />
-    <Content Include="ROSS.rst" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BIFS\bases\fourier.py" />

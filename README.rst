@@ -27,38 +27,13 @@ step can be performed independently on the modes, greatly increasing
 efficiency.
 
 
-Installation
-------------
-
-We are currently working on making the package fully PyPi compatible
-so it will be easy to install, including installing all dependencies
-In the meantime one can just get the package from GitHub (e.g. via
-clone) and manually install the dependencies, e.g. via the pip command
-(a good way to automatically install a number of the dependencies is to
-start with an environment designed for scientific processing in
-Python, e.g. Enthought's Canopy environment).
-
-The currently required packages are (BIFS is known to work with
-the following versions but will typically work with many earlier
-versions as well):
-Python 3
-numpy 1.15.4-2
-scipy 1.2.1-1
-matplotlib 2.2.4-2
-imageio 2.4.1
-jsonpickle 1.2
-pyqt5 5.7.1-1 (note: some version of PyQT 5 is required, i.e.
-              (the package will not work with PyQT 4)
-
-
 Using the Package
 -----------------
 
 Once the dependencies are installed and the BIFS package has
 been obtained from GitHub one can go to the directory containing
 the class definition file, bifs.py, and the BIFS GUI, bifs_gui.py
-(on typical install that will be ../bifs/src:) and run the GUI
-via the command:
+and run the GUI via the command:
 
 python bifs_gui.py
 
@@ -102,7 +77,7 @@ The package is separated into a class representing the calculation
 engine and a main GUI class. The files contained in the package
 are:
 
-BIFS/			- python package directory
+bifs/			- python package directory
 	bifs.py           - the main class containing the BIFS functions
 
 	bifs_gui.py       - the gui interface to bifs.py
@@ -137,7 +112,7 @@ examples/		- sample code that uses BIFS package
 priors/	- definitions of different types of prior distributions
 	FunctionalPrior.py  - priors based on smooth functions
 
-tests/  -  test scripts.  For the pytests framework.
+tests/  -  test scripts.  For the pytest framework.
 		   
 Package Details
 ---------------
@@ -156,18 +131,20 @@ To Do
 These are for the package developers.
 
   1. Settle overall package structure.
-      - presence and location of src directory
-	  - location of other directories
 	  - invocation of test machinery
-	  - merge various branches of development
 	  - capitalization of project name and class names, i.e., class names should start 
-	    upper case.
+	    upper case.  Considerations:
+		   * Python packge names should be lower case
+		   * Class names should be capitalized
+		   * github project names is 'bifs'
+		   * having multiple things with the same name is confusing
+		   * Old scheme was that the project name was 'bifs' in setup.py
+		   but it was under the directory 'BIFS'.  It seems unlikely the package building machinery
+		   would pick up on that.  import directives referred to the module as 'BIFS'.  And the main
+		   class was 'bifs'. -> from BIFS import bifs
+		   * New scheme switches it: from bifs import BIFS
   #. Ensure existing tests work with current code.
   #. Ensure existing examples work with current code.
-     Done for the following:
-	     - presentation.py
-		 - presentation03.py
-		 - bifs_cl_1D.py
   #. Consider which materials should be  distributed.
      - things to consider eliminating
 	     * Visual Studio specific files and dirs

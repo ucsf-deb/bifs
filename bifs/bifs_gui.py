@@ -20,26 +20,21 @@ import matplotlib.pyplot as plt
 from pylab import *
 import numpy as np
 from scipy import misc
-import BIFS
+import bifs
 import jsonpickle
 import os
 import itertools
 import re
 
-#for x in ('Param_Fourier_Space_Dialog', 'Prior_Dialog', 'Likelihood_Dialog', 'Slice3D_Dialog',
-#         'AddBump_Dialog', 'DeleteBump_Dialog'):
-#    globals()[x] = getattr(BIFS.pset_dialogs, x)
-# following don't work with are current packages structure
-# previous code is intended as the equivalent
-from BIFS.pset_dialogs import Param_Fourier_Space_Dialog,Prior_Dialog
-from BIFS.pset_dialogs import Likelihood_Dialog,Slice3D_Dialog
-from BIFS.pset_dialogs import AddBump_Dialog,DeleteBump_Dialog
+from bifs.pset_dialogs import Param_Fourier_Space_Dialog,Prior_Dialog
+from bifs.pset_dialogs import Likelihood_Dialog,Slice3D_Dialog
+from bifs.pset_dialogs import AddBump_Dialog,DeleteBump_Dialog
 
 # gastly hack
 # but currently if this is run in debug mode it has a different working directory than
 # if run from command line.  To avoid problems, hard code whole path.
 # Empirical Prior file
-EPFILE = r"C:\Users\rdboylan\Documents\Kornak\ep1.npz"
+EPFILE = r"ep1.npz"
 
 class MainWindow(QtWidgets.QMainWindow):
     """
@@ -52,8 +47,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.main_widget = QtWidgets.QWidget(self)
-        # Initialize BIFS object
-        self.mybifs = BIFS.bifs()
+        # Initialize bifs object
+        self.mybifs = bifs.BIFS()
         self.filename = None
         self.didMAP = False
         self.setWindowTitle("Bayesian Imaging in Fourier Space")

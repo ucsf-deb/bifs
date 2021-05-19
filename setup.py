@@ -10,20 +10,40 @@ with open('LICENSE') as f:
 
 setup(
     name='bifs',
-    version='0.2.0',
+    version='0.9.0',
     description='Implementation of Bayesian Imaging in Fourier Space (BIFS)',
     long_description=readme,
+    long_description_content_type='text/x-rst',
     author='John Kornak, Karl Young, Ross Boylan',
     author_email='john.kornak@ucsf.edu,kyoung21b2000@gmail.com',
+    maintainer_email='ross.boylan@ucsf.edu',
     url='https://github.com/bifs',
     license=license,
     packages=['bifs'],
+    include_package_data=True,
+
+    # remember to keep in sync with requirements.txt
+    # nibabel is only necessary if your image format requires it
     install_requires=['imageio',
                       'jsonpickle',
                       'matplotlib',
                       'nibabel',
-                      'numpy',
+                      'numpy >= 1.17',
                       'PyQt5',
-                      'scipy']
+                      'scipy'],
+    # not extras_requireS
+    extras_require={"NI" : "nibabel",
+                    "tests" : "pytest"},
+
+    # license type TBD
+    classifiers = ['Programming Language :: Python :: 3',
+                   'Development Status :: 4 - Beta',
+                   'Intended Audience :: Science/Research',
+                   'Natural Language :: English',
+                   'Operating System :: OS Independent',
+                   'Topic :: Multimedia :: Graphics',
+                   'Topic :: Scientific/Engineering :: Image Processing',
+                   'Topic :: Scientific/Engineering :: Visualization',
+                   ]
 )
 

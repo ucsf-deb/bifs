@@ -27,7 +27,7 @@ my_slice = [0,0.5]
 noisy_im = imageio.imread('../../images/test3Dnoisy_sphere.tiff')
 
 # Create mybifs BIFS object:
-mybifs = bifs.bifs()
+mybifs = bifs.BIFS()
 
 # Can take a look at what functions and variables are available with, e.g.:
 # dir(mybifs)

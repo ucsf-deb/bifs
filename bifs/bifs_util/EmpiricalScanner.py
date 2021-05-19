@@ -3,7 +3,7 @@ import os
 import re
 
 # scans files to construct an empirical prior
-from BIFS import bifs
+from bifs import BIFS
 
 # numpy >= 1.17
 from numpy.random import Generator, PCG64
@@ -101,7 +101,7 @@ class AbstractEmpiricalScanner:
             self.image_keep = np.logical_not(image_mask)
         self._benchmarkHdr = None  # checks for consistent headers
         self._mismatch = set()  # holds keys that had a mismatch
-        self._bifs = bifs()
+        self._bifs = BIFS()
 
     def modulus(self)->RunningMean:
         return self._modulus

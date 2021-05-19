@@ -6,8 +6,8 @@ from scipy import misc,stats
 import random
 from pylab import *
 import matplotlib.pyplot as plt
-import BIFS
-import BIFS.bifs_util.util as bu
+import bifs
+import bifs.bifs_util.util as bu
 
 # Make 1D "image"
 # Noise standard deviation in image space
@@ -18,7 +18,7 @@ z = np.concatenate((np.zeros(14),np.arange(19)+1,np.zeros(7)+10,10-np.arange(10)
 y = z + stats.norm.rvs(size=len(z),loc=0.0,scale=noiseSD)
 
 # Create mybifs BIFS object:
-mybifs = BIFS.bifs()
+mybifs = bifs.BIFS()
 
 # Can take a look at what functions and variables are available with, e.g.:
 # dir(mybifs)

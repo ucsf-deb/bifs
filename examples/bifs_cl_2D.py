@@ -20,7 +20,7 @@ noise = noise_level*(np.max(im) - np.min(im))*np.random.rand(im.shape[0],im.shap
 noisy_im = im + noise
 
 # Create mybifs BIFS object:
-mybifs = bifs.bifs()
+mybifs = bifs.BIFS()
 
 # Can take a look at what functions and variables are available with, e.g.:
 # dir(mybifs)

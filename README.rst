@@ -139,42 +139,42 @@ These are for the package developers.
 		   * github project names is 'bifs'
 		   * having multiple things with the same name is confusing
 		   * Old scheme was that the project name was 'bifs' in setup.py
-		   but it was under the directory 'BIFS'.  It seems unlikely the package building machinery
-		   would pick up on that.  import directives referred to the module as 'BIFS'.  And the main
-		   class was 'bifs'. -> from BIFS import bifs
+		     but it was under the directory 'BIFS'.  It seems unlikely the package building machinery
+		     would pick up on that.  import directives referred to the module as 'BIFS'.  And the main
+		     class was 'bifs'. -> from BIFS import bifs
 		   * New scheme switches it: from bifs import BIFS
   #. Ensure existing tests work with current code.
   #. Ensure existing examples work with current code.
   #. Consider which materials should be  distributed.
-     - things to consider eliminating
+      - things to consider eliminating
 	     * Visual Studio specific files and dirs
 		 * some of the example code, i.e., Ross's
 		 * git files
 		 * other work files?
-	 - decide how to eliminate them.  Could use a branch in git or a build script.
-	#. Handling of multiple image loads in same session
-		- could be via GUI or via program, as in  presentation.py
-		- define desired functionality, which I think is and was to retain as many settings as possible.
-		- current behavior simply blows away previous settings
-	#. Review and possibly remove bifs.copy_params
-	#. Create  some general way to generate and use empirical priors.
-		- do not release with hard-coded path to store empirical prior.
-	#. Move much of the empirical prior logic out of bifs_gui.py.
-	#. bifs class should throw exceptions rather than print error messages
-	#. bifs_gui should catch and display the exceptions.
-	#. Continue delegation of model details to components of bifs.
-		- material currently stored in bifs should be obtained from
-		  objects it holds, e.g., allowed function types, specific parameters.
-		- GUI will need to become more dynamic in response.
-	#. Update to components should automatically invalidate the bifs object appropriately.
-	   E.g., reset scale on prior causes bifs object to _invalidate_final().
-	   The right way to do this is probably for the component, e.g., the prior, to hold a reference
-	   to the parent, and send the parent _invalidate_final() as part of component's _mark_dirty().
-	   For now we invalidate by default when handing out a prior object, and knowledgeable clients,
-	   as in presentation.py that poke, plot, poke, replot must manually invalidate.
-	#.  @Karl Verify that the changes relating to isxcbanded are semantically correct; they are at least syntactically correct now.
-	#. *If* more documentation outside the source code is desirable, e.g., this file used to have what was basically a copy
-		of the class comment for bifs, consider how to achieve that automatically.
-	#. Review: NaNs in input file are now silently converted to 0 by bifs.load_image.  Is that desirable?
-	   NaNs cause later processing to fail.
+	  - decide how to eliminate them.  Could use a branch in git or a build script.
+  #. Handling of multiple image loads in same session
+  	- could be via GUI or via program, as in  presentation.py
+  	- define desired functionality, which I think is and was to retain as many settings as possible.
+  	- current behavior simply blows away previous settings
+  #. Review and possibly remove bifs.copy_params
+  #. Create  some general way to generate and use empirical priors.
+  	- do not release with hard-coded path to store empirical prior.
+  #. Move much of the empirical prior logic out of bifs_gui.py.
+  #. bifs class should throw exceptions rather than print error messages
+  #. bifs_gui should catch and display the exceptions.
+  #. Continue delegation of model details to components of bifs.
+  	- material currently stored in bifs should be obtained from
+  		objects it holds, e.g., allowed function types, specific parameters.
+  	- GUI will need to become more dynamic in response.
+  #. Update to components should automatically invalidate the bifs object appropriately.
+  	E.g., reset scale on prior causes bifs object to _invalidate_final().
+  	The right way to do this is probably for the component, e.g., the prior, to hold a reference
+  	to the parent, and send the parent _invalidate_final() as part of component's _mark_dirty().
+  	For now we invalidate by default when handing out a prior object, and knowledgeable clients,
+  	as in presentation.py that poke, plot, poke, replot must manually invalidate.
+  #.  @Karl Verify that the changes relating to isxcbanded are semantically correct; they are at least syntactically correct now.
+  #. *If* more documentation outside the source code is desirable, e.g., this file used to have what was basically a copy
+  	of the class comment for bifs, consider how to achieve that automatically.
+  #. Review: NaNs in input file are now silently converted to 0 by bifs.load_image.  Is that desirable?
+  	NaNs cause later processing to fail.
 

@@ -17,7 +17,7 @@ setup(
     author='John Kornak, Karl Young, Ross Boylan',
     author_email='john.kornak@ucsf.edu,kyoung21b2000@gmail.com',
     maintainer_email='ross.boylan@ucsf.edu',
-    url='https://github.com/bifs',
+    url='https://github.com/ucsf-deb/bifs',
     license=license,
     packages=['bifs'],
     include_package_data=True,

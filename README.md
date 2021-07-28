@@ -18,7 +18,7 @@ For the impatient, here are steps which should install the package and
 launch the GUI:
 
 ```shell
-git clone https://github.com/bifs/bifs.git
+git clone https://github.com/ucsf-deb/bifs.git
 python3 -m pip install --upgrade pip setuptools wheel
 python3 -m pip install -e bifs
 python3 bifs/bifs/bifs_gui.py   # use \ on MS-Windows.  launches program

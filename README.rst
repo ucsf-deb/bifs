@@ -143,6 +143,41 @@ These are for the package developers.
 		     would pick up on that.  import directives referred to the module as 'BIFS'.  And the main
 		     class was 'bifs'. -> from BIFS import bifs
 		   * New scheme switches it: from bifs import BIFS
+  #. bifs_gui.py should be treated as a binary or installable script
+      - Guido considers having executables in packages an anti-pattern
+	  - hence relative imports, and scripts that might be run as either part of a package or separately
+	    work awkwardly if at all.
+	  - Concretely, this means bifs_gui should not use any relative imports.  
+	    That seems to be the case already.
+	  - How to test.
+	  - How to package and install.
+	      * should be in a different directory
+		  * setup should list it as an entry point
+		  * I think there are entry points specific for GUIs
+		  * How and where do I install it?
+  #. Other scripts?  Some of the Empirical Scanners might qualify.
+  #. __init__.py
+      - should be in every directory to import
+	  - currently is not
+	  - and yet the imports are working
+	  - possibly related to relaxation of the __init_.py requirement in Python 3.3.
+	  - but that relaxation was only for Namespace packages, which this is not
+	  - What should go in __init__.py? opinions differ
+	     * Minimalist
+		    - empty
+			- or just the version number
+			- maybe __all__, list of symbols to export
+		* Maximalist
+			- key things is to regard it as a public interface
+			- this means using __all__ and maybe messing with nested modules to hoist some symbols up
+			- anything else that is appropriately global
+  #. version number generally in 2 places, setup.py and __init__.py top level
+      - must keep them in sync
+	  - there is a bump... package to do so, but it's not clear it worth the trouble
+	       * since it requires naming the files to update
+		   * though that info can go in a configuration file
+  #. convert all relative imports to absolute
+      * generally recommended as more robust
   #. Ensure existing tests work with current code.
   #. Ensure existing examples work with current code.
   #. Consider which materials should be  distributed.
@@ -159,7 +194,9 @@ These are for the package developers.
   #. Review and possibly remove bifs.copy_params
   #. Create  some general way to generate and use empirical priors.
   	- do not release with hard-coded path to store empirical prior.
-  #. Move much of the empirical prior logic out of bifs_gui.py.
+	- literally I've done that since there is no path all! but name is hard-coded.
+	- need a GUI to specify the empirical prior file, both construct and read
+  #. Move much of the empirical prior logic out of bifs_gui.py.  Doneish?
   #. bifs class should throw exceptions rather than print error messages
   #. bifs_gui should catch and display the exceptions.
   #. Continue delegation of model details to components of bifs.
@@ -172,7 +209,7 @@ These are for the package developers.
   	to the parent, and send the parent _invalidate_final() as part of component's _mark_dirty().
   	For now we invalidate by default when handing out a prior object, and knowledgeable clients,
   	as in presentation.py that poke, plot, poke, replot must manually invalidate.
-  #.  @Karl Verify that the changes relating to isxcbanded are semantically correct; they are at least syntactically correct now.
+  #. @Karl Verify that the changes relating to isxcbanded are semantically correct; they are at least syntactically correct now.
   #. *If* more documentation outside the source code is desirable, e.g., this file used to have what was basically a copy
   	of the class comment for bifs, consider how to achieve that automatically.
   #. Review: NaNs in input file are now silently converted to 0 by bifs.load_image.  Is that desirable?

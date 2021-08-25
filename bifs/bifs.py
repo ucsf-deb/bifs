@@ -16,8 +16,8 @@ from scipy.optimize import minimize_scalar as ms
 from multiprocessing import Pool, TimeoutError
 from datetime import datetime
 import jsonpickle as jsp
-from .priors import FunctionalPrior as FP
-from .priors import EmpiricalPrior as EP
+from bifs.priors import FunctionalPrior as FP
+from bifs.priors import EmpiricalPrior as EP
 
 import copy
 
@@ -182,7 +182,7 @@ class BIFS:
         # For now set default parameters here; make them editable via
         # pop widget
         if self.basis == "Fourier":
-            from .bases import fourier as fb
+            from bifs.bases import fourier as fb
             self.bas = fb
 
         self.param_func_type = self.bas.param_func_type

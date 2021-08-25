@@ -729,7 +729,11 @@ class StartDeleteBump_Dialog(QtWidgets.QDialog, DeleteBump_Dialog):
         except:
             print("Couldn't get bump function information")
 
-if __name__ == '__main__':
+def launch():
+    "provided as a possible entry point"
     app = QtWidgets.QApplication(sys.argv)
     win = MainWindow()
     sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    launch()

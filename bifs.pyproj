@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>b580896b-29ca-4a24-82be-0c6bf6ae80a8</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>examples\investigate09.py</StartupFile>
+    <StartupFile>bifs\bifs_gui.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -44,19 +44,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="bifs\bases\fourier.py" />
+    <Compile Include="bifs\bases\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="bifs\bifs.py" />
     <Compile Include="bifs\bifs_gui.py" />
     <Compile Include="bifs\bifs_util\EmpiricalScanner.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="bifs\bifs_util\util.py" />
+    <Compile Include="bifs\bifs_util\__init__.py" />
     <Compile Include="bifs\priors\AbstractPrior.py" />
     <Compile Include="bifs\priors\FunctionalPrior.py" />
     <Compile Include="bifs\priors\EmpiricalPrior.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="bifs\priors\__init__.py" />
     <Compile Include="bifs\pset_dialogs.py" />
-    <Compile Include="bifs\test.py" />
     <Compile Include="bifs\__init__.py" />
     <Compile Include="examples\bifs_cl_1D.py" />
     <Compile Include="examples\bifs_cl_2D.py" />

@@ -1,6 +1,6 @@
 # Prior based on empirical distribution of data
 
-from .AbstractPrior import *
+from bifs.priors.AbstractPrior import *
 
 class EmpiricalPrior(AdjustmentPrior):
     """Empirical Prior

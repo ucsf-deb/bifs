@@ -1,5 +1,5 @@
 # Use some functional form to simplify the prior
-from .AbstractPrior import *
+from bifs.priors.AbstractPrior import *
 
 def param_func_choices():
     return ["Inverse Power Decay", "Banded Inverse Power Decay", "Linear Decay"]

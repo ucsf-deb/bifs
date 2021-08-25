@@ -153,8 +153,13 @@ These are for the package developers.
 	  - How to package and install.
 	      * should be in a different directory
 		  * setup should list it as an entry point
+		  * http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html?showComment=1419123890864#c2535793882880782398 
+		    argues entry point machinery is not great.  Note in particular the point about needing to install to run or test.
 		  * I think there are entry points specific for GUIs
 		  * How and where do I install it?
+		  * Influential article says scripts in bin should be thin wrappers
+		      + http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html
+			  + but no reason is ever given
   #. Other scripts?  Some of the Empirical Scanners might qualify.
   #. __init__.py
       - should be in every directory to import
@@ -163,22 +168,27 @@ These are for the package developers.
 	  - possibly related to relaxation of the __init_.py requirement in Python 3.3.
 	  - but that relaxation was only for Namespace packages, which this is not
 	  - What should go in __init__.py? opinions differ
+	    https://www.reddit.com/r/Python/comments/1bbbwk/whats_your_opinion_on_what_to_include_in_init_py/
 	     * Minimalist
-		    - empty
-			- or just the version number
-			- maybe __all__, list of symbols to export
+		    + empty
+			+ or just the version number
+			+ maybe __all__, list of symbols to export
 		* Maximalist
-			- key things is to regard it as a public interface
-			- this means using __all__ and maybe messing with nested modules to hoist some symbols up
-			- anything else that is appropriately global
+			+ key things is to regard it as a public interface
+			+ this means using __all__ and maybe messing with nested modules to hoist some symbols up
+			+ anything else that is appropriately global
   #. version number generally in 2 places, setup.py and __init__.py top level
       - must keep them in sync
 	  - there is a bump... package to do so, but it's not clear it worth the trouble
 	       * since it requires naming the files to update
 		   * though that info can go in a configuration file
   #. convert all relative imports to absolute
-      * generally recommended as more robust
+      * generally recommended as more robust: The PEP 8 style guide recommends using absolute imports in general. 
+  #. __main__.py, if present, executed automatically on package load
+	Maybe only if started via `python -m`.
   #. Ensure existing tests work with current code.
+	  - most seem to put tests directory top level
+	  - http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html?showComment=1419124050650#c5629056591479709945 argues against that
   #. Ensure existing examples work with current code.
   #. Consider which materials should be  distributed.
       - things to consider eliminating

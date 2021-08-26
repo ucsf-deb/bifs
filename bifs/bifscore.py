@@ -4,6 +4,12 @@
 ###         Class for performing Bayesian Image         ###
 ###         Restoration in Fourier Space (BIFS)         ###
 
+## The filename is bifscore, not bifs or BIFS to avoid trouble
+## with the import machinery.  In particular, import bifs, at
+## least when executed in this directory, could import bifs.py 
+## (old name for this file) rather than the package.  And thus
+## from bifs.priors would fail with an error that bifs was not 
+## a package.
 
 import numpy as np
 import scipy as sp

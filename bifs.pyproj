@@ -47,7 +47,7 @@
     <Compile Include="bifs\bases\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="bifs\bifs.py" />
+    <Compile Include="bifs\bifscore.py" />
     <Compile Include="bifs\bifs_gui.py" />
     <Compile Include="bifs\bifs_util\EmpiricalScanner.py">
       <SubType>Code</SubType>

@@ -143,6 +143,7 @@ These are for the package developers.
 		     would pick up on that.  import directives referred to the module as 'BIFS'.  And the main
 		     class was 'bifs'. -> from BIFS import bifs
 		   * New scheme switches it: from bifs import BIFS
+	 - Rename bifs.py -> bifscore.py to avoid import ambiguities.
   #. bifs_gui.py should be treated as a binary or installable script
       - Guido considers having executables in packages an anti-pattern
 	  - hence relative imports, and scripts that might be run as either part of a package or separately

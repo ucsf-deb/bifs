@@ -1,4 +1,7 @@
 include LICENSE
 include README.rst
 include README.md
+include tests/*.py
 include tests/images/*
+include examples/*
+recursive-include bifs *.py

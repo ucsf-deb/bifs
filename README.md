@@ -8,29 +8,25 @@ Installation
 ============
 Prerequisites: 
    - Python3 installed on your computer.
-   - git in order to follow these instructions.
-
-A good way to automatically install a number of the dependencies is to
-start with an environment designed for scientific processing in
-Python, e.g. Enthought's Canopy environment.
 
 For the impatient, here are steps which should install the package and
 launch the GUI:
 
 ```shell
-git clone https://github.com/ucsf-deb/bifs.git
+#python may work instead of python3, depending on your environment
 python3 -m pip install --upgrade pip setuptools wheel
-python3 -m pip install -e bifs
-python3 bifs/bifs/bifs_gui.py   # use \ on MS-Windows.  launches program
+python3 -m pip install bifs
+bifs_gui   # use \ on MS-Windows.  launches program
 ```
 bifs requires a number of other substantial software packages, including SciPy and PyQt5,
 which the installation should take care of if they are not already present.
 
-bifs is *not* currently available from the standard python package index.
-
 See [this guide](https://packaging.python.org/tutorials/installing-packages) for much more
 information about how to install python packages.  In particular, we endorse their
 strong recommendation to *use virtual environments*, which are omitted from the steps above.
+
+On Windows inside a virtual environment we have found `python` rather than `python3` is necessary.
+We recommend against using the Windows specific `py` command since we do not know if it respects virtual environment.
 
 Fallback Installation of Dependencies
 -------------------------------------
@@ -80,3 +76,7 @@ versions as well:
 Using BIFS
 ==========
 See the more [detailed guide](README.rst) and the extensive comments in the code for how to use the package.
+
+Exploring the code
+==================
+https://github.com/ucsf-deb/bifs

@@ -128,7 +128,8 @@ Or see the class documentation in BIFS/bifs.py.
 To Do
 -----
 
-These are for the package developers.
+These are for the package developers.  * as the first character in a headline means that is done.  This is different from * as an item mark, which
+also happens.
 
   1. Settle overall package structure.
 	  - invocation of test machinery
@@ -143,7 +144,7 @@ These are for the package developers.
 		     would pick up on that.  import directives referred to the module as 'BIFS'.  And the main
 		     class was 'bifs'. -> from BIFS import bifs
 		   * New scheme switches it: from bifs import BIFS
-	 - Rename bifs.py -> bifscore.py to avoid import ambiguities.
+	 - *Rename bifs.py -> bifscore.py to avoid import ambiguities.
   #. bifs_gui.py should be treated as a binary or installable script
       - Guido considers having executables in packages an anti-pattern
 	  - hence relative imports, and scripts that might be run as either part of a package or separately
@@ -162,10 +163,16 @@ These are for the package developers.
 		      + http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html
 			  + but no reason is ever given
   #. Other scripts?  Some of the Empirical Scanners might qualify.
+      - bifs_util/EmpiricalScanner.py does not; it won't run by itself.
+	  - bifs_util/util.py also does not
+  #. Probably need to revive some of the scanner-related scripts
+     In examples/
+	   - empirical_scan.py
+	   - scan.py
   #. __init__.py
-      - should be in every directory to import
-	  - currently is not
-	  - and yet the imports are working
+      - *should be in every directory to import
+	  - *was not true
+	  - and yet the imports were working
 	  - possibly related to relaxation of the __init_.py requirement in Python 3.3.
 	  - but that relaxation was only for Namespace packages, which this is not
 	  - What should go in __init__.py? opinions differ
@@ -178,12 +185,14 @@ These are for the package developers.
 			+ key things is to regard it as a public interface
 			+ this means using __all__ and maybe messing with nested modules to hoist some symbols up
 			+ anything else that is appropriately global
-  #. version number generally in 2 places, setup.py and __init__.py top level
+  #. version number generally in 3 places, setup.py, PKG-INFO and __init__.py top level
       - must keep them in sync
+	  - PKG-INFO appears to be generated automatically from other files.  It doesn't reflect the current version,
+	  but I haven't gone through a packaging cycle with that version.
 	  - there is a bump... package to do so, but it's not clear it worth the trouble
 	       * since it requires naming the files to update
 		   * though that info can go in a configuration file
-  #. convert all relative imports to absolute
+  #. *convert all relative imports to absolute
       * generally recommended as more robust: The PEP 8 style guide recommends using absolute imports in general. 
   #. __main__.py, if present, executed automatically on package load
 	Maybe only if started via `python -m`.
@@ -208,7 +217,7 @@ These are for the package developers.
 	- literally I've done that since there is no path all! but name is hard-coded.
 	- need a GUI to specify the empirical prior file, both construct and read
   #. Move much of the empirical prior logic out of bifs_gui.py.  Doneish?
-  #. bifs class should throw exceptions rather than print error messages
+  #. BIFS class should throw exceptions rather than print error messages
   #. bifs_gui should catch and display the exceptions.
   #. Continue delegation of model details to components of bifs.
   	- material currently stored in bifs should be obtained from
@@ -225,4 +234,11 @@ These are for the package developers.
   	of the class comment for bifs, consider how to achieve that automatically.
   #. Review: NaNs in input file are now silently converted to 0 by bifs.load_image.  Is that desirable?
   	NaNs cause later processing to fail.
+  #. Bug? After successfully running bifs_gui and selecting exit from its menu the console says
+```
+    File "J:\source\repos\bifs\bifs\bifs_gui.py", line 438, in close
+    sys.exit(app.exec_())
+	NameError: name 'app' is not defined
+```
+   In the debugger app was defined going into this step.
 

@@ -11,7 +11,7 @@ with open('LICENSE') as f:
 setup(
     name='bifs',
     version='0.9.1',
-    description='Implementation of Bayesian Imaging in Fourier Space (BIFS)',
+    description='Bayesian Imaging in Fourier Space (BIFS)',
     long_description=readme,
     long_description_content_type='text/x-rst',
     author='John Kornak, Karl Young, Ross Boylan',
@@ -21,6 +21,7 @@ setup(
     license=license,
     packages=['bifs'],
     include_package_data=True,
+    gui_scripts={"bifs_gui" : [ "bifs.bifs_gui:launch"] },
 
     # remember to keep in sync with requirements.txt
     # nibabel is only necessary if your image format requires it

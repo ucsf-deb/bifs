@@ -102,8 +102,8 @@ bases/fourier.py  - in principle a BIFS style analysis could be
 examples/		- sample code that uses BIFS package
 	bifs_cl_1D.py     - an example script showing how to perform
 						a BIFS analysis for 1D function in a
-				python or ipython shell (can also just be
-				run as a script)
+						python or ipython shell (can also just be
+						run as a script)
 
 	bifs_cl_2D.py     - similar to bifs_cl_1D.py but for a 2D image
 

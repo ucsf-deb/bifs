@@ -21,7 +21,11 @@ setup(
     license=license,
     packages=['bifs'],
     include_package_data=True,
-    gui_scripts={"bifs_gui" : [ "bifs.bifs_gui:launch"] },
+    # current documentation only gives the setup.cfg syntax for entry points
+    # and the translation is not obvious.  Used https://stackoverflow.com/questions/774824/explain-python-entry-points
+    entry_points = {
+        "gui_scripts" : ["bifs_gui = bifs.bifs_gui:launch"]
+        },
 
     # remember to keep in sync with requirements.txt
     # nibabel is only necessary if your image format requires it

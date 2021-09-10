@@ -1,131 +1,123 @@
 To Do
 -----
 
-These are for the package developers.  X as the first character in a headline means that is done.
+: These are for the package developers.
+: [X] indicates a task is complete; [ ] indicates it is pending, but pretty
+: much everything on the list is pending.
+:
+: This is a plain text file, but to use it best use
+: https://github.com/vimoutliner/vimoutliner, which requires vim, e.g. from
+: https://github.com/vim/vim/tree/master/runtime
 
-  1. Settle overall package structure.
-  
-     - invocation of test machinery
-     - capitalization of project name and class names, i.e., class names should start 
-       upper case.  Considerations:
-       
-       * Python packge names should be lower case
-       * Class names should be capitalized
-       * github project names is 'bifs'
-       * having multiple things with the same name is confusing
-       * Old scheme was that the project name was 'bifs' in setup.py
-         but it was under the directory 'BIFS'.  It seems unlikely the package building machinery
-         would pick up on that.  import directives referred to the module as 'BIFS'.  And the main
-         class was 'bifs'. -> from BIFS import bifs
-       * New scheme switches it: from bifs import BIFS
-     - X Rename bifs.py -> bifscore.py to avoid import ambiguities.
-  #. bifs_gui.py should be treated as a binary or installable script
-  
-     - Guido considers having executables in packages an anti-pattern
-     - hence relative imports, and scripts that might be run as either part of a package or separately
-       work awkwardly if at all.
-     - Concretely, this means bifs_gui should not use any relative imports.  
-       That seems to be the case already.
-     - How to test.
-     - How to package and install.
-     
-       * should be in a different directory
-       * setup should list it as an entry point
-       * http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html?showComment=1419123890864#c2535793882880782398 
-	 argues entry point machinery is not great.  Note in particular the point about needing to install to run or test.
-       * I think there are entry points specific for GUIs
-       * How and where do I install it?
-       * Influential article says scripts in bin should be thin wrappers
-
-	 + http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html
-
-	   + but no reason is ever given
-  #. Other scripts?  Some of the Empirical Scanners might qualify.
-  
-     - bifs_util/EmpiricalScanner.py does not; it won't run by itself.
-     - bifs_util/util.py also does not
-  #. Probably need to revive some of the scanner-related scripts
-     In examples/
-     
-     - empirical_scan.py
-     - scan.py
-  #. __init__.py
-  
-     - X should be in every directory to import
-     - X was not true
-     - and yet the imports were working
-     - possibly related to relaxation of the __init_.py requirement in Python 3.3.
-     - but that relaxation was only for Namespace packages, which this is not
-     - What should go in __init__.py? opinions differ
-       https://www.reddit.com/r/Python/comments/1bbbwk/whats_your_opinion_on_what_to_include_in_init_py/
-       
-       * Minimalist
-       
-      	 + empty
-      	 + or just the version number
-      	 + maybe __all__, list of symbols to export
-       * Maximalist
-       
-      	 + key things is to regard it as a public interface
-      	 + this means using __all__ and maybe messing with nested modules to hoist some symbols up
-      	 + anything else that is appropriately global
-  #. version number generally in 3 places, setup.py, PKG-INFO and __init__.py top level
-
-     - must keep them in sync
-     - PKG-INFO appears to be generated automatically from other files.  It doesn't reflect the current version,
-       but I haven't gone through a packaging cycle with that version.
-     - there is a bump... package to do so, but it's not clear it worth the trouble
-
-       * since it requires naming the files to update
-       * though that info can go in a configuration file
-  #. X convert all relative imports to absolute
-     * generally recommended as more robust: The PEP 8 style guide recommends using absolute imports in general. 
-  #. __main__.py, if present, executed automatically on package load
+Settle overall package structure.
+	invocation of test machinery
+	capitalization of project name and class names
+		Python package names should be lower case
+		Class names should be capitalized
+		github project names is 'bifs'
+		having multiple things with the same name is confusing
+		Old scheme was that the project name was 'bifs' in setup.py
+			: but it was under the directory 'BIFS'.  It seems unlikely
+			: the package building machinery would pick up on that.
+			: import directives referred to the module as 'BIFS'.  And the
+			: main class was 'bifs'. -> from BIFS import bifs
+		New scheme switches it: from bifs import BIFS
+	[X] Rename bifs.py -> bifscore.py to avoid import ambiguities.
+bifs_gui.py should be treated as a binary or installable script
+	Guido considers having executables in packages an anti-pattern
+	hence relative imports, and scripts that might be run as either part of a package or separately work awkwardly if at all.
+	Concretely, this means bifs_gui should not use any relative imports.  
+		That seems to be the case already.
+	How to test.
+	How to package and install.
+		should be in a different directory
+		setup should list it as an entry point
+		: http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html?showComment=1419123890864#c2535793882880782398 
+	 argues entry point machinery is not great.  Note in particular the point
+	 about needing to install to run or test.
+		there are entry points specific for GUIs
+		How and where do I install it?
+		Influential article says scripts in bin should be thin wrappers
+			http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html
+			but no reason is ever given
+Other scripts?  Some of the Empirical Scanners might qualify.
+	bifs_util/EmpiricalScanner.py does not; it won't run by itself.
+	bifs_util/util.py also does not
+Probably need to revive some of the scanner-related scripts
+	In examples/
+		empirical_scan.py
+		scan.py
+__init__.py
+	[X] should be in every directory to import
+	[X] was not true
+	and yet the imports were working
+	possibly related to relaxation of the __init_.py requirement in Python 3.3.
+	but that relaxation was only for Namespace packages, which this is not
+	What should go in __init__.py? opinions differ
+		https://www.reddit.com/r/Python/comments/1bbbwk/whats_your_opinion_on_what_to_include_in_init_py/
+		Minimalist
+			empty
+			or just the version number
+			maybe __all__, list of symbols to export
+		Maximalist
+			key things is to regard it as a public interface
+			this means using __all__ and maybe messing with nested modules to hoist some symbols up
+			anything else that is appropriately global
+version number generally in 3 places, setup.py, PKG-INFO and __init__.py top level
+	must keep them in sync
+	PKG-INFO appears to be generated automatically from other files.  It doesn't reflect the current version,
+		but I haven't gone through a packaging cycle with that version.
+	there is a bump... package to do so, but it's not clear it worth the trouble
+		since it requires naming the files to update
+		though that info can go in a configuration file
+[X] convert all relative imports to absolute
+	generally recommended as more robust: The PEP 8 style guide recommends using absolute imports in general. 
+__main__.py, if present, executed automatically on package load
 	Maybe only if started via `python -m`.
-  #. Ensure existing tests work with current code.
-     - most seem to put tests directory top level
-     - http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html?showComment=1419124050650#c5629056591479709945 argues against that
-  #. Ensure existing examples work with current code.
-  #. Consider which materials should be  distributed.
-     - things to consider eliminating
-
-       * Visual Studio specific files and dirs
-       * some of the example code, i.e., Ross's
-       * git files
-       * other work files?
-     - decide how to eliminate them.  Could use a branch in git or a build script.
-  #. Handling of multiple image loads in same session
-     - could be via GUI or via program, as in  presentation.py
-     - define desired functionality, which I think is and was to retain as many settings as possible.
-     - current behavior simply blows away previous settings
-  #. Review and possibly remove bifs.copy_params
-  #. Create  some general way to generate and use empirical priors.
-     - do not release with hard-coded path to store empirical prior.
-     - literally I've done that since there is no path all! but name is hard-coded.
-     - need a GUI to specify the empirical prior file, both construct and read
-  #. Move much of the empirical prior logic out of bifs_gui.py.  Doneish?
-  #. BIFS class should throw exceptions rather than print error messages
-  #. bifs_gui should catch and display the exceptions.
-  #. Continue delegation of model details to components of bifs.
-     - material currently stored in bifs should be obtained from
+Ensure existing tests work with current code.
+	most seem to put tests directory top level
+	http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html?showComment=1419124050650#c5629056591479709945 argues against that
+Ensure existing examples work with current code.
+Consider which materials should be  distributed.
+	things to consider eliminating
+		Visual Studio specific files and dirs
+		some of the example code, i.e., Ross's
+		git files
+		other work files?
+	decide how to eliminate them.  Could use a branch in git or a build script.
+Handling of multiple image loads in same session
+	could be via GUI or via program, as in  presentation.py
+	define desired functionality, which I think is and was to retain as many settings as possible.
+	current behavior simply blows away previous settings
+Review and possibly remove bifs.copy_params
+Create  some general way to generate and use empirical priors.
+	[_] do not release with hard-coded path to store empirical prior.
+	literally I've done that since there is no path all! but name is hard-coded.
+	[_] need a GUI to specify the empirical prior file, both construct and read
+Move much of the empirical prior logic out of bifs_gui.py.  Doneish?
+BIFS class should throw exceptions rather than print error messages
+bifs_gui should catch and display the exceptions.
+Continue delegation of model details to components of bifs.
+	material currently stored in bifs should be obtained from
        objects it holds, e.g., allowed function types, specific parameters.
-     - GUI will need to become more dynamic in response.
-  #. Update to components should automatically invalidate the bifs object appropriately.
-     E.g., reset scale on prior causes bifs object to _invalidate_final().
-     The right way to do this is probably for the component, e.g., the prior, to hold a reference
-     to the parent, and send the parent _invalidate_final() as part of component's _mark_dirty().
-     For now we invalidate by default when handing out a prior object, and knowledgeable clients,
-     as in presentation.py that poke, plot, poke, replot must manually invalidate.
-  #. @Karl Verify that the changes relating to isxcbanded are semantically correct; they are at least syntactically correct now.
-  #. *If* more documentation outside the source code is desirable, e.g., this file used to have what was basically a copy
-     of the class comment for bifs, consider how to achieve that automatically.
-  #. Review: NaNs in input file are now silently converted to 0 by bifs.load_image.  Is that desirable?
-     NaNs cause later processing to fail.
-  #. Bug? After successfully running bifs_gui and selecting exit from its menu the console says
-```
-    File "J:\source\repos\bifs\bifs\bifs_gui.py", line 438, in close
-    sys.exit(app.exec_())
-	NameError: name 'app' is not defined
-```
-   In the debugger app was defined going into this step.
+	GUI will need to become more dynamic in response.
+Update to components should automatically invalidate the bifs object appropriately.
+	: E.g., reset scale on prior causes bifs object to _invalidate_final().
+	: The right way to do this is probably for the component, e.g., the prior, to hold a reference
+	: to the parent, and send the parent _invalidate_final() as part of component's _mark_dirty().
+	: For now we invalidate by default when handing out a prior object, and knowledgeable clients,
+	: as in presentation.py that poke, plot, poke, replot must manually invalidate.
+@Karl Verify that the changes relating to isxcbanded are semantically correct; they are at least syntactically correct now.
+documentation outside the source code
+	: *If* desirable, e.g., the README used to have what was basically a copy
+	: of the class comment for bifs, consider how to achieve that
+	: automatically.
+Review: NaNs in input file are now silently converted to 0 by bifs.load_image.
+	Is that desirable?
+	NaNs cause later processing to fail.
+Bug? After successfully running bifs_gui and selecting exit from its menu the console says
+	< File "J:\source\repos\bifs\bifs\bifs_gui.py", line 438, in close
+	< sys.exit(app.exec_())
+	< NameError: name 'app' is not defined
+	In the debugger app was defined going into this step.
 

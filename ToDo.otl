@@ -57,8 +57,9 @@ Other sources of To Do information
 				facilitates collaboration
 				allows tags and (I think) priorities
 				no hieararchy
-Settle overall package structure.
-	invocation of test machinery
+Packaging
+	Settle overall package structure.
+		invocation of test machinery
 	[X] capitalization of project name and class names
 		Python package names should be lower case
 		Class names should be capitalized
@@ -71,68 +72,72 @@ Settle overall package structure.
 			: main class was 'bifs'. -> from BIFS import bifs
 		New scheme switches it: from bifs import BIFS
 	[X] Rename bifs.py -> bifscore.py to avoid import ambiguities.
-bifs_gui.py should be treated as a binary or installable script
-	Guido considers having executables in packages an anti-pattern
-	hence relative imports, and scripts that might be run as either part of a package or separately work awkwardly if at all.
-	[X] Concretely, this means bifs_gui should not use any relative imports.  
-		That seems to be the case already.
-	How to test
-	How to package and install
-		should be in a different directory?
-		[X] setup should list it as an entry point
-		: http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html?showComment=1419123890864#c2535793882880782398 
-	 argues entry point machinery is not great.  Note in particular the point
-	 about needing to install to run or test.
-		there are entry points specific for GUIs
-		How and where do I install it?
-		Influential article says scripts in bin should be thin wrappers
-			http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html
-			but no reason is ever given
-Other scripts?  Some of the Empirical Scanners might qualify.
-	bifs_util/EmpiricalScanner.py does not; it won't run by itself.
-	bifs_util/util.py also does not
-[_] Probably need to revive some of the scanner-related scripts
-	In examples/
-		empirical_scan.py
-		scan.py
-[_] __init__.py
-	[X] should be in every directory to import
-	[X] was not true
-	and yet the imports were working
-	possibly related to relaxation of the __init_.py requirement in Python 3.3.
-	but that relaxation was only for Namespace packages, which this is not
-	[_] What should go in __init__.py? opinions differ
-		https://www.reddit.com/r/Python/comments/1bbbwk/whats_your_opinion_on_what_to_include_in_init_py/
-		Minimalist
-			empty
-			or just the version number
-			maybe __all__, list of symbols to export
-		Maximalist
-			key things is to regard it as a public interface
-			this means using __all__ and maybe messing with nested modules to hoist some symbols up
-			anything else that is appropriately global
-version number generally in 3 places, setup.py, PKG-INFO and __init__.py top level
-	must keep them in sync
-	PKG-INFO appears to be generated automatically from other files.  It doesn't reflect the current version,
-		but I haven't gone through a packaging cycle with that version.
-	there is a bump... package to do so, but it's not clear it worth the trouble
-		since it requires naming the files to update
-		though that info can go in a configuration file
-[X] convert all relative imports to absolute
-	generally recommended as more robust: The PEP 8 style guide recommends using absolute imports in general. 
-__main__.py, if present, executed automatically on package load
-	Maybe only if started via `python -m`.
-Ensure existing tests work with current code.
-	most seem to put tests directory top level
-	http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html?showComment=1419124050650#c5629056591479709945 argues against that
-Ensure existing examples work with current code.
-[_] Consider which materials should be  distributed.
-	things to consider eliminating
-		Visual Studio specific files and dirs
-		some of the example code, i.e., Ross's
-		git files
-		other work files?
-	decide how to eliminate them.  Could use a branch in git or a build script.
+	bifs_gui.py should be treated as a binary or installable script
+		Guido considers having executables in packages an anti-pattern
+		hence relative imports, and scripts that might be run as either part of a package or separately work awkwardly if at all.
+		[X] Concretely, this means bifs_gui should not use any relative imports.  
+			That seems to be the case already.
+		How to test
+		How to package and install
+			should be in a different directory?
+			[X] setup should list it as an entry point
+			: http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html?showComment=1419123890864#c2535793882880782398 
+		 argues entry point machinery is not great.  Note in particular the point
+		 about needing to install to run or test.
+			there are entry points specific for GUIs
+			How and where do I install it?
+			Influential article says scripts in bin should be thin wrappers
+				http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html
+				but no reason is ever given
+	Other scripts?  Some of the Empirical Scanners might qualify.
+		bifs_util/EmpiricalScanner.py does not; it won't run by itself.
+		bifs_util/util.py also does not
+	[_] Probably need to revive some of the scanner-related scripts
+		In examples/
+			empirical_scan.py
+			scan.py
+	[_] __init__.py
+		[X] should be in every directory to import
+		[X] was not true
+		and yet the imports were working
+		possibly related to relaxation of the __init_.py requirement in Python 3.3.
+		but that relaxation was only for Namespace packages, which this is not
+		[_] What should go in __init__.py? opinions differ
+			https://www.reddit.com/r/Python/comments/1bbbwk/whats_your_opinion_on_what_to_include_in_init_py/
+			Minimalist
+				empty
+				or just the version number
+				maybe __all__, list of symbols to export
+			Maximalist
+				key things is to regard it as a public interface
+				this means using __all__ and maybe messing with nested modules to hoist some symbols up
+				anything else that is appropriately global
+	version number generally in 3 places, setup.py, PKG-INFO and __init__.py top level
+		must keep them in sync
+		PKG-INFO appears to be generated automatically from other files.  It doesn't reflect the current version,
+			but I haven't gone through a packaging cycle with that version.
+		there is a bump... package to do so, but it's not clear it worth the trouble
+			since it requires naming the files to update
+			though that info can go in a configuration file
+	[X] convert all relative imports to absolute
+		generally recommended as more robust: The PEP 8 style guide recommends using absolute imports in general. 
+	__main__.py, if present, executed automatically on package load
+		Maybe only if started via `python -m`.
+	Ensure existing tests work with current code.
+		most seem to put tests directory top level
+		http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html?showComment=1419124050650#c5629056591479709945 argues against that
+	Ensure existing examples work with current code.
+	[_] Consider which materials should be  distributed.
+		things to consider eliminating
+			Visual Studio specific files and dirs
+			some of the example code, i.e., Ross's
+			git files
+			other work files?
+		decide how to eliminate them.  Could use a branch in git or a build script.
+	[_] documentation outside the source code
+		: *If* desirable, e.g., the README used to have what was basically a copy
+		: of the class comment for bifs, consider how to achieve that
+		: automatically.
 [_] Handling of multiple image loads in same session
 	could be via GUI or via program, as in  presentation.py
 	define desired functionality, which I think is and was to retain as many settings as possible.
@@ -140,8 +145,13 @@ Ensure existing examples work with current code.
 [_] Review and possibly remove bifs.copy_params
 [_] Create  some general way to generate and use empirical priors.
 	[_] do not release with hard-coded path to store empirical prior.
-	[_] literally I've done that since there is no path all! but name is hard-coded.
-	[_] need a GUI to specify the empirical prior file, both construct and read
+	[X] literally I've done that since there is no path all
+		: That is, the file name is hard-coded, but not the file path.
+	[_] need a GUI to specify the empirical prior file
+		constructing the file
+		reading the file
+		: Note those are 2 separate programs and that currently no program is
+		: provided to construct the prior.
 [_] Move much of the empirical prior logic out of bifs_gui.py.  Doneish?
 [_] BIFS class should throw exceptions rather than print error messages
 [_] bifs_gui should catch and display the exceptions.
@@ -156,10 +166,6 @@ Ensure existing examples work with current code.
 	: For now we invalidate by default when handing out a prior object, and knowledgeable clients,
 	: as in presentation.py that poke, plot, poke, replot must manually invalidate.
 [_] @Karl Verify that the changes relating to isxcbanded are semantically correct; they are at least syntactically correct now.
-[_] documentation outside the source code
-	: *If* desirable, e.g., the README used to have what was basically a copy
-	: of the class comment for bifs, consider how to achieve that
-	: automatically.
 [_] Review: NaNs in input file are now silently converted to 0 by bifs.load_image.
 	Is that desirable?
 	NaNs cause later processing to fail.

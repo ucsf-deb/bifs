@@ -1,17 +1,65 @@
 To Do
 -----
 
-: These are for the package developers.
-: [X] indicates a task is complete; [ ] indicates it is pending, but pretty
+: The actions listed below are for the package developers.  If you are a
+: regular user of the program you can ignore this file.
+:
+: [X] indicates a task is complete; [_] indicates it is pending, but pretty
 : much everything on the list is pending.
 :
-: This is a plain text file, but to use it best use
+: This is a plain text file, with related items grouped hiearchically.
+: Indentation indicates position in the hierarchy.  While you can view and
+: even edit the file with any text editor, it is designed for use by
+: vimoutliner.
+:
+: vimoutliner is a plugin for vim (a text editor) that colorizes different
+: outline levels, allows easy collapsing or expanding suboutlines and other
+: outline-like manipulation such as moving over outline sections, and has
+: extra facilities such as checkboxes to track completion. Since the file is
+: plain text it works well with version control.
+:
 : https://github.com/vimoutliner/vimoutliner, which requires vim, e.g. from
 : https://github.com/vim/vim/tree/master/runtime
 
+Other sources of To Do information
+	github project issues
+	Ross's GrandView outline (not in version control)
+	comments in the code (maybe)
+	comments in the log (maybe)
+	[_] consolidate everything to a single spot
+		: Since each method has particular strengths on weaknesses, and since
+		: consolidation requires work, this may not be that desirable or
+		: practical.  Factors to consider:
+		public visibility
+		ease of access to underlying technology
+		suitability to task
+			vimoutliner and Grandview
+				good at hiearchry
+				can track completion and (GrandView) priority
+				can handle large blocks of text
+				require installation of possibly unfamiliar tools
+				Grandview stores in binary format, bad for version control
+			code comments
+				easy to insert inline
+				requires some standardization
+				requires a way to extract them
+					: VSCode has extensions specifically to pull To Do and
+					: other tags from all project files.
+				can be place right near relevant code
+				not so good for more global changes
+			commit log
+				also convenient
+				good way to note where work stands
+				but not great for producing consolidated, persistent list
+			git hub
+				no need for extra technology
+				must have github account
+				facilitates collaboration
+				allows tags and (I think) priorities
+				no hieararchy
 Settle overall package structure.
 	invocation of test machinery
-	capitalization of project name and class names
+	[X] capitalization of project name and class names
 		Python package names should be lower case
 		Class names should be capitalized
 		github project names is 'bifs'
@@ -26,12 +74,12 @@ Settle overall package structure.
 bifs_gui.py should be treated as a binary or installable script
 	Guido considers having executables in packages an anti-pattern
 	hence relative imports, and scripts that might be run as either part of a package or separately work awkwardly if at all.
-	Concretely, this means bifs_gui should not use any relative imports.  
+	[X] Concretely, this means bifs_gui should not use any relative imports.  
 		That seems to be the case already.
-	How to test.
-	How to package and install.
-		should be in a different directory
-		setup should list it as an entry point
+	How to test
+	How to package and install
+		should be in a different directory?
+		[X] setup should list it as an entry point
 		: http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html?showComment=1419123890864#c2535793882880782398 
 	 argues entry point machinery is not great.  Note in particular the point
 	 about needing to install to run or test.
@@ -43,17 +91,17 @@ bifs_gui.py should be treated as a binary or installable script
 Other scripts?  Some of the Empirical Scanners might qualify.
 	bifs_util/EmpiricalScanner.py does not; it won't run by itself.
 	bifs_util/util.py also does not
-Probably need to revive some of the scanner-related scripts
+[_] Probably need to revive some of the scanner-related scripts
 	In examples/
 		empirical_scan.py
 		scan.py
-__init__.py
+[_] __init__.py
 	[X] should be in every directory to import
 	[X] was not true
 	and yet the imports were working
 	possibly related to relaxation of the __init_.py requirement in Python 3.3.
 	but that relaxation was only for Namespace packages, which this is not
-	What should go in __init__.py? opinions differ
+	[_] What should go in __init__.py? opinions differ
 		https://www.reddit.com/r/Python/comments/1bbbwk/whats_your_opinion_on_what_to_include_in_init_py/
 		Minimalist
 			empty
@@ -78,44 +126,44 @@ Ensure existing tests work with current code.
 	most seem to put tests directory top level
 	http://as.ynchrono.us/2007/12/filesystem-structure-of-python-project_21.html?showComment=1419124050650#c5629056591479709945 argues against that
 Ensure existing examples work with current code.
-Consider which materials should be  distributed.
+[_] Consider which materials should be  distributed.
 	things to consider eliminating
 		Visual Studio specific files and dirs
 		some of the example code, i.e., Ross's
 		git files
 		other work files?
 	decide how to eliminate them.  Could use a branch in git or a build script.
-Handling of multiple image loads in same session
+[_] Handling of multiple image loads in same session
 	could be via GUI or via program, as in  presentation.py
 	define desired functionality, which I think is and was to retain as many settings as possible.
 	current behavior simply blows away previous settings
-Review and possibly remove bifs.copy_params
-Create  some general way to generate and use empirical priors.
+[_] Review and possibly remove bifs.copy_params
+[_] Create  some general way to generate and use empirical priors.
 	[_] do not release with hard-coded path to store empirical prior.
-	literally I've done that since there is no path all! but name is hard-coded.
+	[_] literally I've done that since there is no path all! but name is hard-coded.
 	[_] need a GUI to specify the empirical prior file, both construct and read
-Move much of the empirical prior logic out of bifs_gui.py.  Doneish?
-BIFS class should throw exceptions rather than print error messages
-bifs_gui should catch and display the exceptions.
-Continue delegation of model details to components of bifs.
+[_] Move much of the empirical prior logic out of bifs_gui.py.  Doneish?
+[_] BIFS class should throw exceptions rather than print error messages
+[_] bifs_gui should catch and display the exceptions.
+[_] Continue delegation of model details to components of bifs.
 	material currently stored in bifs should be obtained from
        objects it holds, e.g., allowed function types, specific parameters.
 	GUI will need to become more dynamic in response.
-Update to components should automatically invalidate the bifs object appropriately.
+[_] Update to components should automatically invalidate the bifs object appropriately.
 	: E.g., reset scale on prior causes bifs object to _invalidate_final().
 	: The right way to do this is probably for the component, e.g., the prior, to hold a reference
 	: to the parent, and send the parent _invalidate_final() as part of component's _mark_dirty().
 	: For now we invalidate by default when handing out a prior object, and knowledgeable clients,
 	: as in presentation.py that poke, plot, poke, replot must manually invalidate.
-@Karl Verify that the changes relating to isxcbanded are semantically correct; they are at least syntactically correct now.
-documentation outside the source code
+[_] @Karl Verify that the changes relating to isxcbanded are semantically correct; they are at least syntactically correct now.
+[_] documentation outside the source code
 	: *If* desirable, e.g., the README used to have what was basically a copy
 	: of the class comment for bifs, consider how to achieve that
 	: automatically.
-Review: NaNs in input file are now silently converted to 0 by bifs.load_image.
+[_] Review: NaNs in input file are now silently converted to 0 by bifs.load_image.
 	Is that desirable?
 	NaNs cause later processing to fail.
-Bug? After successfully running bifs_gui and selecting exit from its menu the console says
+[_] Bug? After successfully running bifs_gui and selecting exit from its menu the console says
 	< File "J:\source\repos\bifs\bifs\bifs_gui.py", line 438, in close
 	< sys.exit(app.exec_())
 	< NameError: name 'app' is not defined

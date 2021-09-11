@@ -10,7 +10,7 @@ with open('LICENSE') as f:
 
 setup(
     name='bifs',
-    version='0.9.1',
+    version='0.9.2',
     description='Bayesian Imaging in Fourier Space (BIFS)',
     long_description=readme,
     long_description_content_type='text/x-rst',

@@ -1,11 +1,11 @@
 To Do
 -----
 
-: The actions listed below are for the package developers.  If you are a
-: regular user of the program you can ignore this file.
+: The actions listed below this introduction are for package developers.
+: If you are a regular user of the program you can ignore this file.
 :
 : [X] indicates a task is complete; [_] indicates it is pending, but pretty
-: much everything on the list is pending.
+: much everything on the list that is not complete is pending.
 :
 : This is a plain text file, with related items grouped hiearchically.
 : Indentation indicates position in the hierarchy.  While you can view and
@@ -20,6 +20,21 @@ To Do
 :
 : https://github.com/vimoutliner/vimoutliner, which requires vim, e.g. from
 : https://github.com/vim/vim/tree/master/runtime
+:
+: bifs is a Python package, and it should be possible to work with it using
+: any tools that can handle Python. There are some project files from Visual
+: Studio 2019, used for some of the development.  You can ignore them if you
+: use a different tool.  Note Visual Studio Code is distinct from Visual
+: Studio, though both are from Microsoft and support Python.
+:
+: Visual Studio 2019 does not formally support versions of Python above 3.7,
+: and probably never will: https://github.com/microsoft/PTVS/issues/5822.  I
+: don't think that actually matters much, especially as long as no 3.8+ syntax
+: appears in the Python files; currently it does not.  Either Visual Studio
+: 2022 or current VS Code do support later versions of Python fully. It would
+: probably be wise to keep the code base compatible with older versions of
+: Python anyway.
+
 
 Other sources of To Do information
 	github project issues
@@ -116,6 +131,8 @@ Packaging
 		must keep them in sync
 		PKG-INFO appears to be generated automatically from other files.  It doesn't reflect the current version,
 			but I haven't gone through a packaging cycle with that version.
+		currently __init__.py does not have the version number.
+			: It probably should
 		there is a bump... package to do so, but it's not clear it worth the trouble
 			since it requires naming the files to update
 			though that info can go in a configuration file
@@ -138,6 +155,12 @@ Packaging
 		: *If* desirable, e.g., the README used to have what was basically a copy
 		: of the class comment for bifs, consider how to achieve that
 		: automatically.
+	[_] Web documentation consistency
+		github shows README.md
+		testpypi shows README.rst
+		almost certainly both should show the same thing
+		life would be saner with a single README
+		the 2 files serve quite different purposes now
 [_] Handling of multiple image loads in same session
 	could be via GUI or via program, as in  presentation.py
 	define desired functionality, which I think is and was to retain as many settings as possible.

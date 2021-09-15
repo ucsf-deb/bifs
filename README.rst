@@ -117,9 +117,9 @@ tests/  -  test scripts.  For the pytest framework.
 Package Details
 ---------------
 
-At the Python command line:
+At the Python command line::
 
->>> import bifs
->>> help(bifs)
+    import bifs
+    help(bifs)
 
 Or see the class documentation in BIFS/bifs.py.

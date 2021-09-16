@@ -136,6 +136,8 @@ Packaging
 		there is a bump... package to do so, but it's not clear it worth the trouble
 			since it requires naming the files to update
 			though that info can go in a configuration file
+	[_] tag releases in git
+	[_] changelog
 	[X] convert all relative imports to absolute
 		generally recommended as more robust: The PEP 8 style guide recommends using absolute imports in general. 
 	__main__.py, if present, executed automatically on package load
@@ -151,6 +153,24 @@ Packaging
 			git files
 			other work files?
 		decide how to eliminate them.  Could use a branch in git or a build script.
+[_] documentation
+	possible things to document
+		The general purpose of the package
+		The theory behind it and supporting literature.
+		How to install the package
+		How to use the package
+		How to get support or report bugs
+		Package internals
+			Overall structure of the package and its directories
+			Key architectural features
+			Functions
+			Data structures
+			Classes
+			Typical interactions
+		Package development
+			How to obtain code
+			How to contribute changes
+			To Do list
 	[_] documentation outside the source code
 		: *If* desirable, e.g., the README used to have what was basically a copy
 		: of the class comment for bifs, consider how to achieve that
@@ -161,6 +181,19 @@ Packaging
 		almost certainly both should show the same thing
 		life would be saner with a single README
 		the 2 files serve quite different purposes now
+	[_] README.rst
+		[_] formatting of directory hiearchy is messed up
+		[_] instructions are dated
+			[_] bifs_gui can now be launched directly
+			[_] some references to BIFS should be bifs
+		[_] should internal stuff even go here?
+		[_] Use of >>> section problematic
+			clearly VSCode extension can't handle it
+			possibly it needs to have the output too
+			in rst >>> is a doctest block
+			I turned it into a regular block
+				not uploaded yet
+				result not indented, at least in preview
 [_] Handling of multiple image loads in same session
 	could be via GUI or via program, as in  presentation.py
 	define desired functionality, which I think is and was to retain as many settings as possible.

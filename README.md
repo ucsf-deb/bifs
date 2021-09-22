@@ -14,19 +14,59 @@ launch the GUI:
 
 ```shell
 #python may work instead of python3, depending on your environment
+#py -3 should work on MS-Windows
 python3 -m pip install --upgrade pip setuptools wheel
 python3 -m pip install bifs
-bifs_gui   # use \ on MS-Windows.  launches program
+bifs_gui
 ```
 bifs requires a number of other substantial software packages, including SciPy and PyQt5,
 which the installation should take care of if they are not already present.
+
+Virtual Environments
+--------------------
 
 See [this guide](https://packaging.python.org/tutorials/installing-packages) for much more
 information about how to install python packages.  In particular, we endorse their
 strong recommendation to *use virtual environments*, which are omitted from the steps above.
 
 On Windows inside a virtual environment we have found `python` rather than `python3` is necessary.
-We recommend against using the Windows specific `py` command since we do not know if it respects virtual environment.
+
+We recommend against using the Windows-specific `py` command since it only respects the venv [sometimes, for example `py -3` will ignore it,](https://docs.python.org/3/using/windows.html#virtual-environments) under Python 3.9, and may have been even less reliable with earlier versions.
+
+Qt Compatibility Problems
+-------------------------
+
+The graphical program `bifs_gui` depends on the `Qt` graphic framework.  This will be installed automatically if it is not present, 
+but if it is already present the packages that `pip` installs may not be compatible with it.  We found this to be the case on Debian GNU/Linux 10 (buster).  If you get such a problem, you can fix it by specifying an explicit version for PyQt5 with `==`:
+
+```bash
+(testEnv) ross@barley:~/UCSF/Kornak$ python -m pip install PyQt5==5.11.2
+Collecting PyQt5==5.11.2
+  Downloading PyQt5-5.11.2-5.11.1-cp35.cp36.cp37.cp38-abi3-manylinux1_x86_64.whl (117.9 MB)
+     |████████████████████████████████| 117.9 MB 84 kB/s 
+Collecting PyQt5_sip<4.20,>=4.19.11
+  Downloading PyQt5_sip-4.19.19-cp37-cp37m-manylinux1_x86_64.whl (67 kB)
+     |████████████████████████████████| 67 kB 997 kB/s 
+Installing collected packages: PyQt5-sip, PyQt5
+  Attempting uninstall: PyQt5-sip
+    Found existing installation: PyQt5-sip 12.9.0
+    Uninstalling PyQt5-sip-12.9.0:
+      Successfully uninstalled PyQt5-sip-12.9.0
+  Attempting uninstall: PyQt5
+    Found existing installation: PyQt5 5.15.4
+    Uninstalling PyQt5-5.15.4:
+      Successfully uninstalled PyQt5-5.15.4
+Successfully installed PyQt5-5.11.2 PyQt5-sip-4.19.19
+```
+
+5.11.2 is the version of `Qt` that was already on the system, while 5.15.4 is the version that `pip` installed.
+
+The current stable release of Debian is 11 (bullseye) and uses `Qt` 5.15.2, probably close enough to work with the default installation of `PyQt5`.
+
+See https://github.com/ucsf-deb/bifs/issues/25 for more.
+
+An alternative would be to manually install the required packages (see the `requirements.txt` or `setup.py` files) using your OS's package manager instead of `pip`, and then install `bifs` *without* using a  virtual environment.
+
 
 Fallback Installation of Dependencies
 -------------------------------------

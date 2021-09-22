@@ -7,6 +7,8 @@ To Do
 : [X] indicates a task is complete; [_] indicates it is pending, but pretty
 : much everything on the list that is not complete is pending.
 :
+: #24 is a reference to an issue in the github bug tracker for the project.
+:
 : This is a plain text file, with related items grouped hiearchically.
 : Indentation indicates position in the hierarchy.  While you can view and
 : even edit the file with any text editor, it is designed for use by
@@ -225,9 +227,15 @@ Packaging
 [_] Review: NaNs in input file are now silently converted to 0 by bifs.load_image.
 	Is that desirable?
 	NaNs cause later processing to fail.
-[_] Bug? After successfully running bifs_gui and selecting exit from its menu the console says
+[_] Bug #24: After successfully running bifs_gui and selecting exit from its menu the console says
 	< File "J:\source\repos\bifs\bifs\bifs_gui.py", line 438, in close
 	< sys.exit(app.exec_())
 	< NameError: name 'app' is not defined
 	In the debugger app was defined going into this step.
-
+[_] test on different systems
+	[_] 0.9.1
+		[X] Windows
+		[X] Mac
+		[_] Linux: fails
+			#25: Qt mismatch problems
+			#26: testpi problems with Python 3.7 pip

@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-with open('README.rst') as f:
+with open('README.md') as f:
     readme = f.read()
 
 with open('LICENSE') as f:
@@ -13,7 +13,7 @@ setup(
     version='0.9.2',
     description='Bayesian Imaging in Fourier Space (BIFS)',
     long_description=readme,
-    long_description_content_type='text/x-rst',
+    long_description_content_type='text/markdown',
     author='John Kornak, Karl Young, Ross Boylan',
     author_email='john.kornak@ucsf.edu,kyoung21b2000@gmail.com',
     maintainer_email='ross.boylan@ucsf.edu,bifs@ucsf.edu',

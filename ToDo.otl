@@ -205,10 +205,9 @@ Packaging
 		: *If* desirable, e.g., the README used to have what was basically a copy
 		: of the class comment for bifs, consider how to achieve that
 		: automatically.
-	[_] Web documentation consistency
-		I believe I've fixed this, but need to verify
+	[X] Web documentation consistency
 		github shows README.md
-		testpypi was (?) showing README.rst
+		testpypi was showing README.rst
 		almost certainly both should show the same thing
 		life would be saner with a single README
 		the 2 files serve quite different purposes now
@@ -216,7 +215,7 @@ Packaging
 			README.rst longer intro, how to use, package internals
 		setup.py controls which file is used on PyPI
 			changed it to use README.md with type text/markdown
-			I believe that will fix the problem
+			that fixed the problem
 	[_] README.rst
 		[_] formatting of directory hiearchy is messed up
 		[_] instructions are dated
@@ -275,3 +274,5 @@ Packaging
 			#26: testpi problems with Python 3.7 pip
 			both have work-arounds
 			and those are documented
+	0.9.2
+		is __version_ a package attribute?

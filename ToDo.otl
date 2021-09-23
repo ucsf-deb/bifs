@@ -163,7 +163,7 @@ Packaging
 		there is a bump... package to do so, but it's not clear it worth the trouble
 			since it requires naming the files to update
 			though that info can go in a configuration file
-	[_] tag releases in git
+	[X] tag releases in git
 	[_] changelog
 	[X] convert all relative imports to absolute
 		generally recommended as more robust: The PEP 8 style guide recommends using absolute imports in general. 
@@ -218,9 +218,9 @@ Packaging
 			that fixed the problem
 	[_] README.rst
 		[_] formatting of directory hiearchy is messed up
-		[_] instructions are dated
-			[_] bifs_gui can now be launched directly
-			[_] some references to BIFS should be bifs
+		[X] instructions are dated
+			[X] bifs_gui can now be launched directly
+			[X] some references to BIFS should be bifs
 		[_] should internal stuff even go here?
 		[_] Use of >>> section problematic
 			clearly VSCode extension can't handle it
@@ -229,6 +229,11 @@ Packaging
 			I turned it into a regular block
 				not uploaded yet
 				result not indented, at least in preview
+	[_] link to README.rst doesn't work from testpypi
+		oddly, the following link to the code does work
+		: The link appears to be relative, but PyPI, unlike github, does not
+		: serve individual files.  Perhaps it could be made to.
+		easiest fix probably to make reference absolute
 [_] Handling of multiple image loads in same session
 	could be via GUI or via program, as in  presentation.py
 	define desired functionality, which I think is and was to retain as many settings as possible.
@@ -274,5 +279,9 @@ Packaging
 			#26: testpi problems with Python 3.7 pip
 			both have work-arounds
 			and those are documented
-	0.9.2
-		is __version_ a package attribute?
+	[X] 0.9.2
+		[X] is __version_ a package attribute? No
+		but the new metadata library works OK
+		| >>> from importlib.metadata import version
+		| >>> version('bifs')
+		| '0.9.2'

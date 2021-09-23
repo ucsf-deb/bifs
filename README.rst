@@ -30,31 +30,19 @@ efficiency.
 Using the Package
 -----------------
 
-Once the dependencies are installed and the BIFS package has
-been obtained from GitHub one can go to the directory containing
-the class definition file, bifs.py, and the BIFS GUI, bifs_gui.py
-and run the GUI via the command:
+For the graphical interface, click on the bifs_gui shortcut installed with the package.  
+If you are in a terminal, just type bifs_gui.
 
-python bifs_gui.py
+This provides the easiest access to the bifs package but is not as flexible as using the bifs module from a Python program.
 
-on MS-Windows, try
-py bifs_gui.py
-or
-py -3 bifs_gui.py
-
-This provides the easiest access to the BIFS package but provides
-limited access to BIFS class variables.
-
-To gain full access to the capabilities of BIFS one can: 1) run python,
-2) load the BIFS class (import bifs), and 3) e.g. modify the
-commands in one of the scripts (e.g. bifs_cl_2D.py) described below
+For programming, one might start by modifying one of the example scripts (e.g. bifs_cl_2D.py) described below
 to suit one's particular project.
 
 Empirical Priors
 ~~~~~~~~~~~~~~~~
 
 One can scan a set of images and use them to form a prior in Fourier space for
-later analysis.  To do so, select "BIFS Operations" and then "Empirical Prior". 
+later analysis.  To do so, start bifs_gui and select "BIFS Operations" and then "Empirical Prior". 
 Then select the top directory that holds all your images.  The code scans all subdirectories
 and reads all files matching a regular expression, optionally skipping some of them.
 It complains if the images don't all have the same dimensions.
@@ -64,7 +52,7 @@ _scanImages.
 
 The results are stored in a file ep1.npz in your current working directory.  This is defined
 in EPFILE near the top of bifs_gui.py.  Saving the results means the scanning process
-need only be done once; it it time and resource intensive.
+need only be done once; it is time and resource intensive.
 
 To use the empirical prior select "Parameter Set" and then "Load Empirical Prior".  This reads
 the file just mentioned and then uses it to form a prior.
@@ -74,15 +62,16 @@ Package Structure
 -----------------
 
 The package is separated into a class representing the calculation
-engine and a main GUI class. The files contained in the package
+engine and a main GUI class. The package bifs is lower case, but its main class, BIFS is upper case.  The files contained in the package
 are:
 
 bifs/			- python package directory
-	bifs.py           - the main class containing the BIFS functions
+	bifscore.py           - contains the BIFS class
 
-	bifs_gui.py       - the gui interface to bifs.py
+	bifs_gui.py       - the gui interface to bifs
 
-	pset_dialogs.py   - set up functions for the BIFS Gui dialog boxes
+	pset_dialogs.py   - set up functions for the bifs_gui dialog boxes
+						Not of direct interest to most users.
 
 	bifs.pyproj, bifs.sln  - MS Visual Studio 2019 project files
 
@@ -99,7 +88,7 @@ bases/fourier.py  - in principle a BIFS style analysis could be
 					Fourier bases. fourier.py contains the Fourier
 					specific functions.
 
-examples/		- sample code that uses BIFS package
+examples/		- sample code that uses the bifs package
 	bifs_cl_1D.py     - an example script showing how to perform
 						a BIFS analysis for 1D function in a
 						python or ipython shell (can also just be
@@ -111,6 +100,7 @@ examples/		- sample code that uses BIFS package
 
 priors/	- definitions of different types of prior distributions
 	FunctionalPrior.py  - priors based on smooth functions
+	EmpiricalPrior.py	- priors based on observed data
 
 tests/  -  test scripts.  For the pytest framework.
 		   
@@ -120,6 +110,6 @@ Package Details
 At the Python command line::
 
     import bifs
-    help(bifs)
+    help(bifs.BIFS)
 
-Or see the class documentation in BIFS/bifs.py.
+Or see the comments in the source code.

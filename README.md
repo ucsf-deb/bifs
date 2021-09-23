@@ -115,7 +115,7 @@ versions as well:
 
 Using BIFS
 ==========
-See the more [detailed guide](README.rst) and the extensive comments in the code for how to use the package.
+See the more [detailed guide](https://github.com/ucsf-deb/bifs/blob/master/README.rst) and the extensive comments in the code for how to use the package.
 
 Exploring the code
 ==================

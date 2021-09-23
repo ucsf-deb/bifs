@@ -157,10 +157,10 @@ Packaging
 				requested write_to "bifs/_version.py"
 				is that necessary?
 				is it sufficient?
-				is bifs.__version__ defined after this?
+				bifs.__version__ is NOT defined after this
 		currently __init__.py does not have the version number.
 			: Maybe it should
-		there is a bump... package to do so, but it's not clear it worth the trouble
+		there is a bump... package to coordinate, but seems not worth the trouble
 			since it requires naming the files to update
 			though that info can go in a configuration file
 	[X] tag releases in git
@@ -229,7 +229,7 @@ Packaging
 			I turned it into a regular block
 				not uploaded yet
 				result not indented, at least in preview
-	[_] link to README.rst doesn't work from testpypi
+	[X] link to README.rst doesn't work from testpypi
 		oddly, the following link to the code does work
 		: The link appears to be relative, but PyPI, unlike github, does not
 		: serve individual files.  Perhaps it could be made to.

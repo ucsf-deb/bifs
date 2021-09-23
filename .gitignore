@@ -100,3 +100,4 @@ ENV/
 *.xlsx
 *.pdf
 *.otl.swp
+bifs/_version.py

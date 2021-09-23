@@ -129,12 +129,37 @@ Packaging
 				key things is to regard it as a public interface
 				this means using __all__ and maybe messing with nested modules to hoist some symbols up
 				anything else that is appropriately global
-	version number generally in 3 places, setup.py, PKG-INFO and __init__.py top level
+	version number coordination
+		may appear in 
+			setup.py
+			PKG-INFO
+			__init__.py top level
+			version control tags
+			PyPI
+		available, by convention, as module attributes
+			__version__  (string)
+			__version_info__ (tuple, possibly using numbers when appropriate)
+		convention may be obsolescent with the advent of the metadata library
+			https://docs.python.org/3/library/importlib.metadata.html#distribution-versions
 		must keep them in sync
-		PKG-INFO appears to be generated automatically from other files.  It doesn't reflect the current version,
-			but I haven't gone through a packaging cycle with that version.
+		PKG-INFO appears to be generated automatically from other files. 
+			only updated when build the distribution
+		advice on how to handle versions
+			https://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
+			https://packaging.python.org/guides/single-sourcing-package-version/#single-sourcing-the-version
+			https://www.python.org/dev/peps/pep-0440/
+		I'm using setuptools-scm
+			version constructed from tag in git or hg
+			only identical to the tag if tag is for current version
+			this is the last alternative suggested in the single-sourcing-package-version above
+			https://pypi.org/project/setuptools-scm/
+			not completely clear to me how to use it as a producer or consumer
+				requested write_to "bifs/_version.py"
+				is that necessary?
+				is it sufficient?
+				is bifs.__version__ defined after this?
 		currently __init__.py does not have the version number.
-			: It probably should
+			: Maybe it should
 		there is a bump... package to do so, but it's not clear it worth the trouble
 			since it requires naming the files to update
 			though that info can go in a configuration file
@@ -159,6 +184,9 @@ Packaging
 	possible things to document
 		The general purpose of the package
 		The theory behind it and supporting literature.
+		tutorial
+			how to use command line << JK says start here
+			how to use GUI
 		How to install the package
 		How to use the package
 		How to get support or report bugs
@@ -178,11 +206,17 @@ Packaging
 		: of the class comment for bifs, consider how to achieve that
 		: automatically.
 	[_] Web documentation consistency
+		I believe I've fixed this, but need to verify
 		github shows README.md
-		testpypi shows README.rst
+		testpypi was (?) showing README.rst
 		almost certainly both should show the same thing
 		life would be saner with a single README
 		the 2 files serve quite different purposes now
+			README.md quick intro and how to install
+			README.rst longer intro, how to use, package internals
+		setup.py controls which file is used on PyPI
+			changed it to use README.md with type text/markdown
+			I believe that will fix the problem
 	[_] README.rst
 		[_] formatting of directory hiearchy is messed up
 		[_] instructions are dated
@@ -239,3 +273,5 @@ Packaging
 		[_] Linux: fails
 			#25: Qt mismatch problems
 			#26: testpi problems with Python 3.7 pip
+			both have work-arounds
+			and those are documented

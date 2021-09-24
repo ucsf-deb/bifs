@@ -201,6 +201,12 @@ Packaging
 			How to obtain code
 			How to contribute changes
 			To Do list
+	[_] improve installation instructions
+		maybe cute graphic tricks for Windows vs *nix
+			: Model on the python instructions for venv creation
+		[_] provide explicit instructions with virtual environment
+		make venv the default?
+		[_] link problems more explicitly to their likely causes
 	[_] documentation outside the source code
 		: *If* desirable, e.g., the README used to have what was basically a copy
 		: of the class comment for bifs, consider how to achieve that

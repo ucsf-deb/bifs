@@ -102,6 +102,7 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             # something funky in images
             pass
+        return
 
     def _scanImages(self, rootDir):
         """
@@ -225,6 +226,9 @@ class MainWindow(QtWidgets.QMainWindow):
         mybifs to use those, rather than functional shortcuts, for the prior in reconstructing
         a particular image.
         """
+        if not self.mybifs.image_file_loaded:
+            QtWidgets.QMessageBox.information(self,"Empirical Prior", "You must load image using Load Initial Image... option from BIFS menu before loading the empirical prior.")
+            return
         self.mybifs.load_empirical(EPFILE)
 
     def getImage_real(self):

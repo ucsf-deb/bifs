@@ -159,7 +159,12 @@ Packaging
 				is it sufficient?
 				bifs.__version__ is NOT defined after this
 		currently __init__.py does not have the version number.
-			: Maybe it should
+			: Maybe it should.
+			: https://github.com/spyder-ide/qtpy/blob/master/setup.py provides
+			: an example of hot to info from _version.py into regular
+			: setup.py.
+			: https://github.com/spyder-ide/qtpy/blob/master/qtpy/__init__.py
+			: shows how to get the info into the module __version__.
 		there is a bump... package to coordinate, but seems not worth the trouble
 			since it requires naming the files to update
 			though that info can go in a configuration file

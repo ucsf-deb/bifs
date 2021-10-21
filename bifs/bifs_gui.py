@@ -13,6 +13,8 @@ except:
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtWidgets import QMessageBox
+# docs for PySide2 say import Slot would do for next line
+from PyQt5.QtCore import pyqtSlot as Slot
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.colors import NoNorm 
@@ -74,8 +76,27 @@ class MainWindow(QtWidgets.QMainWindow):
         # left, top, width, height
         self.setGeometry(30,30,850,850)
         self.setCentralWidget(self.main_widget)
+        self._signal_setup()
         self.show()
         self.update()
+
+    def _signal_setup(self):
+        "connect myself to current mybifs object"
+        self.mybifs.image_loaded.connect(self.set_image_loaded)
+        self.mybifs.image_unloaded.connect(self.set_image_unloaded)
+
+    @Slot()
+    def set_image_loaded(self):
+        #enable menu
+        self.loadEmpiricalPriorAct.setEnabled(True)  # must have loaded image
+        self.loadEmpiricalPriorAct.setText("&Load Empirical Prior")
+
+
+    @Slot()
+    def set_image_unloaded(self):
+        # disable menu
+       self.loadEmpiricalPriorAct.setEnabled(False)  # must have loaded image
+       self.loadEmpiricalPriorAct.setText("&Load Empirical Prior (requires loaded image and basis)")
 
     def getImage(self):
         self.getImage_real()
@@ -429,6 +450,7 @@ class MainWindow(QtWidgets.QMainWindow):
             bifsj = bifs_handle.read()
             bifs_handle.close()
             self.mybifs = jsonpickle.decode(bifsj)
+            self._signal_setup()
             # Show intial image
             self.show_initial_image()
             # Show initial and post BIFS k-spage images and final image
@@ -477,7 +499,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.getEmpiricalPriorAct = QtWidgets.QAction("&Empirical Prior...", self, triggered=self.getEmpiricalPrior)
 
-        self.loadEmpiricalPriorAct = QtWidgets.QAction("&Load Empirical Prior (requires loaded image)", self, triggered=self.loadEmpiricalPrior)
+        self.loadEmpiricalPriorAct = QtWidgets.QAction("&Load Empirical Prior (requires loaded image and basis)", self, triggered=self.loadEmpiricalPrior)
         self.loadEmpiricalPriorAct.setEnabled(False)  # must have loaded image
 
         self.doMapAct = QtWidgets.QAction("&Get MAP Estimate Image...", self,triggered=self.doMAP)

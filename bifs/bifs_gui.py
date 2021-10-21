@@ -477,7 +477,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.getEmpiricalPriorAct = QtWidgets.QAction("&Empirical Prior...", self, triggered=self.getEmpiricalPrior)
 
-        self.loadEmpiricalPriorAct = QtWidgets.QAction("&Load Empirical Prior", self, triggered=self.loadEmpiricalPrior)
+        self.loadEmpiricalPriorAct = QtWidgets.QAction("&Load Empirical Prior (requires loaded image)", self, triggered=self.loadEmpiricalPrior)
+        self.loadEmpiricalPriorAct.setEnabled(False)  # must have loaded image
 
         self.doMapAct = QtWidgets.QAction("&Get MAP Estimate Image...", self,triggered=self.doMAP)
 

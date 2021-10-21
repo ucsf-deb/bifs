@@ -25,15 +25,17 @@ import jsonpickle as jsp
 from bifs.priors import FunctionalPrior as FP
 from bifs.priors import EmpiricalPrior as EP
 
+from PyQt5.QtCore import QObject, Signal
+
 import copy
 
-class BIFS:
+class BIFS(QObject):
     """
     Class BIFS for performing Bayesian image restoration
     in k-space
 
-     Class Variables
-    ----------------
+    Variables
+    ---------
 
     In the next group, clients should always use the accessor functions listed:
 
@@ -131,7 +133,18 @@ class BIFS:
                  "barthann"
     bump_default_type - the default window type used (currently "blackman")
 
+
+    Signals
+    -------
+    These are Qt signals, the reason the class must inherit from QObject.
+
+    image_loaded - initial image has been loaded and basis established
+    image_unloaded -  image has been unloaded
+
     """
+
+    image_loaded = Signal()
+    image_unloaded = Signal()
     
     def __init__(self,prior = "Gaussian",likelihood = "Gaussian",likelihood_scale = 0.05,prior_scale=0.0005,basis="Fourier"):
         """ 
@@ -149,6 +162,8 @@ class BIFS:
           initializes class
 
         """
+
+        super().__init__()
 
         self._invalidate_initial_image()
         self.view3Dslice = [0,0.5]
@@ -204,6 +219,7 @@ class BIFS:
     def _invalidate_initial_image(self):
         "Existing image, if any, and all that depends on it, is obsolete"
         self._init_image = None
+        self.image_unloaded.emit()
         self.imdim = None
         self.image_file_loaded = False
         self.initial_image_file_name = ''
@@ -418,6 +434,8 @@ class BIFS:
         self.set_prior_func_type(self.param_func_type)
         # Set Rice parameter in case you use it
         # self.rice_arg = self.mod_image/self.likelihood_scale
+
+        self.image_loaded.emit()
 
         #### - The following doesn't seem to work, i.e. de-emphasizes -  ####
         #### - prior to too large an extent - need to investigate this - ####

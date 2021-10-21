@@ -320,7 +320,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.ax1.imshow(self.mybifs.init_image(),cmap = cm.Greys_r,norm=NoNorm())
                 else: # assume for now that the only other possibility is 3D
                       # can change later
-                    slice_index = np.int(np.round(self.mybifs.view3Dslice[1]*self.mybifs.init_image().shape[self.mybifs.view3Dslice[0]]))
+                    slice_index = np.intp(np.round(self.mybifs.view3Dslice[1]*self.mybifs.init_image().shape[self.mybifs.view3Dslice[0]]))
                     if self.mybifs.view3Dslice[0] == 0:
                         init_im_slice = self.mybifs.init_image()[slice_index,:,:]
                     elif self.mybifs.view3Dslice[0] == 1:
@@ -357,7 +357,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.ax2.imshow(self.mybifs.final_image(),cmap = cm.Greys_r)
                 else: # assume for now that the only other possibility is 3D
                       # can change later
-                    slice_index = np.int(np.round(self.mybifs.view3Dslice[1]*self.mybifs.final_image().shape[self.mybifs.view3Dslice[0]]))
+                    slice_index = np.intp(np.round(self.mybifs.view3Dslice[1]*self.mybifs.final_image().shape[self.mybifs.view3Dslice[0]]))
                     if self.mybifs.view3Dslice[0] == 0:
                         final_im_slice = self.mybifs.final_image()[slice_index,:,:]
                     elif self.mybifs.view3Dslice[0] == 1:
@@ -380,7 +380,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.ax3.imshow(np.log(showim1k),cmap = cm.Greys_r)
                 else: # assume for now that the only other possibility is 3D
                       # can change later
-                    slice_index = np.int(np.round(self.mybifs.view3Dslice[1]*self.mybifs.mod_image().shape[self.mybifs.view3Dslice[0]]))
+                    slice_index = np.intp(np.round(self.mybifs.view3Dslice[1]*self.mybifs.mod_image().shape[self.mybifs.view3Dslice[0]]))
                     if self.mybifs.view3Dslice[0] == 0:
                         init_mod_im_slice = self.mybifs.mod_image()[slice_index,:,:]
                     elif self.mybifs.view3Dslice[0] == 1:
@@ -405,7 +405,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.ax4.imshow(np.log(showim2k),cmap = cm.Greys_r)
                 else: # assume for now that the only other possibility is 3D
                       # can change later
-                    slice_index = np.int(np.round(self.mybifs.view3Dslice[1]*self.mybifs.bifsk_image().shape[self.mybifs.view3Dslice[0]]))
+                    slice_index = np.intp(np.round(self.mybifs.view3Dslice[1]*self.mybifs.bifsk_image().shape[self.mybifs.view3Dslice[0]]))
                     if self.mybifs.view3Dslice[0] == 0:
                         bifs_mod_im_slice = self.mybifs.bifsk_image()[slice_index,:,:]
                     elif self.mybifs.view3Dslice[0] == 1:

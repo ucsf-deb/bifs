@@ -138,7 +138,7 @@ class BIFS(QObject):
     -------
     These are Qt signals, the reason the class must inherit from QObject.
 
-    image_loaded - initial image has been loaded and basis established
+    image_loaded - initial image has been loaded
     image_unloaded -  image has been unloaded
 
     """
@@ -222,6 +222,7 @@ class BIFS(QObject):
         self.image_unloaded.emit()
         self.imdim = None
         self.image_file_loaded = False
+        self.image_unloaded.emit()
         self.initial_image_file_name = ''
         self._prior = None  # depends on image dimensions
         self._invalidate_kspace()
@@ -386,6 +387,7 @@ class BIFS(QObject):
         self._init_image[np.isnan(init_image)] = 0.0
         self.imdim = len(init_image.shape)
         self.image_file_loaded = True
+        self.image_loaded.emit()
         return
 
     def init_image(self):
@@ -435,7 +437,6 @@ class BIFS(QObject):
         # Set Rice parameter in case you use it
         # self.rice_arg = self.mod_image/self.likelihood_scale
 
-        self.image_loaded.emit()
 
         #### - The following doesn't seem to work, i.e. de-emphasizes -  ####
         #### - prior to too large an extent - need to investigate this - ####

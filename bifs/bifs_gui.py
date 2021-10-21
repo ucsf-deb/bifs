@@ -96,7 +96,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def set_image_unloaded(self):
         # disable menu
        self.loadEmpiricalPriorAct.setEnabled(False)  # must have loaded image
-       self.loadEmpiricalPriorAct.setText("&Load Empirical Prior (requires loaded image and basis)")
+       self.loadEmpiricalPriorAct.setText("&Load Empirical Prior (requires loaded image)")
 
     def getImage(self):
         self.getImage_real()
@@ -248,6 +248,7 @@ class MainWindow(QtWidgets.QMainWindow):
         a particular image.
         """
         if not self.mybifs.image_file_loaded:
+            # should never happen since action should be disabled
             QtWidgets.QMessageBox.information(self,"Empirical Prior", "You must load image using Load Initial Image... option from BIFS menu before loading the empirical prior.")
             return
         self.mybifs.load_empirical(EPFILE)
@@ -499,7 +500,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.getEmpiricalPriorAct = QtWidgets.QAction("&Empirical Prior...", self, triggered=self.getEmpiricalPrior)
 
-        self.loadEmpiricalPriorAct = QtWidgets.QAction("&Load Empirical Prior (requires loaded image and basis)", self, triggered=self.loadEmpiricalPrior)
+        self.loadEmpiricalPriorAct = QtWidgets.QAction("&Load Empirical Prior (requires loaded image)", self, triggered=self.loadEmpiricalPrior)
         self.loadEmpiricalPriorAct.setEnabled(False)  # must have loaded image
 
         self.doMapAct = QtWidgets.QAction("&Get MAP Estimate Image...", self,triggered=self.doMAP)

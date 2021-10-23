@@ -51,7 +51,7 @@ Other sources of To Do information
 		ease of access to underlying technology
 		suitability to task
 			vimoutliner and Grandview
-				good at hiearchry
+				good at hiearchy
 				can track completion and (GrandView) priority
 				can handle large blocks of text
 				require installation of possibly unfamiliar tools
@@ -80,7 +80,7 @@ Packaging
 	[X] capitalization of project name and class names
 		Python package names should be lower case
 		Class names should be capitalized
-		github project names is 'bifs'
+		github project name is 'bifs'
 		having multiple things with the same name is confusing
 		Old scheme was that the project name was 'bifs' in setup.py
 			: but it was under the directory 'BIFS'.  It seems unlikely
@@ -126,7 +126,7 @@ Packaging
 				or just the version number
 				maybe __all__, list of symbols to export
 			Maximalist
-				key things is to regard it as a public interface
+				key thing is to regard it as a public interface
 				this means using __all__ and maybe messing with nested modules to hoist some symbols up
 				anything else that is appropriately global
 	version number coordination
@@ -276,11 +276,17 @@ Packaging
 [_] Review: NaNs in input file are now silently converted to 0 by bifs.load_image.
 	Is that desirable?
 	NaNs cause later processing to fail.
-[_] Bug #24: After successfully running bifs_gui and selecting exit from its menu the console says
+[X] Bug #24: After successfully running bifs_gui and selecting exit from its menu the console says
 	< File "J:\source\repos\bifs\bifs\bifs_gui.py", line 438, in close
 	< sys.exit(app.exec_())
 	< NameError: name 'app' is not defined
 	In the debugger app was defined going into this step.
+	but same code occurs in MainWindow.close() even though app is unknown there
+	If add cleanup code, Qt docs say
+		: We recommend that you connect clean-up code to the aboutToQuit()
+		: signal, instead of putting it in your application's main() function.
+		: This is because, on some platforms, the QApplication::exec() call
+		: may not return.
 [_] test on different systems
 	[_] 0.9.1
 		[X] Windows

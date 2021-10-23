@@ -46,11 +46,15 @@ class MainWindow(QtWidgets.QMainWindow):
     """
     send_fig = QtCore.pyqtSignal(str)
 
-    def __init__(self):
+    def __init__(self, app):
         super(MainWindow, self).__init__()
         self.main_widget = QtWidgets.QWidget(self)
         # Initialize bifs object
         self.mybifs = bifs.BIFS()
+        self.myapp = app
+        # use self.myapp.quit() for successful completion or
+        # self.myapp.exit(code) for errors
+        # No sys.exit is necessary.
         self.filename = None
         self.didMAP = False
         self.setWindowTitle("Bayesian Imaging in Fourier Space")
@@ -462,7 +466,7 @@ class MainWindow(QtWidgets.QMainWindow):
         return
     
     def close(self):
-        sys.exit(app.exec_())
+        self.myapp.quit()
         
     def zoomIn(self):
         self.scaleImage(1.25)
@@ -760,8 +764,8 @@ class StartDeleteBump_Dialog(QtWidgets.QDialog, DeleteBump_Dialog):
 def launch():
     "provided as a possible entry point"
     app = QtWidgets.QApplication(sys.argv)
-    win = MainWindow()
-    sys.exit(app.exec_())
+    win = MainWindow(app)
+    app.exec()  # for Python2 and Qt4 sys.exit(app.exec_())
 
 if __name__ == '__main__':
     launch()

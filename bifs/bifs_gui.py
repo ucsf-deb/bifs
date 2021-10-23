@@ -44,7 +44,6 @@ class MainWindow(QtWidgets.QMainWindow):
     Class that generates the main BIFS GUI window
  
     """
-    send_fig = QtCore.pyqtSignal(str)
 
     def __init__(self, app):
         super(MainWindow, self).__init__()

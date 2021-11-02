@@ -46,6 +46,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="bifs\bifscore.py" />
+    <Compile Include="bifs\bifsexception.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="bifs\bifs_gui.py" />
     <Compile Include="bifs\bifs_util\EmpiricalScanner.py">
       <SubType>Code</SubType>

@@ -24,6 +24,7 @@ from datetime import datetime
 import jsonpickle as jsp
 from bifs.priors import FunctionalPrior as FP
 from bifs.priors import EmpiricalPrior as EP
+from bifs.bifsexception import *
 
 from PyQt5.QtCore import QObject, Signal
 
@@ -226,6 +227,7 @@ class BIFS(QObject):
         self.initial_image_file_name = ''
         self._prior = None  # depends on image dimensions
         self._invalidate_kspace()
+        raise BifsBadParameter("test exception handling")
 
     def _invalidate_kspace(self):
         """

@@ -23,6 +23,7 @@ from pylab import *
 import numpy as np
 from scipy import misc
 import bifs
+from bifs.bifsexception import *
 import jsonpickle
 import os
 import itertools
@@ -38,6 +39,8 @@ from bifs.pset_dialogs import AddBump_Dialog,DeleteBump_Dialog
 # Empirical Prior file
 EPFILE = r"ep1.npz"
 
+x = BifsException('foo', 'bar')
+pass
 class MainWindow(QtWidgets.QMainWindow):
     """
 

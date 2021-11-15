@@ -4,16 +4,6 @@
 ###        for the BIFS package                    ###
 ###                                                ###
 
-# debugging
-import inspect
-def quickinfo(f):
-    "quick info about signature of f"
-    s = inspect.signature(f, follow_wrapped=False)
-    p = s.parameters  # does not respond to usual dictionary protocol
-    for k in p:
-        v = p[k]
-        print("{}: {} {}".format(k, v.kind, v))
-
 import cProfile, pstats
 try:
     # new in 3.7
@@ -286,13 +276,10 @@ class MainWindow(QtWidgets.QMainWindow):
                                                      QtCore.QDir.currentPath())[0]
         # Qt docs say return value is a string, but it is tuple whose first element we want
 
-        try:
-            self.mybifs.load_image_file(self.fileName)
-            self.show_initial_image()
-            return
-        except:
-            QtWidgets.QMessageBox.information(self, "Image Viewer","Cannot load " + self.fileName)
-            return
+        self.mybifs.load_image_file(self.fileName)
+        self.show_initial_image()
+        return
+
 
     @catcher
     def doMAP(self):
@@ -322,7 +309,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.didMAP = True
             except:
                 QtWidgets.QMessageBox.information(self,"MAP Estimator", "MAP estimate failed") 
-            raise BifsBadParameter("test exception handling")
             return
             
     def show_initial_image(self):
@@ -799,8 +785,4 @@ def launch():
     app.exec()  # for Python2 and Qt4 sys.exit(app.exec_())
 
 if __name__ == '__main__':
-    print("doMap, wrapped: ")
-    quickinfo(MainWindow.doMAP)
-    print("\ngetEmpiricalPrior (no wrapping):")
-    quickinfo(MainWindow.getEmpiricalPrior)
     launch()

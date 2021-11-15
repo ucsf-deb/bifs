@@ -361,10 +361,8 @@ class BIFS(QObject):
                         self.read_imfile = imageio.imread(self.initial_image_file_name)
                         read_image = np.asarray(self.read_imfile)
             self.load_image(read_image, invalidate=False)
-        except:
-            raise
-            print("BIFS Couldn't read image file: ",fileName)
-            return
+        except Exception as exc:
+            raise BifsBadInputs(f"BIFS Couldn't read image file: {fileName}") from exc
         return
 
     def load_image(self, init_image, invalidate=True):

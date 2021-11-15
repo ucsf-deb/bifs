@@ -39,6 +39,7 @@
     <Content Include="README.md" />
     <Content Include="README.rst" />
     <Content Include="requirements.txt" />
+    <Content Include="ToDo.otl" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="bifs\bases\fourier.py" />

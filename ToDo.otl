@@ -1,7 +1,10 @@
 To Do
 -----
 
+Current Task: convert from print to exceptions or logging
+
 : The actions listed below this introduction are for package developers.
+:
 : If you are a regular user of the program you can ignore this file.
 :
 : [X] indicates a task is complete; [_] indicates it is pending, but pretty
@@ -262,6 +265,10 @@ Packaging
 [_] Move much of the empirical prior logic out of bifs_gui.py.  Doneish?
 [_] feedback to users
 	includes errors, information, etc
+	[_] convert from print to Exceptions
+		[_] bifscore.py
+		[_] elsewhere
+		[_] note if Exception seems wrong solution to particular problem
 	possible ways to give feedback
 		print on terminal
 			: This is the main current practice and it is lousy for a graphic
@@ -309,7 +316,7 @@ Packaging
 						use decorator package
 							another dependency
 				[_] remember to delete mre.py test code
-			combine logic for exception hook and wrapper
+			[_] combine logic for exception hook and wrapper
 				undo the code copying I did
 				formatting message
 				option handling re verbosity

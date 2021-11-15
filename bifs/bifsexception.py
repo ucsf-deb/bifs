@@ -37,6 +37,58 @@ from bifs.bifsexception import *
 import logging
 log = logging.getLogger("Bifs")
 
+GUI Wrapper for Errors
+=======================
+To avoid silent failures when running in a GUI, we want to catch all Exceptions and pop up
+a  window with the relevant information.  Errors are also logged to the console.
+
+Somewhat unfortunately, there are 2 mechanisms for doing this.
+
+First, this module puts a hook in the global exception handler; this should catch everything.
+However, an exception that makes it to that hook has already failed out of the main event
+loop of the application.  Python's exception semantics means the app has failed and can't be
+resumed.
+
+To avoid that, we also define a function wrapper `@catcher` that goes around individual functions.
+This catches errors while inside the event loop, allowing the user to decide
+whether to continue with the application.  Use it like this:
+
+@catcher
+def myfunction(self):
+
+The function wrapped must take a single argument only; typically it is a class method with `self` as 
+the only argument.  The function must not return a value.
+
+Why the restrictions on the function to be wrapped?
+  No return value: The exception means the function didn't complete, and the exception handler
+    doesn't know what return value(s) would be appropriate.  So it doesn't make sense to use it
+    when a value needs to be returned.
+  Single argument only: The anticipated use if for QtActions implemented as methods with only
+    self as an argument (and no return value).
+  Single argument only: There is a technical limitation in functools.wraps; consider
+  ```python
+  def mywrapper(fn):
+    @wraps(fn)
+    def _wrapper(*args, **kwds):
+        return fn(*args, **kwds)
+    return _wrapper
+
+  class Foo:
+    @mywrapper
+    def bar(self):
+        # do stuff
+  ```
+  `Foo.bar` will appear to have the signature `*args, **kwds` despite the fact that the original
+  bar had only the argument `self` and `@wraps` is advertised as preserving the characteristics
+  of the original function.  This means, in particular, that Qt will send 2 arguments to the
+  wrapped function, which will cause an error when `fn(*args, **kwds)` attempts to invoke the original `bar`.
+
+  The decorator package, in particular its decorator member, supposedly does a better job preserving the original
+  signature.  But after reading https://github.com/micheles/decorator/blob/master/docs/documentation.md a few times
+  I still wasn't sure how it was to be used.  Since it's an extra dependency, and since my needs seem to
+  all be met with the single argument case, I just solved that problem.  RB
+
+
 Implementation Note
 -------------------
 Python's import machinery should assure the code here is executed only once even if multiple
@@ -46,7 +98,7 @@ the code.
 Future Directions
 -----------------
 * ability to suppress traceback in dialog box
-* separate the general and GUI specific parts
+* separate the general and GUI-specific parts
 * more use of logging
 
 Credits
@@ -59,13 +111,47 @@ Modifications by Ross Boylan <ross.boylan@ucsf.edu> under GPL-3 or BSD-ish licen
 
 """
 
-__all__ = ("BifsException", "BifsBadParameter", "BifsBadIndex", "BifsLookupFailure", "BifsBadInputs")
+__all__ = ("catcher", "BifsException", "BifsBadParameter", "BifsBadIndex", "BifsLookupFailure", "BifsBadInputs")
 
 
+from functools import wraps
 import sys
 import traceback
 import logging
 from PyQt5 import QtCore, QtWidgets
+
+def catcher(function):
+    """A decorator to catch exceptions in raised while running function
+
+    ONLY USE THIS TO WRAP FUNCTIONS OF A SINGLE ARGUMENT WITH NO RETURN VALUE
+    Since intended use is for class methods, the inner function uses self as the
+    name of the single argument.
+    """
+    @wraps(function)
+    def wrapper(self):
+        try:
+            return function(self)
+        except:
+            exc_info = sys.exc_info()
+            exc_type, exc_value, exc_traceback = exc_info
+            if issubclass(exc_type, KeyboardInterrupt):
+                # ignore keyboard interrupt to support console applications
+                # Maybe I could just re-raise the exception? RB
+                sys.__excepthook__(exc_type, exc_value, exc_traceback)
+            else:
+                log_msg = '\n'.join([''.join(traceback.format_tb(exc_traceback)),
+                                     '{0}: {1}'.format(exc_type.__name__, exc_value)])
+                if issubclass(exc_type, BifsException):
+                    log_msg = str(exc_value)+"\nProceed with caution.\n"+log_msg
+                    log.warn(log_msg)
+                else:
+                    log.critical("Uncaught exception:\n {0}".format(log_msg), exc_info=exc_info)
+
+                # Unlike the code further down, this takes no steps to
+                # assure execution in main thread.  Probably could cause trouble if there were
+                # multiple threads.
+                show_exception_box(log_msg)
+    return wrapper
 
 # basic logger functionality
 log = logging.getLogger("Bifs")

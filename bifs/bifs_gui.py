@@ -3,6 +3,17 @@
 ###        This file contains the GUI interface    ###
 ###        for the BIFS package                    ###
 ###                                                ###
+
+# debugging
+import inspect
+def quickinfo(f):
+    "quick info about signature of f"
+    s = inspect.signature(f, follow_wrapped=False)
+    p = s.parameters  # does not respond to usual dictionary protocol
+    for k in p:
+        v = p[k]
+        print("{}: {} {}".format(k, v.kind, v))
+
 import cProfile, pstats
 try:
     # new in 3.7
@@ -35,19 +46,19 @@ from bifs.pset_dialogs import AddBump_Dialog,DeleteBump_Dialog
 
 # gastly hack
 # but currently if this is run in debug mode it has a different working directory than
-# if run from command line.  To avoid problems, hard code whole path.
+# if run from command line.  To avoid problems, hard code whole path.  Path removed for public release.
 # Empirical Prior file
 EPFILE = r"ep1.npz"
 
-x = BifsException('foo', 'bar')
-pass
+
 class MainWindow(QtWidgets.QMainWindow):
     """
 
     Class that generates the main BIFS GUI window
+
+    Methods corresponding to QtActions are wrapped with @catcher; nothing else should be.
  
     """
-
     def __init__(self, app):
         super(MainWindow, self).__init__()
         self.main_widget = QtWidgets.QWidget(self)
@@ -104,10 +115,12 @@ class MainWindow(QtWidgets.QMainWindow):
        self.loadEmpiricalPriorAct.setEnabled(False)  # must have loaded image
        self.loadEmpiricalPriorAct.setText("&Load Empirical Prior (requires loaded image)")
 
+    @catcher
     def getImage(self):
         self.getImage_real()
 
 
+    @catcher
     def getEmpiricalPrior(self):
         """
 
@@ -242,6 +255,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print("{} has means and sds for modulus of {} PET scans".format(EPFILE, self.nImages))
         #np.savez_compressed("ep1_compressed.npz", mean=mns, sd=sds)
 
+    @catcher
     def loadEmpiricalPrior(self):
         """
         Load a previously computed empirical prior and use it as the prior for image reconstruction.
@@ -277,9 +291,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.show_initial_image()
             return
         except:
-            QtWidgets.QMessageBox.information(self, "Image Viewer","Cannot load %s % self.fileName")
+            QtWidgets.QMessageBox.information(self, "Image Viewer","Cannot load " + self.fileName)
             return
 
+    @catcher
     def doMAP(self):
         """
     
@@ -307,6 +322,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.didMAP = True
             except:
                 QtWidgets.QMessageBox.information(self,"MAP Estimator", "MAP estimate failed") 
+            raise BifsBadParameter("test exception handling")
             return
             
     def show_initial_image(self):
@@ -429,6 +445,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return
         return
     
+    @catcher
     def saveCurrent(self):
         """
     
@@ -443,6 +460,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Saving Current Results")
             self.mybifs.save_results()
 
+    @catcher
     def loadPrevious(self):
         """
     
@@ -463,23 +481,27 @@ class MainWindow(QtWidgets.QMainWindow):
             # Show initial and post BIFS k-spage images and final image
             self.show_post_proc_images()                    
         else:
-            QtWidgets.QMessageBox.information(self, "Parameter File Loader","Cannot load %s., doesn't look like a bifs parameter file" % fileName)
+            QtWidgets.QMessageBox.information(self, "Parameter File Loader", "Cannot load {}. Doesn't look like a bifs parameter file".format(fileName))
             return
         return
-    
+    @catcher    
     def close(self):
         self.myapp.quit()
         
+    @catcher
     def zoomIn(self):
         self.scaleImage(1.25)
 
+    @catcher
     def zoomOut(self):
         self.scaleImage(0.8)
 
+    @catcher
     def normalSize(self):
         self.imageLabel.adjustSize()
         self.scaleFactor = 1.0
 
+    @catcher
     def fitToWindow(self):
         fitToWindow = self.fitToWindowAct.isChecked()
         self.scrollArea.setWidgetResizable(fitToWindow)
@@ -582,6 +604,7 @@ class MainWindow(QtWidgets.QMainWindow):
         scrollBar.setValue(int(factor * scrollBar.value()
                                 + ((factor - 1) * scrollBar.pageStep()/2)))
 
+    @catcher
     def setParamFunc(self):
         if self.mybifs.basis == "Fourier": # add else clauses as bases are added
             dialog = StartParam_Fourier_Space_Dialog(self)
@@ -591,18 +614,21 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             print("Sorry, don't know how to handle",self.mybifs.basis,"basis yet.")
 
+    @catcher
     def setPrior(self):
         dialog = StartPrior_Dialog(self)
         if dialog.exec_() == 1: # If OK button pressed
             self.mybifs.prior = dialog.getDist()
             self.mybifs.prior_scale = dialog.getScale()
 
+    @catcher
     def setLikelihood(self):
         dialog = StartLikelihood_Dialog(self)
         if dialog.exec_() == 1: # If OK button pressed
             self.mybifs.likelihood = dialog.getDist()
             self.mybifs.likelihood_scale = dialog.getScale()
 
+    @catcher
     def setAddBump(self):
         if not self.mybifs.image_file_loaded:
             QtWidgets.QMessageBox.information(self,"Add Bump", "Can't add bump without k-space structure, need to first load image using Load Initial Image... option from BIFS menu")
@@ -619,6 +645,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
 #                QtWidgets.QMessageBox.information(self, "Add Bump","Failed")
 #                return
+
+    @catcher
     def setDeleteBump(self):
         if self.mybifs.bumps:
             self.bumplist = []
@@ -633,7 +661,8 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             print("No bumps to delete yet")
             return
-        
+    
+    @catcher
     def set3DSlice(self):
         if self.mybifs.imdim != 3:
             print("Sorry can only view slices for 3D data")
@@ -770,4 +799,8 @@ def launch():
     app.exec()  # for Python2 and Qt4 sys.exit(app.exec_())
 
 if __name__ == '__main__':
+    print("doMap, wrapped: ")
+    quickinfo(MainWindow.doMAP)
+    print("\ngetEmpiricalPrior (no wrapping):")
+    quickinfo(MainWindow.getEmpiricalPrior)
     launch()

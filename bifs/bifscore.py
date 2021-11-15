@@ -227,7 +227,6 @@ class BIFS(QObject):
         self.initial_image_file_name = ''
         self._prior = None  # depends on image dimensions
         self._invalidate_kspace()
-        raise BifsBadParameter("test exception handling")
 
     def _invalidate_kspace(self):
         """
@@ -363,6 +362,7 @@ class BIFS(QObject):
                         read_image = np.asarray(self.read_imfile)
             self.load_image(read_image, invalidate=False)
         except:
+            raise
             print("BIFS Couldn't read image file: ",fileName)
             return
         return

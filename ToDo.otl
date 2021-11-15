@@ -279,6 +279,43 @@ Packaging
 				though failed operations may raise other exceptions
 				: Even if every exception I raise has a common ancestor
 				: other exceptions may arise
+		[_] exception handling
+			installed general exception handler
+				pops up a window
+				[_] maybe too much stuff in window
+				[_] what happens if run from terminal?
+				limitation: handler activates after event loop exited
+					i.e., no way for app to continue
+					unless error happens in 2ndry window
+			catch exceptions at function level?
+				this fixes limitation above
+					: Since it happens below the event loop
+				nothing useful to return
+					: So don't do it with functions that return a value
+				functions for Qt Actions are ideal candidates
+				wrappers
+					seemingly simple: wrap a function to catch exceptions
+					problems
+						need arguments of wrapped function to conform to original
+						otherwise Qt sends extra arguments and execution fails
+						: Having the wrapper return a function that takes (*args,
+						: **kwds) seems like a general solution, but it makes Qt
+						: send an extra arg (False).
+					solutions
+						make a single argument function to be wrapped
+							may be adequate for me
+							a bit brittle for general release
+						work out appropriate function template
+						use decorator package
+							another dependency
+				[_] remember to delete mre.py test code
+			safe to continue?
+				: Not entirely clear what shape we are in if there is an
+				: exception.  We are relying on judgement of user about
+				: whether to continue.  But user doesn't know details of our
+				: internals, and so may not be a good judge.
+				: Basic idea if something didn't work is to try it again,
+				: possibly after some tweaks.
 		original plan (now I'm not sure this is what to do)
 			[_] BIFS class should throw exceptions rather than print error messages
 			[_] bifs_gui should catch and display the exceptions.

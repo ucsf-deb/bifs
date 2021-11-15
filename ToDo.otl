@@ -287,13 +287,13 @@ Packaging
 				limitation: handler activates after event loop exited
 					i.e., no way for app to continue
 					unless error happens in 2ndry window
-			catch exceptions at function level?
+			catch exceptions at function level
 				this fixes limitation above
 					: Since it happens below the event loop
 				nothing useful to return
 					: So don't do it with functions that return a value
 				functions for Qt Actions are ideal candidates
-				wrappers
+				[X] wrappers
 					seemingly simple: wrap a function to catch exceptions
 					problems
 						need arguments of wrapped function to conform to original
@@ -301,14 +301,21 @@ Packaging
 						: Having the wrapper return a function that takes (*args,
 						: **kwds) seems like a general solution, but it makes Qt
 						: send an extra arg (False).
-					solutions
-						make a single argument function to be wrapped
+					[X] solutions
+						-> make a single argument function to be wrapped
 							may be adequate for me
 							a bit brittle for general release
 						work out appropriate function template
 						use decorator package
 							another dependency
 				[_] remember to delete mre.py test code
+			combine logic for exception hook and wrapper
+				undo the code copying I did
+				formatting message
+				option handling re verbosity
+				maybe displaying window
+					: Though app event loop is dead in one case and not the
+					: other.
 			safe to continue?
 				: Not entirely clear what shape we are in if there is an
 				: exception.  We are relying on judgement of user about

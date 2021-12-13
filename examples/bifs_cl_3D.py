@@ -52,11 +52,8 @@ mybifs.param_func_type = "Inverse Power Decay"
 # Load the image - note, typically just start here re. loading a noisy image
 mybifs.load_image(noisy_im)
 
-# Run BIFS making sure that the initial image is loaded
-if np.isscalar(mybifs.init_image):
-  print("Error: Need to load an image into mybifs before running MAP")
-else:
-  mybifs.BIFS_MAP()
+# Run BIFS
+mybifs.BIFS_MAP()
 
 # Take a look at the parameter function
 # NOTE: For a reason I don't yet understand
@@ -75,53 +72,50 @@ bu.plot_param_func(mybifs)
 # Look at the prior, liklelihood, and posterior at a voxel
 bu.voxel_dist(mybifs,[mybifs.mod_image.shape[0]//2,mybifs.mod_image.shape[1]//2,mybifs.mod_image.shape[2]//2],do_plots=True)
   
-# Plot the resulting images, checking again that nothing went wrong...
-if np.isscalar(mybifs.init_image):
-  print("Error: Need to load an image into mybifs before running MAP")
-else:
-  # Get slices from 3D data
-  slice_index = np.int(np.round(my_slice[1]*mybifs.init_image.shape[my_slice[0]]))
-  if my_slice[0] == 0:
+# Plot the resulting image
+# Get slices from 3D data
+slice_index = np.int(np.round(my_slice[1]*mybifs.init_image.shape[my_slice[0]]))
+if my_slice[0] == 0:
     init_im_slice = mybifs.init_image[slice_index,:,:]
     init_mod_im_slice = mybifs.mod_image[slice_index,:,:]
     fin_im_slice = mybifs.final_image[slice_index,:,:]
     fin_mod_im_slice = mybifs.bifsk_image[slice_index,:,:]
-  elif my_slice[0] == 1:
+elif my_slice[0] == 1:
     init_im_slice = mybifs.init_image[:,slice_index,:]
     init_mod_im_slice = mybifs.mod_image[:,slice_index,:]
     fin_im_slice = mybifs.final_image[:,slice_index,:]
     fin_mod_im_slice = mybifs.bifsk_image[:,slice_index,:]
-  elif my_slice[0] == 2:
+elif my_slice[0] == 2:
     init_im_slice = mybifs.init_image[:,:,slice_index]
     init_mod_im_slice = mybifs.mod_image[:,:,slice_index]
     fin_im_slice = mybifs.final_image[:,:,slice_index]
     fin_mod_im_slice = mybifs.bifsk_image[:,:,slice_index]
-  else:
+else:
     print("Sorry slice index needs to be one of 0,1,2") 
 
-  plt.subplot(221)
-  plt.axis('off')
-  plt.title("Initial Image")
-  plt.imshow(init_im_slice, cmap = cm.Greys_r)
+plt.subplot(221)
+plt.axis('off')
+plt.title("Initial Image")
+plt.imshow(init_im_slice, cmap = cm.Greys_r)
   
-  # Initial K-Space Image
-  plt.subplot(223)
-  plt.axis('off')
-  plt.title("Initial K-Space Image")
-  showim1k = np.roll(np.roll(init_mod_im_slice,init_mod_im_slice.shape[0]//2,0),init_mod_im_slice.shape[1]//2,1)
-  plt.imshow(np.log(showim1k), cmap = cm.Greys_r)
+# Initial K-Space Image
+plt.subplot(223)
+plt.axis('off')
+plt.title("Initial K-Space Image")
+showim1k = np.roll(np.roll(init_mod_im_slice,init_mod_im_slice.shape[0]//2,0),init_mod_im_slice.shape[1]//2,1)
+plt.imshow(np.log(showim1k), cmap = cm.Greys_r)
   
-  # Final K-Space Image after running BIFS
-  plt.subplot(224)
-  plt.axis('off')
-  plt.title("Final K-Space Image")
-  showim2k = np.roll(np.roll(fin_mod_im_slice,fin_mod_im_slice.shape[0]//2,0),fin_mod_im_slice.shape[1]//2,1)
-  plt.imshow(np.log(showim2k), cmap = cm.Greys_r)
+# Final K-Space Image after running BIFS
+plt.subplot(224)
+plt.axis('off')
+plt.title("Final K-Space Image")
+showim2k = np.roll(np.roll(fin_mod_im_slice,fin_mod_im_slice.shape[0]//2,0),fin_mod_im_slice.shape[1]//2,1)
+plt.imshow(np.log(showim2k), cmap = cm.Greys_r)
 
-  # Final Image after running BIFS
-  plt.subplot(222)
-  plt.axis('off')
-  plt.title("Reconstructed Image")
-  plt.imshow(fin_im_slice, cmap = cm.Greys_r)
+# Final Image after running BIFS
+plt.subplot(222)
+plt.axis('off')
+plt.title("Reconstructed Image")
+plt.imshow(fin_im_slice, cmap = cm.Greys_r)
 
-  plt.show()
+plt.show()

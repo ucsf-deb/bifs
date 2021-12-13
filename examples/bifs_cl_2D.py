@@ -51,12 +51,9 @@ mybifs.param_func_type = "Inverse Power Decay"
 # Load the image - note, typically just start here re. loading a noisy image
 mybifs.load_image(noisy_im)
 
-# Run BIFS MAP making sure that the initial image is loaded
-if np.isscalar(mybifs.init_image):
-  print("Error: Need to load an image into mybifs before running MAP")
-else:
-  print("Running BIFS_MAP() on image")
-  mybifs.BIFS_MAP()
+# Run BIFS MAP
+print("Running BIFS_MAP() on image")
+mybifs.BIFS_MAP()
 
 # Take a look at the parameter function
 # NOTE: For a reason I don't yet understand
@@ -75,34 +72,31 @@ else:
 # Look at the prior, liklelihood, and posterior at a voxel
 bu.voxel_dist(mybifs,[mybifs.mod_image.shape[0]//2,mybifs.mod_image.shape[1]//2],do_plots=True)
 
-# Plot the resulting images, checking again that nothing went wrong...
-if np.isscalar(mybifs.init_image):
-  print("Error: Need to load an image into mybifs before running MAP")
-else:
-  # Initial noisy image
-  plt.subplot(221)
-  plt.axis('off')
-  plt.title("Initial Image")
-  plt.imshow(mybifs.init_image, cmap = cm.Greys_r)
+# Plot the resulting images
+# Initial noisy image
+plt.subplot(221)
+plt.axis('off')
+plt.title("Initial Image")
+plt.imshow(mybifs.init_image, cmap = cm.Greys_r)
   
-  # Initial K-Space Image
-  plt.subplot(222)
-  plt.axis('off')
-  plt.title("Initial K-Space Image")
-  showim1k = np.roll(np.roll(mybifs.mod_image,mybifs.mod_image.shape[0]//2,0),mybifs.mod_image.shape[1]//2,1)
-  plt.imshow(np.log(showim1k), cmap = cm.Greys_r)
+# Initial K-Space Image
+plt.subplot(222)
+plt.axis('off')
+plt.title("Initial K-Space Image")
+showim1k = np.roll(np.roll(mybifs.mod_image,mybifs.mod_image.shape[0]//2,0),mybifs.mod_image.shape[1]//2,1)
+plt.imshow(np.log(showim1k), cmap = cm.Greys_r)
              
-  # Final K-Space Image after running BIFS
-  plt.subplot(224)
-  plt.axis('off')
-  plt.title("Initial K-Space Image")
-  showim2k = np.roll(np.roll(mybifs.bifsk_image,mybifs.bifsk_image.shape[0]//2,0),mybifs.bifsk_image.shape[1]//2,1)
-  plt.imshow(np.log(showim2k), cmap = cm.Greys_r)
+# Final K-Space Image after running BIFS
+plt.subplot(224)
+plt.axis('off')
+plt.title("Initial K-Space Image")
+showim2k = np.roll(np.roll(mybifs.bifsk_image,mybifs.bifsk_image.shape[0]//2,0),mybifs.bifsk_image.shape[1]//2,1)
+plt.imshow(np.log(showim2k), cmap = cm.Greys_r)
              
-  # Final Image after running BIFS
-  plt.subplot(223)
-  plt.axis('off')
-  plt.title("Reconstructed Image")
-  plt.imshow(mybifs.final_image,cmap = cm.Greys_r)
+# Final Image after running BIFS
+plt.subplot(223)
+plt.axis('off')
+plt.title("Reconstructed Image")
+plt.imshow(mybifs.final_image,cmap = cm.Greys_r)
 
-  plt.show()
+plt.show()

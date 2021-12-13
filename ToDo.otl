@@ -315,7 +315,7 @@ Packaging
 						work out appropriate function template
 						use decorator package
 							another dependency
-				[_] remember to delete mre.py test code
+				[X] remember to delete mre.py test code
 			[_] combine logic for exception hook and wrapper
 				undo the code copying I did
 				formatting message

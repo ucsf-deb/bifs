@@ -289,27 +289,20 @@ class MainWindow(QtWidgets.QMainWindow):
         to perform a MAP analysis.  
 
         """
-        # Do MAP estimation
-        if not self.mybifs.image_file_loaded:
-            QtWidgets.QMessageBox.information(self,"MAP Estimator", "Can't perform MAP without an image - load image using Load Initial Image... option from BIFS menu")
-            return
-        else:
-            try:
-                print("Performing k-space MAP estimation")
-                # RB: original version of code created a new bifs instance.
-                # I changed that to making one with copy_params.
-                # Then I had it reload the image.  But under the current scheme that
-                # will eliminate all customizations, which copy_params mostly does anyway.
-                # Hopefully the original invalidity with mutliple image loads will no longer 
-                # be possible in the new scheme.  Although loading a new image will destroy 
-                # all customization in the new scheme.
+        print("Performing k-space MAP estimation")
+        # RB: original version of code created a new bifs instance.
+        # I changed that to making one with copy_params.
+        # Then I had it reload the image.  But under the current scheme that
+        # will eliminate all customizations, which copy_params mostly does anyway.
+        # Hopefully the original invalidity with mutliple image loads will no longer 
+        # be possible in the new scheme.  Although loading a new image will destroy 
+        # all customization in the new scheme.
 
-                #self.mybifs.BIFS_MAP() should now happen implicitly
-                self.show_post_proc_images()
-                self.didMAP = True
-            except:
-                QtWidgets.QMessageBox.information(self,"MAP Estimator", "MAP estimate failed") 
-            return
+        #self.mybifs.BIFS_MAP() should now happen implicitly
+        self.show_post_proc_images()
+        self.didMAP = True
+
+        return
             
     def show_initial_image(self):
         """
@@ -351,84 +344,78 @@ class MainWindow(QtWidgets.QMainWindow):
 
         """
         # Show initial and post BIFS k-spage images and final image
-        try:
-            if self.mybifs.image_file_loaded == True:
-
-                self.ax1.set_title("Initial Image") # For some reason plt.cla()
-                                                    # clears plot 1 title
-                self.ax2.clear()
-                self.canvas.draw()
-                self.ax2.set_title("Reconstructed Image")
-                if self.mybifs.imdim == 1:
-                    self.ax2.plot(self.mybifs.final_image()) 
-                elif self.mybifs.imdim == 2:
-                    self.ax2.imshow(self.mybifs.final_image(),cmap = cm.Greys_r)
-                else: # assume for now that the only other possibility is 3D
-                      # can change later
-                    slice_index = np.intp(np.round(self.mybifs.view3Dslice[1]*self.mybifs.final_image().shape[self.mybifs.view3Dslice[0]]))
-                    if self.mybifs.view3Dslice[0] == 0:
-                        final_im_slice = self.mybifs.final_image()[slice_index,:,:]
-                    elif self.mybifs.view3Dslice[0] == 1:
-                        final_im_slice = self.mybifs.final_image()[:,slice_index,:]
-                    elif self.mybifs.view3Dslice[0] == 2:
-                        final_im_slice = self.mybifs.final_image()[:,:,slice_index]
-                    else:
-                        print("Sorry slice index needs to be one of 0,1,2")
-                    self.ax2.imshow(final_im_slice, cmap = cm.Greys_r)
-                self.canvas.draw()
+        self.ax1.set_title("Initial Image") # For some reason plt.cla()
+                                            # clears plot 1 title
+        self.ax2.clear()
+        self.canvas.draw()
+        self.ax2.set_title("Reconstructed Image")
+        if self.mybifs.imdim == 1:
+            self.ax2.plot(self.mybifs.final_image()) 
+        elif self.mybifs.imdim == 2:
+            self.ax2.imshow(self.mybifs.final_image(),cmap = cm.Greys_r)
+        else: # assume for now that the only other possibility is 3D
+                # can change later
+            slice_index = np.intp(np.round(self.mybifs.view3Dslice[1]*self.mybifs.final_image().shape[self.mybifs.view3Dslice[0]]))
+            if self.mybifs.view3Dslice[0] == 0:
+                final_im_slice = self.mybifs.final_image()[slice_index,:,:]
+            elif self.mybifs.view3Dslice[0] == 1:
+                final_im_slice = self.mybifs.final_image()[:,slice_index,:]
+            elif self.mybifs.view3Dslice[0] == 2:
+                final_im_slice = self.mybifs.final_image()[:,:,slice_index]
+            else:
+                print("Sorry slice index needs to be one of 0,1,2")
+            self.ax2.imshow(final_im_slice, cmap = cm.Greys_r)
+        self.canvas.draw()
                 
-                self.ax3.clear()
-                self.canvas.draw()
-                self.ax3.set_title("Initial K-Space Modulus Image")
-                if self.mybifs.imdim == 1:
-                    showim1k = np.roll(np.roll(self.mybifs.mod_image(),self.mybifs.mod_image().shape[0]//2,0),1)
-                    self.ax3.plot(np.log(showim1k)) 
-                elif self.mybifs.imdim == 2:
-                    showim1k = np.roll(np.roll(self.mybifs.mod_image(),self.mybifs.mod_image().shape[0]//2,0),self.mybifs.mod_image().shape[1]//2,1)
-                    self.ax3.imshow(np.log(showim1k),cmap = cm.Greys_r)
-                else: # assume for now that the only other possibility is 3D
-                      # can change later
-                    slice_index = np.intp(np.round(self.mybifs.view3Dslice[1]*self.mybifs.mod_image().shape[self.mybifs.view3Dslice[0]]))
-                    if self.mybifs.view3Dslice[0] == 0:
-                        init_mod_im_slice = self.mybifs.mod_image()[slice_index,:,:]
-                    elif self.mybifs.view3Dslice[0] == 1:
-                        init_mod_im_slice = self.mybifs.mod_image()[:,slice_index,:]
-                    elif self.mybifs.view3Dslice[0] == 2:
-                        init_mod_im_slice = self.mybifs.mod_image()[:,:,slice_index]
-                    else:
-                        print("Sorry slice index needs to be one of 0,1,2")
+        self.ax3.clear()
+        self.canvas.draw()
+        self.ax3.set_title("Initial K-Space Modulus Image")
+        if self.mybifs.imdim == 1:
+            showim1k = np.roll(np.roll(self.mybifs.mod_image(),self.mybifs.mod_image().shape[0]//2,0),1)
+            self.ax3.plot(np.log(showim1k)) 
+        elif self.mybifs.imdim == 2:
+            showim1k = np.roll(np.roll(self.mybifs.mod_image(),self.mybifs.mod_image().shape[0]//2,0),self.mybifs.mod_image().shape[1]//2,1)
+            self.ax3.imshow(np.log(showim1k),cmap = cm.Greys_r)
+        else: # assume for now that the only other possibility is 3D
+                # can change later
+            slice_index = np.intp(np.round(self.mybifs.view3Dslice[1]*self.mybifs.mod_image().shape[self.mybifs.view3Dslice[0]]))
+            if self.mybifs.view3Dslice[0] == 0:
+                init_mod_im_slice = self.mybifs.mod_image()[slice_index,:,:]
+            elif self.mybifs.view3Dslice[0] == 1:
+                init_mod_im_slice = self.mybifs.mod_image()[:,slice_index,:]
+            elif self.mybifs.view3Dslice[0] == 2:
+                init_mod_im_slice = self.mybifs.mod_image()[:,:,slice_index]
+            else:
+                print("Sorry slice index needs to be one of 0,1,2")
 
-                    showim1k = np.roll(np.roll(init_mod_im_slice,init_mod_im_slice.shape[0]//2,0),init_mod_im_slice.shape[1]//2,1)
-                    self.ax3.imshow(np.log(showim1k), cmap = cm.Greys_r)
-                self.canvas.draw()
+            showim1k = np.roll(np.roll(init_mod_im_slice,init_mod_im_slice.shape[0]//2,0),init_mod_im_slice.shape[1]//2,1)
+            self.ax3.imshow(np.log(showim1k), cmap = cm.Greys_r)
+        self.canvas.draw()
 
-                self.ax4.clear()
-                self.canvas.draw()
-                self.ax4.set_title("BIFS K-Space Image")
-                if self.mybifs.imdim == 1:
-                    showim2k = np.roll(np.roll(self.mybifs.bifsk_image(),self.mybifs.bifsk_image().shape[0]//2,0),1)
-                    self.ax4.plot(np.log(showim2k)) 
-                elif self.mybifs.imdim == 2:
-                    showim2k = np.roll(np.roll(self.mybifs.bifsk_image(),self.mybifs.bifsk_image().shape[0]//2,0),self.mybifs.bifsk_image().shape[1]//2,1)
-                    self.ax4.imshow(np.log(showim2k),cmap = cm.Greys_r)
-                else: # assume for now that the only other possibility is 3D
-                      # can change later
-                    slice_index = np.intp(np.round(self.mybifs.view3Dslice[1]*self.mybifs.bifsk_image().shape[self.mybifs.view3Dslice[0]]))
-                    if self.mybifs.view3Dslice[0] == 0:
-                        bifs_mod_im_slice = self.mybifs.bifsk_image()[slice_index,:,:]
-                    elif self.mybifs.view3Dslice[0] == 1:
-                        bifs_mod_im_slice = self.mybifs.bifsk_image()[:,slice_index,:]
-                    elif self.mybifs.view3Dslice[0] == 2:
-                        bifs_mod_im_slice = self.mybifs.bifsk_image()[:,:,slice_index]
-                    else:
-                        print("Sorry slice index needs to be one of 0,1,2")
+        self.ax4.clear()
+        self.canvas.draw()
+        self.ax4.set_title("BIFS K-Space Image")
+        if self.mybifs.imdim == 1:
+            showim2k = np.roll(np.roll(self.mybifs.bifsk_image(),self.mybifs.bifsk_image().shape[0]//2,0),1)
+            self.ax4.plot(np.log(showim2k)) 
+        elif self.mybifs.imdim == 2:
+            showim2k = np.roll(np.roll(self.mybifs.bifsk_image(),self.mybifs.bifsk_image().shape[0]//2,0),self.mybifs.bifsk_image().shape[1]//2,1)
+            self.ax4.imshow(np.log(showim2k),cmap = cm.Greys_r)
+        else: # assume for now that the only other possibility is 3D
+                # can change later
+            slice_index = np.intp(np.round(self.mybifs.view3Dslice[1]*self.mybifs.bifsk_image().shape[self.mybifs.view3Dslice[0]]))
+            if self.mybifs.view3Dslice[0] == 0:
+                bifs_mod_im_slice = self.mybifs.bifsk_image()[slice_index,:,:]
+            elif self.mybifs.view3Dslice[0] == 1:
+                bifs_mod_im_slice = self.mybifs.bifsk_image()[:,slice_index,:]
+            elif self.mybifs.view3Dslice[0] == 2:
+                bifs_mod_im_slice = self.mybifs.bifsk_image()[:,:,slice_index]
+            else:
+                print("Sorry slice index needs to be one of 0,1,2")
 
-                    showim2k = np.roll(np.roll(bifs_mod_im_slice,bifs_mod_im_slice.shape[0]//2,0),bifs_mod_im_slice.shape[1]//2,1)
-                    self.ax4.imshow(np.log(showim2k), cmap = cm.Greys_r)
-                self.canvas.draw()
-        except:
-            QtWidgets.QMessageBox.information(self, "Image Viewer","No image loaded.")
-            return
+            showim2k = np.roll(np.roll(bifs_mod_im_slice,bifs_mod_im_slice.shape[0]//2,0),bifs_mod_im_slice.shape[1]//2,1)
+            self.ax4.imshow(np.log(showim2k), cmap = cm.Greys_r)
+        self.canvas.draw()
         return
     
     @catcher

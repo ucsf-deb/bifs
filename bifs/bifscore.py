@@ -684,8 +684,7 @@ class BIFS(QObject):
         # time consuming but I still need to figure out how to send
         # chunks of multivariate arrays to a multiprocessing pool
         if not self.image_file_loaded:
-            print ("Error: Need to load an image before running MAP")
-            return
+            raise BifsBadInputs("Error: Need to load an image before running MAP")
         self._final_setup()
 
         # Square of likelihood

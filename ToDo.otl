@@ -45,7 +45,7 @@ Other sources of To Do information
 	github project issues
 	Ross's GrandView outline (not in version control)
 	comments in the code (maybe)
-	comments in the log (maybe)
+	comments in the git log (maybe)
 	[_] consolidate everything to a single spot
 		: Since each method has particular strengths on weaknesses, and since
 		: consolidation requires work, this may not be that desirable or

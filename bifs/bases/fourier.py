@@ -295,7 +295,7 @@ def add_bumps_to_pf(bvec,x,bumps,kmax):
         #
         for k,v in bumps.items():
             bump_center = np.int(v[0]*kmax)
-            bump_amp = np.float(v[1]*bvec[1])
+            bump_amp = float(v[1]*bvec[1])
             bump_width = np.int(v[2]*kmax)
             start = bump_center - np.int(np.floor(bump_width/2))
             stop = bump_center + np.int(np.ceil(bump_width/2))

@@ -195,7 +195,7 @@ class AdjustmentPrior(AbstractPrior):
                 raise RuntimeError("No more than 10 bump filters of a type allowed.  Exceeded for type "+key_orig)
         else:
             new_key = my_key
-        self._bumps[new_key] = np.array([np.float(position),np.float(amplitude),np.float(width)])
+        self._bumps[new_key] = np.array([float(position),float(amplitude),float(width)])
         self._markDirty()
         return
 

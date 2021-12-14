@@ -658,7 +658,7 @@ class StartParam_Fourier_Space_Dialog(QtWidgets.QDialog, Param_Fourier_Space_Dia
 
     def getDecay(self):
         try:
-            return np.float(QtWidgets.QLineEdit.text(self.decay))
+            return float(QtWidgets.QLineEdit.text(self.decay))
         except:
             raise BifsBadParameter("Couldn't get decay value")
             
@@ -675,7 +675,7 @@ class StartPrior_Dialog(QtWidgets.QDialog, Prior_Dialog):
 
     def getScale(self):
         try:
-            return np.float(QtWidgets.QLineEdit.text(self.scale))
+            return float(QtWidgets.QLineEdit.text(self.scale))
         except:
             raise BifsBadParameter("Couldn't get scale value")
             
@@ -692,7 +692,7 @@ class StartLikelihood_Dialog(QtWidgets.QDialog, Likelihood_Dialog):
 
     def getScale(self):
         try:
-            return np.float(QtWidgets.QLineEdit.text(self.scale))
+            return float(QtWidgets.QLineEdit.text(self.scale))
         except:
             raise BifsBadParameter("Couldn't get scale value")
             
@@ -718,7 +718,7 @@ class Start3DSlice_Dialog(QtWidgets.QDialog, Slice3D_Dialog):
     def getSlicePercent(self):
         # the value is actually a fraction between 0 and 1
         try:
-            return np.float(QtWidgets.QLineEdit.text(self.slice_percent))
+            return float(QtWidgets.QLineEdit.text(self.slice_percent))
         except:
             raise BifsBadParameter("Couldn't get slice percent")
 
@@ -735,19 +735,19 @@ class StartAddBump_Dialog(QtWidgets.QDialog, AddBump_Dialog):
             
     def getPosition(self):
         try:
-            return np.float(QtWidgets.QLineEdit.text(self.Position))
+            return float(QtWidgets.QLineEdit.text(self.Position))
         except:
             raise BifsBadParameter("Couldn't get bump position")
             
     def getAmplitude(self):
         try:
-            return np.float(QtWidgets.QLineEdit.text(self.Amplitude))
+            return float(QtWidgets.QLineEdit.text(self.Amplitude))
         except:
             raise BifsBadParameter("Couldn't get bump position")
             
     def getWidth(self):
         try:
-            return np.float(QtWidgets.QLineEdit.text(self.Width))
+            return float(QtWidgets.QLineEdit.text(self.Width))
         except:
             raise BifsBadParameter("Couldn't get bump width")
             

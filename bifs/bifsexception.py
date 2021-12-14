@@ -124,7 +124,7 @@ def catcher(function):
     """A decorator to catch exceptions in raised while running function
 
     ONLY USE THIS TO WRAP FUNCTIONS OF A SINGLE ARGUMENT WITH NO RETURN VALUE
-    Since intended use is for class methods, the inner function uses self as the
+    Since intended use is for instance methods, the inner function uses self as the
     name of the single argument.
     """
     @wraps(function)

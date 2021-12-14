@@ -13,6 +13,7 @@ from matplotlib import cm
 import scipy.stats as stats
 from scipy.optimize import minimize_scalar as ms
 import jsonpickle
+import sys
 
 def read_bifs(filename):
     bifs_handle = open(filename,"r")
@@ -20,7 +21,7 @@ def read_bifs(filename):
     bifs_handle.close()
     return(jsonpickle.decode(bifsj))
  
-def voxel_dist(bifs_obj,vox_coord,do_plots=False):
+def voxel_dist(bifs_obj,vox_coord, ostr=sys.stdout, do_plots=False):
     """
     voxel_dist() is a function for examining particular 
     choices of prior, likelihood, and posterior distributions at 
@@ -42,15 +43,16 @@ def voxel_dist(bifs_obj,vox_coord,do_plots=False):
                 examine the the prior, likelihood, and posterior
                 distributions and some of their properties (e.g. mean)
 
-    do_plots = a flag determining whehter or not to display the
-               distributions (True,False); if False will just 
-               print mean and scale for Gaussian prior and , Gaussian 
-               and Rician likelihoods (only distributions currently used 
-               for this test)
+    ostr      - optional output stream, stdout by default
+                Textual output goes here
+
+    do_plots  - optional boolean flag, False by default, determining whether
+                or not to plot the distributions
 
     Output:
 
-    Prints  -  Prior mean
+    Prints to ostr
+               Prior mean
                Prior scale
                K-space data value
                Likelihood scale,
@@ -91,12 +93,11 @@ def voxel_dist(bifs_obj,vox_coord,do_plots=False):
     err_code = 0
     if np.size(vox_coord) != bifs_obj.imdim:
         raise BifsBadInputs("Co-ordinate dimension: {} is not the same as image dimension: {}".format(np.size(vox_coord), bifs_obj.imdim))
-        err_code = 1
     else:
-        print("Prior mean: ",prior_mn)
-        print("Prior scale: ",prior_sc)
-        print("K-space data value:",data_mn)
-        print("Likelihood scale:",data_sc)
+        print("Prior mean: ",prior_mn, file=ostr)
+        print("Prior scale: ",prior_sc, file=ostr)
+        print("K-space data value:",data_mn, file=ostr)
+        print("Likelihood scale:",data_sc, file=ostr)
 
         # Distributions
         glike = lambda x: stats.norm.pdf(x,loc=data_mn,scale=data_sc)
@@ -105,24 +106,24 @@ def voxel_dist(bifs_obj,vox_coord,do_plots=False):
             
         findmin = lambda x: -rlike(x)
         res = ms(findmin, method='brent')
-        print("Maximum of Rice Likelihood at: ",res.x)
+        print("Maximum of Rice Likelihood at: ",res.x, file=ostr)
 
         findmin = lambda x: -glike(x)
         res = ms(findmin, method='brent')
-        print("Maximum of Gaussian Likelihood at: ",res.x)
+        print("Maximum of Gaussian Likelihood at: ",res.x, file=ostr)
 
         gposterior = lambda x: prior(x)*glike(x)
         rposterior = lambda x: prior(x)*rlike(x)
 
-        print("Conjugate Gaussian value: ",gauss_guass)
+        print("Conjugate Gaussian value: ",gauss_guass, file=ostr)
 
         findming = lambda x: -gposterior(x)
         resg = ms(findming, method='brent')
-        print("Gaussian Likelihood MAP estimate:",resg.x,"at k-space co-ordinates:",tuple(vox_coord))
+        print("Gaussian Likelihood MAP estimate:",resg.x,"at k-space co-ordinates:",tuple(vox_coord), file=ostr)
 
         findminr = lambda x: -rposterior(x)
         resr = ms(findminr, method='brent')
-        print("Rician Likelihood MAP estimate:",resr.x,"at k-space co-ordinates:",tuple(vox_coord))
+        print("Rician Likelihood MAP estimate:",resr.x,"at k-space co-ordinates:",tuple(vox_coord), file=ostr)
         
         if do_plots:
             n_points = 100 # points to plot

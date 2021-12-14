@@ -90,7 +90,7 @@ def voxel_dist(bifs_obj,vox_coord,do_plots=False):
         
     err_code = 0
     if np.size(vox_coord) != bifs_obj.imdim:
-        print("Co-ordinate dimension:",np.size(vox_coord),"is not the same as image dimension:",bifs_obj.imdim)
+        raise BifsBadInputs("Co-ordinate dimension: {} is not the same as image dimension: {}".format(np.size(vox_coord), bifs_obj.imdim))
         err_code = 1
     else:
         print("Prior mean: ",prior_mn)

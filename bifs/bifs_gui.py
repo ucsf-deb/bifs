@@ -310,32 +310,29 @@ class MainWindow(QtWidgets.QMainWindow):
         function that displays the initial image.  
 
         """
-        try:
-            if self.mybifs.image_file_loaded == True:
-                self.ax1.clear()
-                self.canvas.draw()
-                self.ax1.set_title("Initial Image")
-                if self.mybifs.imdim == 1:
-                    self.ax1.plot(self.mybifs.init_image()) 
-                elif self.mybifs.imdim == 2:
-                    self.ax1.imshow(self.mybifs.init_image(),cmap = cm.Greys_r,norm=NoNorm())
-                else: # assume for now that the only other possibility is 3D
-                      # can change later
-                    slice_index = np.intp(np.round(self.mybifs.view3Dslice[1]*self.mybifs.init_image().shape[self.mybifs.view3Dslice[0]]))
-                    if self.mybifs.view3Dslice[0] == 0:
-                        init_im_slice = self.mybifs.init_image()[slice_index,:,:]
-                    elif self.mybifs.view3Dslice[0] == 1:
-                        init_im_slice = self.mybifs.init_image()[:,slice_index,:]
-                    elif self.mybifs.view3Dslice[0] == 2:
-                        init_im_slice = self.mybifs.init_image()[:,:,slice_index]
-                    else:
-                        print("Sorry slice index needs to be one of 0,1,2")
-                    self.ax1.imshow(init_im_slice, cmap = cm.Greys_r)
-                self.canvas.draw()
-            return
-        except:
-            QtWidgets.QMessageBox.information(self, "Image Viewer","No image loaded.")
-            return
+        if self.mybifs.image_file_loaded == True:
+            self.ax1.clear()
+            self.canvas.draw()
+            self.ax1.set_title("Initial Image")
+            if self.mybifs.imdim == 1:
+                self.ax1.plot(self.mybifs.init_image()) 
+            elif self.mybifs.imdim == 2:
+                self.ax1.imshow(self.mybifs.init_image(),cmap = cm.Greys_r,norm=NoNorm())
+            else: # assume for now that the only other possibility is 3D
+                    # can change later
+                slice_index = np.intp(np.round(self.mybifs.view3Dslice[1]*self.mybifs.init_image().shape[self.mybifs.view3Dslice[0]]))
+                if self.mybifs.view3Dslice[0] == 0:
+                    init_im_slice = self.mybifs.init_image()[slice_index,:,:]
+                elif self.mybifs.view3Dslice[0] == 1:
+                    init_im_slice = self.mybifs.init_image()[:,slice_index,:]
+                elif self.mybifs.view3Dslice[0] == 2:
+                    init_im_slice = self.mybifs.init_image()[:,:,slice_index]
+                else:
+                    raise BifsBadIndex("Sorry slice index needs to be one of 0,1,2")
+                self.ax1.imshow(init_im_slice, cmap = cm.Greys_r)
+            self.canvas.draw()
+        return
+
         
     def show_post_proc_images(self):
         """
@@ -363,7 +360,7 @@ class MainWindow(QtWidgets.QMainWindow):
             elif self.mybifs.view3Dslice[0] == 2:
                 final_im_slice = self.mybifs.final_image()[:,:,slice_index]
             else:
-                print("Sorry slice index needs to be one of 0,1,2")
+                raise BifsBadIndex("Sorry slice index needs to be one of 0,1,2")
             self.ax2.imshow(final_im_slice, cmap = cm.Greys_r)
         self.canvas.draw()
                 
@@ -386,7 +383,7 @@ class MainWindow(QtWidgets.QMainWindow):
             elif self.mybifs.view3Dslice[0] == 2:
                 init_mod_im_slice = self.mybifs.mod_image()[:,:,slice_index]
             else:
-                print("Sorry slice index needs to be one of 0,1,2")
+                raise BifsBadIndex("Sorry slice index needs to be one of 0,1,2")
 
             showim1k = np.roll(np.roll(init_mod_im_slice,init_mod_im_slice.shape[0]//2,0),init_mod_im_slice.shape[1]//2,1)
             self.ax3.imshow(np.log(showim1k), cmap = cm.Greys_r)
@@ -411,7 +408,7 @@ class MainWindow(QtWidgets.QMainWindow):
             elif self.mybifs.view3Dslice[0] == 2:
                 bifs_mod_im_slice = self.mybifs.bifsk_image()[:,:,slice_index]
             else:
-                print("Sorry slice index needs to be one of 0,1,2")
+                raise BifsBadIndex("Sorry slice index needs to be one of 0,1,2")
 
             showim2k = np.roll(np.roll(bifs_mod_im_slice,bifs_mod_im_slice.shape[0]//2,0),bifs_mod_im_slice.shape[1]//2,1)
             self.ax4.imshow(np.log(showim2k), cmap = cm.Greys_r)
@@ -585,7 +582,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.mybifs.param_func_type = dialog.getFunc()
                 self.mybifs.decay = dialog.getDecay()
         else:
-            print("Sorry, don't know how to handle",self.mybifs.basis,"basis yet.")
+            raise BifsBadInputs("Sorry, don't know how to handle {} basis yet.".format(self.mybifs.basis))
 
     @catcher
     def setPrior(self):
@@ -632,13 +629,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 del self.mybifs.bumps[delkey]
             return
         else:
-            print("No bumps to delete yet")
+            raise BifsBadInputs("No bumps to delete yet")
             return
     
     @catcher
     def set3DSlice(self):
         if self.mybifs.imdim != 3:
-            print("Sorry can only view slices for 3D data")
+            raise BifsBadInputs("Sorry can only view slices for 3D data")
             return
         else:
             dialog = Start3DSlice_Dialog(self)
@@ -663,13 +660,13 @@ class StartParam_Fourier_Space_Dialog(QtWidgets.QDialog, Param_Fourier_Space_Dia
         try:
             return np.float(QtWidgets.QLineEdit.text(self.decay))
         except:
-            print("Couldn't get decay value")
+            raise BifsBadParameter("Couldn't get decay value")
             
     def getFunc(self):
         try:
             return str(self.param_spaceBox.currentText())
         except:
-            print("Couldn't get parameter function")
+            raise BifsBadParameter("Couldn't get parameter function")
 
 class StartPrior_Dialog(QtWidgets.QDialog, Prior_Dialog):
     def __init__(self,parent=MainWindow):
@@ -680,13 +677,13 @@ class StartPrior_Dialog(QtWidgets.QDialog, Prior_Dialog):
         try:
             return np.float(QtWidgets.QLineEdit.text(self.scale))
         except:
-            print("Couldn't get scale value")
+            raise BifsBadParameter("Couldn't get scale value")
             
     def getDist(self):
         try:
             return str(self.priorBox.currentText())
         except:
-            print("Couldn't get prior distribution")
+            raise BifsBadParameter("Couldn't get prior distribution")
             
 class StartLikelihood_Dialog(QtWidgets.QDialog, Likelihood_Dialog):
     def __init__(self,parent=MainWindow):
@@ -697,13 +694,13 @@ class StartLikelihood_Dialog(QtWidgets.QDialog, Likelihood_Dialog):
         try:
             return np.float(QtWidgets.QLineEdit.text(self.scale))
         except:
-            print("Couldn't get scale value")
+            raise BifsBadParameter("Couldn't get scale value")
             
     def getDist(self):
         try:
             return str(self.likelihoodBox.currentText())
         except:
-            print("Couldn't get likelihood distribution")
+            raise BifsBadParameter("Couldn't get likelihood distribution")
 
 class Start3DSlice_Dialog(QtWidgets.QDialog, Slice3D_Dialog):
     def __init__(self,parent=MainWindow):
@@ -716,14 +713,14 @@ class Start3DSlice_Dialog(QtWidgets.QDialog, Slice3D_Dialog):
             # seems more future-proof.  RB
             return np.int(self.slice_index.currentData())
         except:
-            print("Couldn't get slice index")
+            raise BifsBadParameter("Couldn't get slice index")
             
     def getSlicePercent(self):
         # the value is actually a fraction between 0 and 1
         try:
             return np.float(QtWidgets.QLineEdit.text(self.slice_percent))
         except:
-            print("Couldn't get slice percent")
+            raise BifsBadParameter("Couldn't get slice percent")
 
 class StartAddBump_Dialog(QtWidgets.QDialog, AddBump_Dialog):
     def __init__(self,parent=MainWindow):
@@ -734,25 +731,25 @@ class StartAddBump_Dialog(QtWidgets.QDialog, AddBump_Dialog):
         try:
             return str(self.addBumpKeyBox.currentText())
         except:
-            print("Couldn't get bump key")
+            raise BifsBadParameter("Couldn't get bump key")
             
     def getPosition(self):
         try:
             return np.float(QtWidgets.QLineEdit.text(self.Position))
         except:
-            print("Couldn't get bump position")
+            raise BifsBadParameter("Couldn't get bump position")
             
     def getAmplitude(self):
         try:
             return np.float(QtWidgets.QLineEdit.text(self.Amplitude))
         except:
-            print("Couldn't get bump position")
+            raise BifsBadParameter("Couldn't get bump position")
             
     def getWidth(self):
         try:
             return np.float(QtWidgets.QLineEdit.text(self.Width))
         except:
-            print("Couldn't get bump width")
+            raise BifsBadParameter("Couldn't get bump width")
             
 class StartDeleteBump_Dialog(QtWidgets.QDialog, DeleteBump_Dialog):
     def __init__(self,parent=MainWindow):
@@ -763,7 +760,7 @@ class StartDeleteBump_Dialog(QtWidgets.QDialog, DeleteBump_Dialog):
         try:
             return str(self.deleteBumpKeyBox.currentText())
         except:
-            print("Couldn't get bump function information")
+            raise BifsBadParameter("Couldn't get bump function information")
 
 def launch():
     "provided as a possible entry point"

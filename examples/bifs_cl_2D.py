@@ -6,11 +6,11 @@ import random
 from pylab import *
 import matplotlib.pyplot as plt
 import bifs
-import bifs_util.util as bu
+import bifs.bifs_util.util as bu
 
 # 2D image
 # Load image - standard Lena for now
-im = imageio.imread('../../images/lena512.bmp')
+im = imageio.imread('../tests/images/lena512.bmp')
 im = np.asarray(im)
 # 2D imag
 noise_level = 1.5
@@ -70,33 +70,33 @@ mybifs.BIFS_MAP()
 # bu.plot_param_func(mybifs)
   
 # Look at the prior, liklelihood, and posterior at a voxel
-bu.voxel_dist(mybifs,[mybifs.mod_image.shape[0]//2,mybifs.mod_image.shape[1]//2],do_plots=True)
+bu.voxel_dist(mybifs,[mybifs.mod_image().shape[0]//2,mybifs.mod_image().shape[1]//2],do_plots=True)
 
 # Plot the resulting images
 # Initial noisy image
 plt.subplot(221)
 plt.axis('off')
 plt.title("Initial Image")
-plt.imshow(mybifs.init_image, cmap = cm.Greys_r)
+plt.imshow(mybifs.init_image(), cmap = cm.Greys_r)
   
 # Initial K-Space Image
 plt.subplot(222)
 plt.axis('off')
 plt.title("Initial K-Space Image")
-showim1k = np.roll(np.roll(mybifs.mod_image,mybifs.mod_image.shape[0]//2,0),mybifs.mod_image.shape[1]//2,1)
+showim1k = np.roll(np.roll(mybifs.mod_image(),mybifs.mod_image().shape[0]//2,0),mybifs.mod_image().shape[1]//2,1)
 plt.imshow(np.log(showim1k), cmap = cm.Greys_r)
              
 # Final K-Space Image after running BIFS
 plt.subplot(224)
 plt.axis('off')
 plt.title("Initial K-Space Image")
-showim2k = np.roll(np.roll(mybifs.bifsk_image,mybifs.bifsk_image.shape[0]//2,0),mybifs.bifsk_image.shape[1]//2,1)
+showim2k = np.roll(np.roll(mybifs.bifsk_image(),mybifs.bifsk_image().shape[0]//2,0),mybifs.bifsk_image().shape[1]//2,1)
 plt.imshow(np.log(showim2k), cmap = cm.Greys_r)
              
 # Final Image after running BIFS
 plt.subplot(223)
 plt.axis('off')
 plt.title("Reconstructed Image")
-plt.imshow(mybifs.final_image,cmap = cm.Greys_r)
+plt.imshow(mybifs.final_image(),cmap = cm.Greys_r)
 
 plt.show()

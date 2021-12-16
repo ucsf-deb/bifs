@@ -6,7 +6,7 @@ import random
 from pylab import *
 import matplotlib.pyplot as plt
 import bifs
-import bifs_util.util as bu
+import bifs.bifs_util.util as bu
 
 # 3D image
 # Load image - sphere in 64x64x64 array
@@ -24,7 +24,7 @@ my_slice = [0,0.5]
 # Add noise:
 # noisy_im = im + noise
 
-noisy_im = imageio.imread('../../images/test3Dnoisy_sphere.tiff')
+noisy_im = imageio.imread('../tests/images/test3Dnoisy_sphere.tiff')
 
 # Create mybifs BIFS object:
 mybifs = bifs.BIFS()
@@ -70,26 +70,26 @@ mybifs.BIFS_MAP()
 bu.plot_param_func(mybifs)
 
 # Look at the prior, liklelihood, and posterior at a voxel
-bu.voxel_dist(mybifs,[mybifs.mod_image.shape[0]//2,mybifs.mod_image.shape[1]//2,mybifs.mod_image.shape[2]//2],do_plots=True)
+bu.voxel_dist(mybifs,[mybifs.mod_image().shape[0]//2,mybifs.mod_image().shape[1]//2,mybifs.mod_image().shape[2]//2],do_plots=True)
   
 # Plot the resulting image
 # Get slices from 3D data
-slice_index = np.int(np.round(my_slice[1]*mybifs.init_image.shape[my_slice[0]]))
+slice_index = np.int(np.round(my_slice[1]*mybifs.init_image().shape[my_slice[0]]))
 if my_slice[0] == 0:
-    init_im_slice = mybifs.init_image[slice_index,:,:]
-    init_mod_im_slice = mybifs.mod_image[slice_index,:,:]
-    fin_im_slice = mybifs.final_image[slice_index,:,:]
-    fin_mod_im_slice = mybifs.bifsk_image[slice_index,:,:]
+    init_im_slice = mybifs.init_image()[slice_index,:,:]
+    init_mod_im_slice = mybifs.mod_image()[slice_index,:,:]
+    fin_im_slice = mybifs.final_image()[slice_index,:,:]
+    fin_mod_im_slice = mybifs.bifsk_image()[slice_index,:,:]
 elif my_slice[0] == 1:
-    init_im_slice = mybifs.init_image[:,slice_index,:]
-    init_mod_im_slice = mybifs.mod_image[:,slice_index,:]
-    fin_im_slice = mybifs.final_image[:,slice_index,:]
-    fin_mod_im_slice = mybifs.bifsk_image[:,slice_index,:]
+    init_im_slice = mybifs.init_image()[:,slice_index,:]
+    init_mod_im_slice = mybifs.mod_image()[:,slice_index,:]
+    fin_im_slice = mybifs.final_image()[:,slice_index,:]
+    fin_mod_im_slice = mybifs.bifsk_image()[:,slice_index,:]
 elif my_slice[0] == 2:
-    init_im_slice = mybifs.init_image[:,:,slice_index]
-    init_mod_im_slice = mybifs.mod_image[:,:,slice_index]
-    fin_im_slice = mybifs.final_image[:,:,slice_index]
-    fin_mod_im_slice = mybifs.bifsk_image[:,:,slice_index]
+    init_im_slice = mybifs.init_image()[:,:,slice_index]
+    init_mod_im_slice = mybifs.mod_image()[:,:,slice_index]
+    fin_im_slice = mybifs.final_image()[:,:,slice_index]
+    fin_mod_im_slice = mybifs.bifsk_image()[:,:,slice_index]
 else:
     print("Sorry slice index needs to be one of 0,1,2") 
 

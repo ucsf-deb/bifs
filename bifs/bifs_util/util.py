@@ -183,10 +183,11 @@ def plot_param_func(bifs_obj):
 
     """
     prior = bifs_obj.prior_object(invalidate=False)
+    im_size = bifs_obj.init_image().shape
     if bifs_obj.imdim == 1 or bifs_obj.imdim == 3:
         plt.title("K Space Parameter Function") 
         plt.xlabel("kx")
-        KX = np.arange(bifs_obj.init_image().shape[0])
+        KX = np.arange(im_size[0])
         # For now have to do the following by hand
         # Should figure some way to automate
         # when new parameter functions are added
@@ -210,8 +211,8 @@ def plot_param_func(bifs_obj):
         ax.set_title('K Space Parameter Function')
         ax.set_xlabel('kx')
         ax.set_ylabel('ky')
-        KX = np.arange(bifs_obj.imdim1)
-        KY = np.arange(bifs_obj.imdim2)
+        KX = np.arange(im_size[0])
+        KY = np.arange(im_size[1])
         KX, KY = np.meshgrid(KX, KY)
         Kdist = np.sqrt(KX**2 + KY**2)
         if bifs_obj.param_func_type == "Inverse Power Decay":
@@ -222,7 +223,7 @@ def plot_param_func(bifs_obj):
             Z = bifs_obj.bas.linsc(prior.bvec(), Kdist) 
         else:
             do_nothing = None
-        if bifs_obj.bumps():
+        if bifs_obj.bumps:
             kdist = bifs_obj.kdist()
             Z += bifs_obj.bas.add_bumps_to_pf(prior.bvec(), kdist, prior.bumps(), np.max(kdist))
         ZRoll = np.roll(np.roll(Z,(Z.shape[0]//2),0),(Z.shape[1]//2),1)

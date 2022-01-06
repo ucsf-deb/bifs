@@ -206,8 +206,18 @@ def plot_param_func(bifs_obj):
     else: # Sort of silly since the parameter function is rotationally
           # symmetric (unless there's a trivial deviation due to kx != ky)
           # but it's pretty and might help check numerical glitches in filters
-        fig = plt.figure()    
-        ax = fig.gca(projection='3d')
+        fig = plt.figure()
+        ax = plt.axes(projection='3d')
+        # '3d' is not a documented projection type in https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.axes.html
+        # execept that arbitrary strings are permitted.
+        # previous code with
+        #   ax = fig.gca(projection='3d')
+        # Triggered this warning
+        # j:\source\repos\bifs\bifs\bifs_util\util.py:210: MatplotlibDeprecationWarning: Calling gca() with keyword arguments was deprecated in Matplotlib 3.4.
+        # Starting two minor releases later, gca() will take no keyword arguments.
+        # The gca() function should only be used to get the current axes, or if no axes exist, create new axes with default keyword arguments.
+        # To create a new axes with non-default arguments, use plt.axes() or plt.subplot().
+
         ax.set_title('K Space Parameter Function')
         ax.set_xlabel('kx')
         ax.set_ylabel('ky')

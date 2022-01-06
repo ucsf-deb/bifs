@@ -1,6 +1,7 @@
 import itertools
 import os
 import re
+import sys
 
 # scans files to construct an empirical prior
 from bifs import BIFS
@@ -220,6 +221,7 @@ class EmpiricalScanner(AbstractEmpiricalScanner):
         Matching is on the file name only, not its full path.
     exclude     <String> optional regular expression.  Any directory matching this pattern is excluded.
         Any file that satisfies matchFile is excluded if it also matches exclude.
+    ostr    A stream-like object that will receive routines notices of skipped files and statistics.
 
     See AbstractEmpiricalScanner for sampleFraction, seed and image_mask.
 
@@ -228,7 +230,7 @@ class EmpiricalScanner(AbstractEmpiricalScanner):
 
     We also check that the headers are consistent.  This works for .nii files, and may or may not for others.
     """
-    def __init__(self, sampleFraction=0, seed=85792359, topDir=".", matchFile="", exclude=None, image_mask=None, phase=False, corr=False):
+    def __init__(self, sampleFraction=0, seed=85792359, topDir=".", matchFile="", exclude=None, image_mask=None, phase=False, corr=False, ostr=sys.stdout):
         super().__init__(sampleFraction, seed, image_mask, phase, corr)
         self._topDir = topDir
         self._matchRE = re.compile(matchFile, re.I)
@@ -236,12 +238,14 @@ class EmpiricalScanner(AbstractEmpiricalScanner):
             self._excludeRE = re.compile(exclude, re.I)
         else:
             self._excludeRE = None
-        self.go()
+        self.go(ostr=ostr)
 
-    def go(self):
+    def go(self, ostr=sys.stdout):
         """Actually perform the scan.
         Note this is triggered by object initialization.
         Repeated calls may not work.
+
+        ostr is an output stream
         """
         for root, dirs, files in os.walk(self._topDir):
             if self._excludeRE:
@@ -251,7 +255,7 @@ class EmpiricalScanner(AbstractEmpiricalScanner):
                     nKill = 0
                     for i in iKill:
                         i -= nKill
-                        print("Skipping {}".format(dirs[i]))
+                        print("Skipping {}".format(dirs[i]), file=ostr)
                         del dirs[i-nKill]
                         nKill += 1
             # look for files to import
@@ -262,17 +266,17 @@ class EmpiricalScanner(AbstractEmpiricalScanner):
                         continue
                     if self._excludeRE:
                         if self._excludeRE.search(f):
-                            print("Skipping {}".format(f))
+                            print("Skipping {}".format(f), file=ostr)
                             continue
                     self._do_one(os.path.join(root, f))
         self._post()
 
 class FeedScanner(AbstractEmpiricalScanner):
     """A scanner that accepts anything iterable as a list of file names to scan"""
-    def __init__(self, files, sampleFraction=0, seed=85792359, image_mask=None, phase=False, corr=False):
+    def __init__(self, files, sampleFraction=0, seed=85792359, image_mask=None, phase=False, corr=False, ostr=sys.stdout):
         super().__init__(sampleFraction, seed, image_mask, phase, corr)
         self._files = files
-        self.go()
+        self.go(ostr=ostr)
 
     def go(self):
         for f in self._files:

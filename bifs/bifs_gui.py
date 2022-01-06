@@ -34,6 +34,10 @@ from bifs.pset_dialogs import Param_Fourier_Space_Dialog,Prior_Dialog
 from bifs.pset_dialogs import Likelihood_Dialog,Slice3D_Dialog
 from bifs.pset_dialogs import AddBump_Dialog,DeleteBump_Dialog
 
+import logging
+# the default log does not display anything graphically, which is not ideal. RB
+log = logging.getLogger("Bifs")
+
 # gastly hack
 # but currently if this is run in debug mode it has a different working directory than
 # if run from command line.  To avoid problems, hard code whole path.  Path removed for public release.
@@ -159,7 +163,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 nKill = 0
                 for i in iKill:
                     i -= nKill
-                    print("Skipping {}".format(dirs[i]))
+                    log.info("Skipping {}".format(dirs[i]))
                     del dirs[i-nKill]
                     nKill += 1
             # look for files to import
@@ -169,7 +173,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     if not reFile.match(f):
                         continue
                     if f.find("10933")>=0:
-                        print("Skipping {}".format(f))
+                        log.info("Skipping {}".format(f))
                         continue
                     self.nImages += 1
                     b = self.mybifs.copy_params()
@@ -242,7 +246,7 @@ class MainWindow(QtWidgets.QMainWindow):
         del self._mns
         del self._ss
         np.savez(EPFILE, mean=self.mns, sd=self.sds)
-        print("{} has means and sds for modulus of {} PET scans".format(EPFILE, self.nImages))
+        log.info("{} has means and sds for modulus of {} PET scans".format(EPFILE, self.nImages))
         #np.savez_compressed("ep1_compressed.npz", mean=mns, sd=sds)
 
     @catcher
@@ -289,7 +293,7 @@ class MainWindow(QtWidgets.QMainWindow):
         to perform a MAP analysis.  
 
         """
-        print("Performing k-space MAP estimation")
+        log.info("Performing k-space MAP estimation")
         # RB: original version of code created a new bifs instance.
         # I changed that to making one with copy_params.
         # Then I had it reload the image.  But under the current scheme that
@@ -427,7 +431,7 @@ class MainWindow(QtWidgets.QMainWindow):
             # probably the test will throw an error rather than return
             QtWidgets.QMessageBox.information(self,"Save Current Results","No Results to Output Yet; Probably need to run - Get MAP Estimate Image - first")
         else:
-            print("Saving Current Results")
+            log.info("Saving Current Results")
             self.mybifs.save_results()
 
     @catcher

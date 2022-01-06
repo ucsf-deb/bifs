@@ -101,3 +101,4 @@ ENV/
 *.pdf
 *.otl.swp
 bifs/_version.py
+*.swo

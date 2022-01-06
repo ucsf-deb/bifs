@@ -29,8 +29,13 @@ mybifs.load_image(y)
 
 # Set a few things:
 # Prior
-mybifs.prior = "Gaussian" # Choices are currently: "Gaussian","Uniform"
-# "Gaussian" is actually the default but for illustration...
+mybifs.prior = "Gaussian" # Only possibility.
+# We had a uniform prior at one point, but Karl Young says (from issue #4)
+# I realized that doing “maximum likehood” analysis (the equivalent of using a uniform prior)
+# was silly in our case as the data point (pixel value) is, by definition, the maximum of the
+# likelihood distribution. So doing a fancy optimization that just returns the original image
+# didn’t seem like the best use of cycles
+
 
 # Lilelihood
 mybifs.likelihood = "Gaussian" # Choices are currently: "Gaussian","Rician" 

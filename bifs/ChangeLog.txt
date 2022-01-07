@@ -1,0 +1,21 @@
+* 0.9.4 2022-01-06 Ross Boylan <ross.boylan@ucsf.edu>
+  * Improved handling of sequence-dependent operations
+    E.g., don't show commands in the GUI that require a loaded image til one is loaded.
+  * Updates for changing code in support libraries.
+    + np.intp not np.int for indices
+    + float not np.float
+    + matplotlib will ignore keyword arguments to gca(projection='3d').
+      Unsure about the "fix"; flagged in Issue #29.
+  * Fix Issue #24: error on exit from File | Quit
+  * Develop exception handling and logging
+  * Catch exceptions and display them graphically in bifs_gui.py
+  * Avoid print to sys.stdout for GUI friendliness
+  * Above changes address much of Issue #21, put the GUI in bifs_gui.
+    However, some output continues to go to the terminal.  This is mostly
+    in functions that need an overhaul or removal.
+  * Updated examples to work with current code.
+  * bifs_cl_3D.py still does not work, and it's unclear what it should do.
+    Opened Issue #28 about it.  Issue #29 also related.
+  * Remove more references to uniform prior and add comments explaining its absence,
+    closes Issue #4 (should have been closed earlier).
+  * Create this ChangeLog file.

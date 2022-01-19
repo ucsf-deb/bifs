@@ -172,7 +172,7 @@ Packaging
 			since it requires naming the files to update
 			though that info can go in a configuration file
 	[X] tag releases in git
-	[_] changelog
+	[X] changelog
 	[X] convert all relative imports to absolute
 		generally recommended as more robust: The PEP 8 style guide recommends using absolute imports in general. 
 	__main__.py, if present, executed automatically on package load
@@ -341,23 +341,13 @@ Packaging
 	: E.g., reset scale on prior causes bifs object to _invalidate_final().
 	: The right way to do this is probably for the component, e.g., the prior, to hold a reference
 	: to the parent, and send the parent _invalidate_final() as part of component's _mark_dirty().
+	: Alternately, could use Qt signals and slots.
 	: For now we invalidate by default when handing out a prior object, and knowledgeable clients,
 	: as in presentation.py that poke, plot, poke, replot must manually invalidate.
 [_] @Karl Verify that the changes relating to isxcbanded are semantically correct; they are at least syntactically correct now.
 [_] Review: NaNs in input file are now silently converted to 0 by bifs.load_image.
 	Is that desirable?
 	NaNs cause later processing to fail.
-[X] Bug #24: After successfully running bifs_gui and selecting exit from its menu the console says
-	< File "J:\source\repos\bifs\bifs\bifs_gui.py", line 438, in close
-	< sys.exit(app.exec_())
-	< NameError: name 'app' is not defined
-	In the debugger app was defined going into this step.
-	but same code occurs in MainWindow.close() even though app is unknown there
-	If add cleanup code, Qt docs say
-		: We recommend that you connect clean-up code to the aboutToQuit()
-		: signal, instead of putting it in your application's main() function.
-		: This is because, on some platforms, the QApplication::exec() call
-		: may not return.
 [_] test on different systems
 	[_] 0.9.1
 		[X] Windows

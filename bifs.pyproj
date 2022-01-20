@@ -35,7 +35,7 @@
     <Folder Include="tests\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bifs\ChangeLog.txt" />
+    <Content Include="ChangeLog.txt" />
     <Content Include="LICENSE" />
     <Content Include="MANIFEST.in" />
     <Content Include="pyproject.toml" />

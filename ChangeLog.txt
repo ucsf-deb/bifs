@@ -1,3 +1,8 @@
+* 0.9.5 2022-01-19 Ross Boylan <ross.boylan@ucsf.edu>
+  * Raise more exceptions for unknown or invalid inputs.
+    Earlier code tended simply to do nothing in those cases.
+  * Move ChangeLog.txt to top dir of project.
+
 * 0.9.4 2022-01-06 Ross Boylan <ross.boylan@ucsf.edu>
   * Improved handling of sequence-dependent operations
     E.g., don't show commands in the GUI that require a loaded image til one is loaded.

@@ -1,6 +1,7 @@
 include LICENSE
 include README.rst
 include README.md
+include ChangeLog.txt
 include ToDo.otl
 include tests/*.py
 include tests/images/*

@@ -86,20 +86,33 @@ Release checklist
 		: I've been doing lightweight tags; they seem to suffice.
 	open a terminal (e.g.,  PowerShell) and move to the project top directory
 		J:\source\repos\bifs\ for me
+	# PowerShell understands py but not python
+	python -m pip install --upgrade pip twine
 	python -m build
 		: note this creates its own venv
 		: must be python3
-	python -m pip install --upgrade twine # and maybe pip too.  not sure if same line OK
 	python -m twine check .\dist\bifs-x.x.x.tar.gz  # if paranoid
 	upload source to github, requiring authentication
+		: RB currently unable to authenticate with current repo under deb, but
+		: can push to the old, non-existent, bifs repo, which causes the
+		: current one to be updated
 	# changes should be on master branch
 	# this ensures new github version will be available as soon as new PyPi version is
 	close or modify github issues as appropriate
-		: Github automatic linking works with issues and pull requests.  If I
-		: directly work on the master branch and upload magic descriptions
-		: don't seem to create any links or close issues.
+		: Github says that if a commit description includes magic commands
+		: like `fixes #30` this will automatically link the pull request to the
+		: issue and automatically close the issue when the pull is merged with
+		: master.
+		:
+		: This says nothing about what happens when the relevant commit is
+		: directly uploaded to master.  I thought in the past it did nothing,
+		: but I just had a push that did close an issue, as well as linking it
+		: to the exact commit in which the issue was claimed to be fixed.
+		:
+		: Perhaps my earlier push was not to master or used the wrong syntax,
+		: e.g., `fixes 30` instead of `fixes #30`.
 	python -m twine upload dist\bifs-x.x.x*
-	# --repository testpypi after upload to do a test run
+	# python -m twine upload --repository testpypi ... to do a test run
 	# upload will require authentication
 
 Packaging

@@ -206,6 +206,8 @@ class BIFS(QObject):
         if self.basis == "Fourier":
             from bifs.bases import fourier as fb
             self.bas = fb
+        else:
+            raise BifsBadInputs("Unknown basis: {}".format(self.basis))
 
         self.param_func_type = self.bas.param_func_type
         ##### Test 1 ##############
@@ -385,6 +387,8 @@ class BIFS(QObject):
         self._init_image = init_image
         self._init_image[np.isnan(init_image)] = 0.0
         self.imdim = len(init_image.shape)
+        if not self.imdim in [1, 2, 3]:
+            raise BifsBadInputs(f"Images with {self.imdim} dimensions are not supported.  Must be 1, 2, or 3 dimensions.")
         self.image_file_loaded = True
         self.image_loaded.emit()
         return
@@ -414,6 +418,8 @@ class BIFS(QObject):
                 self._k_image = self.bas.tx2(self._init_image) # Get k-space image
             elif self.imdim == 3:
                 self._k_image = self.bas.txn(self._init_image) # Get k-space image
+            else:
+                raise BifsBadInputs(f"1, 2, or 3 dimensional images supported. {self.imdim} dimensions are not supported." )
         return self._k_image
 
     def _final_setup(self):
@@ -430,6 +436,8 @@ class BIFS(QObject):
             self._phase_image = np.angle(self.k_image()) # Get phase image in k-space
             # self.data_std =  self.likelihood_scale*self.mod_image
             self.image_exists = True
+        else:
+            raise BifsBadInputs(f"{self.basis} basis unsupported.  Use Fourier.")
 
         # Set prior via orthogonal-space parameter function
         self.set_prior_func_type(self.param_func_type)
@@ -538,9 +546,11 @@ class BIFS(QObject):
                 # This should already have been handled via set_empirical()
                 assert self._prior.name() == "Empirical"
             else:
-                raise RuntimeError("Please specify recognized transform space parameter function, one of:"+
+                raise BifsBadInputs("Please specify recognized transform space parameter function, one of:"+
                                    ", ".join(self.param_func_choices))
             self.param_func_type = pft
+        else:
+            raise BifBadInputs(f"{self.basis} basis unsupported.  Use Fourier.")
 
     def prior_object(self, invalidate=True):
         """ Return object representing the prior for possible editing.
@@ -702,7 +712,7 @@ class BIFS(QObject):
             self.bsa = self.bessel_approx_array[besind,:]
             self._bifsk_image = self.bifs_map_gauss_rice(self._prior, self.mod_image(), self.likelihood_scale)
         else:
-            pass
+            raise BifsBadInputs(f"Unable to calculate with {self.prior} prior and {self.likelihood} likelihood.")
         # Send back to image space
         if self.basis == "Fourier": # usual add else for other tx 
             if self.imdim == 1:
@@ -711,4 +721,6 @@ class BIFS(QObject):
                 self._final_image = np.real(self.bas.itx2(self._bifsk_image*np.exp(1j*self.phase_image())))
             elif self.imdim == 3:
                 self._final_image = np.real(self.bas.itxn(self._bifsk_image*np.exp(1j*self.phase_image())))
+        else:
+            raise BifsBadInputs(f"{self.basis} basis unsupported.  Use Fourier.")
         return

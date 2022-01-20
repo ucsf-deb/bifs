@@ -16,6 +16,9 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtWidgets import QMessageBox
 # docs for PySide2 say import Slot would do for next line
 from PyQt5.QtCore import pyqtSlot as Slot
+# next is not currently needed but for future-proofing
+# also likely different in PySide2
+from PyQt5.QtCore import pyqtSignal as Signal
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.colors import NoNorm 

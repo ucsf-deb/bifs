@@ -119,6 +119,7 @@ import sys
 import traceback
 import logging
 from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import pyqtSignal as Signal
 
 def catcher(function):
     """A decorator to catch exceptions in raised while running function
@@ -185,7 +186,7 @@ def show_exception_box(log_msg):
         log.debug("No QApplication instance available.")
  
 class UncaughtHook(QtCore.QObject):
-    _exception_caught = QtCore.Signal(object)
+    _exception_caught = Signal(object)
  
     def __init__(self, *args, **kwargs):
         super(UncaughtHook, self).__init__(*args, **kwargs)

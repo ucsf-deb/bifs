@@ -1,8 +1,6 @@
 To Do
 -----
 
-Current Task: convert from print to exceptions or logging
-
 : The actions listed below this introduction are for package developers.
 :
 : If you are a regular user of the program you can ignore this file.
@@ -77,6 +75,33 @@ Other sources of To Do information
 				facilitates collaboration
 				allows tags and (I think) priorities
 				no hieararchy
+Release checklist
+	save all files to disk
+	run test suite
+	Update ChangeLog.txt
+	commit all changes
+	git tag with a release number, e.g. v1.4.2
+		: The package versioning machinery gets the number from the git tag,
+		: which must be exactly on the current head.
+		: I've been doing lightweight tags; they seem to suffice.
+	open a terminal (e.g.,  PowerShell) and move to the project top directory
+		J:\source\repos\bifs\ for me
+	python -m build
+		: note this creates its own venv
+		: must be python3
+	python -m pip install --upgrade twine # and maybe pip too.  not sure if same line OK
+	python -m twine check .\dist\bifs-x.x.x.tar.gz  # if paranoid
+	upload source to github, requiring authentication
+	# changes should be on master branch
+	# this ensures new github version will be available as soon as new PyPi version is
+	close or modify github issues as appropriate
+		: Github automatic linking works with issues and pull requests.  If I
+		: directly work on the master branch and upload magic descriptions
+		: don't seem to create any links or close issues.
+	python -m twine upload dist\bifs-x.x.x*
+	# --repository testpypi after upload to do a test run
+	# upload will require authentication
+
 Packaging
 	Settle overall package structure.
 		invocation of test machinery
@@ -337,6 +362,7 @@ Packaging
 	material currently stored in bifs should be obtained from
        objects it holds, e.g., allowed function types, specific parameters.
 	GUI will need to become more dynamic in response.
+	calculation method really depends on combination of prior and likelihood
 [_] Update to components should automatically invalidate the bifs object appropriately.
 	: E.g., reset scale on prior causes bifs object to _invalidate_final().
 	: The right way to do this is probably for the component, e.g., the prior, to hold a reference

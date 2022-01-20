@@ -1,9 +1,10 @@
-* 0.9.5 2022-01-19 Ross Boylan <ross.boylan@ucsf.edu>
+* 0.9.5 2022-01-20 Ross Boylan <ross.boylan@ucsf.edu>
   * Raise more exceptions for unknown or invalid inputs.
     Earlier code tended simply to do nothing in those cases.
   * Move ChangeLog.txt to top dir of project.
   * fix:  'PyQt5.QtCore' has no attribute 'Signal' #30 
     which has been an issue in at least some Mac environments (with conda)
+  * Add release instructions for developers in ToDo.otl
 
 * 0.9.4 2022-01-06 Ross Boylan <ross.boylan@ucsf.edu>
   * Improved handling of sequence-dependent operations

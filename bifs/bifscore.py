@@ -32,8 +32,8 @@ import copy
 
 class BIFS(QObject):
     """
-    Class BIFS for performing Bayesian image restoration
-    in k-space
+    Class BIFS for performing Bayesian image analysis
+    in fourier space
 
     Variables
     ---------
@@ -220,7 +220,6 @@ class BIFS(QObject):
     def _invalidate_initial_image(self):
         "Existing image, if any, and all that depends on it, is obsolete"
         self._init_image = None
-        self.image_unloaded.emit()
         self.imdim = None
         self.image_file_loaded = False
         self.image_unloaded.emit()

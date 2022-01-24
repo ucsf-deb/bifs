@@ -430,7 +430,7 @@ class MainWindow(QtWidgets.QMainWindow):
         to save the results of analysis.  
 
         """
-        if not self.mybifs.final_image():
+        if self.mybifs.final_image() is None:
             # probably the test will throw an error rather than return
             QtWidgets.QMessageBox.information(self,"Save Current Results","No Results to Output Yet; Probably need to run - Get MAP Estimate Image - first")
         else:

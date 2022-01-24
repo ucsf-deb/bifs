@@ -265,6 +265,8 @@ class BIFS(QObject):
           saves time stamped files containing images and bifs parameters
 
         """
+        if self.final_image().ndim != 2:
+            raise BifsBadInputs(f"Image is {self.final_image().ndim}-D; only 2-D saving currently supported.")
         # Date stamp for parameter output file
         date_stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         # Output file names

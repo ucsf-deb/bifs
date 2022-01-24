@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>b580896b-29ca-4a24-82be-0c6bf6ae80a8</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>examples\bifs_cl_3D.py</StartupFile>
+    <StartupFile>bifs\bifs_gui.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
